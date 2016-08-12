@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+		
+		<link rel="alternate" href="http://purl.org/DC/elements/1.0/"/>
+		<link rel="icon" href="http://www.ibm.com/favicon.ico"/>
+		
+		<meta name="robots" content="index,follow"/>
+
+<meta name="dcterms.date" content="2013-07-23"/>
+<meta name="dcterms.rights" content="Â© Copyright IBM Corp. 2014"/>
+
+<!-- JSON meta data objects for customer experience W3C spec-->
+<script type="text/javascript">
+digitalData = {
+	page: {
+		pageInfo: {
+	        pageID: "DOJO new DDO test",
+			pageName: "new DDO structure replacing all meta tags",
+			effectiveDate: '2011-04-18',		//formerly IBM.Effective meta tag
+			expiryDate: '2017-12-18',			//formerly IBM.Expires meta tag
+			language: 'en-US',					//formerly DC.Language meta tag
+			publishDate: '2013-12-19',			//formerly DC.Date meta tag, same as dcterms.date
+			publisher: 'IBM Corporation',		//formerly DC.Publisher meta tag
+			version: 'v17e',					//version part of Source meta tag (e.g. v17)
+			description: "testing",				//formerly Description meta tag
+			keywords: "new DDO",				//formerly Keywords meta tag
+			ibm: {
+				contentDelivery: 'ECM/Filegen',	//"delivery" portion of Source meta tag
+				contentProducer: 'ECM/IConS Adopter 30 - M702060A54589B10 - 02/19/2014 05:14:00 PM',	//"authoring" portion of the Source meta tag
+				country: 'US',					//formerly IBM.Country meta tag, same as geo.country
+				industry: 'IBM Industry',		//formerly IBM.Industry meta tag
+				owner: 'sudepal1@in.ibm.com',	//formerly Owner meta tag
+				siteID: 'DOJO123456',		//formerly IBM.WTMSite meta tag
+				subject: 'new DDO structure',	//formerly DC.Subject meta tag
+				specialPurpose: "testing purpose",//formerly IBM.SpecialPurpose meta tag
+				type: 'testing'					//formerly DC.Type meta tag 
+			}
+		},
+		category: {
+			primaryCategory: 'DWNEXT'		//formerly IBM.WTMCategory meta tag
+		}
+	}
+}
+</script>
+<!-- JSON meta data objects for customer experience W3C spec-->
+
+		
+
+		<title>DOJO FILE WITH NEW DDO</title>
+		<link href="/common/v17/css/www.css" rel="stylesheet" title="www" type="text/css" />
+		
+		<!-- v17_NOT-BUILD_VERSION -->
+		<script type="text/javascript" src="/common/js/dojo-src/src-1.6.0/dojo/dojo.js"></script>
+		<script type="text/javascript">
+			// this we use until testing will done, note: this condition will be remove for production
+			//eluminate_enabled = true;
+
+			dojo.registerModulePath('ibmweb', "/common/js/dojo-src/ibmweb");
+			dojo.registerModulePath('ext', '/common/js/dojo-src/ext');
+			dojo.require('ibmweb.www.config');
+			dojo.require('ibmweb._base');
+			dojo.require('ibmweb.dynnav._base-v17');
+			dojo.require('ibmweb.www.controller');
+						
+		</script>
+
+		<script type="text/javascript">
+
+			dojo.addOnLoad(function() {
+				var s = dojo.query('#sTest');
+
+				dojo.connect(s[0], 'onclick', function(e) {
+					//alert('submiting')
+				});
+
+			});
+
+		</script>
+	
+	</head>
+	<body id="ibm-com">
+		<div id="ibm-top">
+
+			<!-- v17 SSIs: version 1.1 -->
+			<!-- MASTHEAD_BEGIN -->
+			<div id="ibm-masthead">
+				<div id="ibm-mast-options">
+					<ul>
+						<li id="ibm-geo">
+							<a href="http://www.ibm.com/planetwide/select/selector.html"><span class="ibm-access">Select a country/region: </span>United States</a>
+						</li>
+					</ul>
+				</div>
+				<div id="ibm-universal-nav">
+					<ul id="ibm-unav-links">
+						<li id="ibm-home">
+							<a href="http://www.ibm.com/us/en/">IBM®</a>
+						</li>
+					</ul>
+					<ul id="ibm-menu-links">
+						<li>
+							<a href="http://www.ibm.com/sitemap/us/en/">Site map</a>
+						</li>
+					</ul>
+					<div id="ibm-search-module">
+						<form id="ibm-search-form" action="http://www.ibm.com/Search/" method="get">
+							<p>
+								<label for="q"><span class="ibm-access">Search</span></label>
+								<input type="text" maxlength="100" value="" name="q" id="q"/>
+								<input type="hidden" value="17" name="v"/>
+								<input type="hidden" value="utf" name="en"/>
+								<input type="hidden" value="en" name="lang"/>
+								<input type="hidden" value="us" name="cc"/>
+								<input type="submit" id="ibm-search" class="ibm-btn-search" value="Submit"/>
+							</p>
+						</form>
+					</div>
+				</div>
+			</div>
+			<!-- MASTHEAD_END -->
+
+			<div id="ibm-pcon">
+				<!-- CONTENT_BEGIN -->
+				<div id="ibm-content">
+					<div id="ibm-leadspace-head" class="ibm-alternate">
+						<div id="ibm-leadspace-body">
+							<h1>IBM Eluminate testing - Default page</h1>
+						</div>
+					</div>
+					<!-- CONTENT_BODY -->
+					<div id="ibm-content-body">
+						<div id="ibm-content-main">
+							<p>Can take the help of <a href="//www.google.com">google</a></p>
+                            <p><a class="ibm-pdf-link" href="testing_document.pdf">PDF file without parameter</a></p>
+							<p><a class="ibm-forward-link" href="pdfdownload.jpg">Get image without params</a></p>
+						</div>
+						<!-- FEATURES_BEGIN -->
+						<div id="ibm-content-sidebar">
+							<div id="ibm-contact-module">
+								<!--IBM Contact Module-->
+							</div>
+							<div id="ibm-merchandising-module">
+								<!--IBM Web Merchandising Module-->
+							</div>
+							%%sidebarspace%%
+						</div>
+						<!-- FEATURES_END -->
+						<!-- CONTENT_BODY_END -->
+					</div>
+				</div>
+				<!-- CONTENT_END -->
+				<!-- NAVIGATION_BEGIN -->
+				<div id="ibm-navigation">
+					<h2 class="ibm-access">Content navigation</h2>
+					<ul id="ibm-primary-links">
+						<li id="ibm-overview">
+							<a href="#">lorem ipsum</a>
+						</li>
+					</ul>
+
+					<div id="ibm-secondary-navigation">
+						<!-- SECONDARY NAVIGATION SECTION -->
+					</div>
+
+				</div>
+				<!-- NAVIGATION_END -->
+			</div>
+			<div id="ibm-related-content"></div>
+
+			<!-- v17 SSIs: version 1.1 -->
+			<!-- FOOTER_BEGIN -->
+			<div id="ibm-footer-module"></div>
+			<div id="ibm-footer">
+				<h2 class="ibm-access">Footer links </h2>
+				<ul>
+					<li>
+						<a href="http://www.ibm.com/contact/us/en/">Contact</a>
+					</li>
+					<li>
+						<a href="http://www.ibm.com/privacy/us/en/">Privacy</a>
+					</li>
+					<li>
+						<a href="http://www.ibm.com/legal/us/en/">Terms of use</a>
+					</li>
+					<li>
+						<a href="http://www.ibm.com/accessibility/us/en/">Accessibility</a>
+					</li>
+				</ul>
+			</div>
+			<!-- FOOTER_END -->
+		</div>
+		<div id="ibm-metrics">
+			<script src="//www.ibm.com/common/stats/stats.js" type="text/javascript"></script>
+		</div>
+	</body>
+</html>
