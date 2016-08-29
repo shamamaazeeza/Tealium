@@ -2291,6 +2291,27 @@ function createUtagLinkObject(obj){
 		}else{
 			storeIBMStatsEvent(data,obj,linkIdentifier);
 		}
+	//--------------------------------------------Call Event IBMDependencyRegistry---------------------------------------------//
+	/**
+	 * Id      : IBMDependencyRegistry
+	 * Author  : devarajk@us.ibm.com
+	 * MemberOf: Tag Management Registry 
+	 * Date    : 2016-08-23
+	 * Description: 
+	 */
+	//>>>>> Start of Call IBMDependencyRegistry
+	try {
+	   if (window.IBMDependencyRegistry) {
+	      window.IBMDependencyRegistry.on('tealium.IBMSimpleEventRouter.loaded',
+	            function() {
+	               window.IBMSimpleEventRouter.idaEvent(f);
+	            });
+	   }
+	} 
+	catch (error) {
+	   console.log('Error occurred in IBMDependencyRegistry event registration. Error is: ' + error);
+	}
+	//>>>>> End of Call IBMDependencyRegistry
 }
 
 function trackingConversionEvent(utagLinkIdentifier,obj){
@@ -2678,6 +2699,61 @@ ibmweb.eluminate = {
 
 		_conf.enabled = true;
 
+		//----------------------------- IBMDependencyRegistry --------------------------------//
+		/**
+		 * Id      : IBMDependencyRegistry
+		 * Author  : devarajk@us.ibm.com
+		 * MemberOf: Tag Management Registry 
+		 * Date    : 2016-08-23
+		 * Description: 
+		 */
+		//>>>>> Start of IBMDependencyRegistry
+		try {
+		   (function() {
+		      window.IBMDependencyRegistry = window.IBMDependencyRegistry || {
+		         isLoaded : {},
+		         listeners : [],
+		         check : function(dependencies) {
+		            for (var i = 0, l = dependencies.length; i < l; i++) {
+		               if (!this.isLoaded[dependencies[i]])
+		                  return false;
+		            }
+		            return true;
+		         },
+		         on : function(dependencies, callback) {
+		            if (typeof callback !== 'function')
+		               return false;
+		            if (typeof dependencies === 'string')
+		               dependencies = [dependencies];
+		            if (this.check(dependencies)) {
+		               callback();
+		            } else {
+		               this.listeners.push({
+		                  dependencies : dependencies,
+		                  callback : callback
+		               });
+		            }
+		         },
+		         emit : function(name) {
+		            this.isLoaded[name] = 1;
+		            var toCall = [];
+		            for (var i = this.listeners.length - 1; i > -1; i--) {
+		               var listener = this.listeners[i];
+		               if (this.check(listener.dependencies)) {
+		                  toCall.push(this.listeners.splice(i, 1)[0]);
+		               }
+		            }
+		            for (i = 0; i < toCall.length; i++) {
+		               toCall[i].callback();
+		            }
+		         }
+		      };
+		   })();
+		}
+		catch (error) {
+		   console.log('Error in IBMDependencyRegistry. Error is: ' + error);
+		}
+		//>>>>> End of IBMDependencyRegistry
 
 		/* TEALIUM IMPLEMENTATION - START */
 

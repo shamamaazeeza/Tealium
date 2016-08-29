@@ -179,6 +179,27 @@ function createUtagLinkObject(obj){
    }else{
       storeIBMStatsEvent(data,obj,linkIdentifier);
    }
+   //--------------------------------------------Call Event IBMDependencyRegistry---------------------------------------------//
+   /**
+    * Id      : IBMDependencyRegistry
+    * Author  : devarajk@us.ibm.com
+    * MemberOf: Tag Management Registry 
+    * Date    : 2016-08-23
+    * Description: 
+    */
+   //>>>>> Start of Call IBMDependencyRegistry
+   try {
+      if (window.IBMDependencyRegistry) {
+         window.IBMDependencyRegistry.on('tealium.IBMSimpleEventRouter.loaded',
+               function() {
+                  window.IBMSimpleEventRouter.idaEvent(f);
+               });
+      }
+   } 
+   catch (error) {
+      console.log('Error occurred in IBMDependencyRegistry event registration. Error is: ' + error);
+   }
+   //>>>>> End of Call IBMDependencyRegistry
 }
 
 function trackingConversionEvent(utagLinkIdentifier,obj){
