@@ -2183,6 +2183,9 @@ else {
     }
 })();
 
+//----------------------Ensure that old browsers don't break when referencing the console-----------------------//
+if (!window.console) { window.console = {log: function(){}, error:function(){} }; }
+
 /*
  * This part is starting very first
  * Use it for loading eluminate.js 
