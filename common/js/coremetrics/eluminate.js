@@ -1,11 +1,8 @@
-/* $Id: eluminate.js 18644 2016-08-04 19:12:06Z jleon@us.ibm.com $
- *
+/*
+ * Id         : /tm-v1.0/common/js/coremetrics/eluminate.js
+ * Scope      : All IBM pages
  * Description: Script used to load Tag Management (Tealium) on IBM web pages
- * - ida_stats.js for v18+ pages
- * - ida_production.js for non-v17+ pages
- * - eluminate.js for v17 pages
- * - There are other versions of ida_stats.js for different projects, which should be listed at:
- *   http://ibm.biz/ida_stats-releasenotes
+ * 
  */
 (function ibmCoreAuto(){
 
@@ -2192,38 +2189,38 @@ else {
  */
 //----------------------ibmStats.event function for Tealium started---------------------------------------------//
 function storeIBMStatsEvent(data,obj,linkIdentifier){
-	var statsObjListString = JSON.stringify(obj).replace(/-_-/g,"---");
-	var statsObjList = JSON.parse(statsObjListString);
-	statsObjList.event_name = linkIdentifier;
-	window.arrObjList.push(statsObjList,window.arrObjList.length);
-	window.arrObjList.pop();
-	window.onload = function(){
-		if(typeof window.utag !== "undefined" && typeof window.utag.data !== "undefined"){
-			modifySiteID = checkMarketingData();
-			for(var i=0;i<window.arrObjList.length;i++){
-					data = JSON.parse(JSON.stringify(window.arrObjList[i]));
-					  data.event_name = window.arrObjList[i].event_name;
-					  data.evPageLoadingTime = utag.data["page_loadingTime"];
-					  data.evTriggerTime = utag.data["page_loadingTime"];
-					  data.IbmerVal = utag.data["IBMER_value"];
-					  data.evPageLocation = window.location.href.replace(/-_-/g,"---");
-					  data.categoryVal = utag.data["category_id"];
-					  data.cookie_sessionID = utag.data["cookie_sessionID"];
-					  data.evClientID = modifySiteID;
-					  data.site_id = utag.data['site_id'];
-					  //for generating product view tag
-					  if(window.arrObjList[i].event_name == "ibmStatsEvent_product" && typeof window.pageViewAttributes !== "undefined"){
-							var x = window.pageViewAttributes.split("-_-");
-							for(var k=0; k<= x.length; k++){
-								var pr_y = "productTag_a"+k;
-								if(x[k] !== "undefined" || x[k] !== "")	data[pr_y] = x[k];
-							}
-							if(typeof window.arrObjList[i].serviceType !== "undefined") data["productTag_serviceType"] = window.arrObjList[i].serviceType;
-						}
-					utag.link(data);
-				}
-		}
-	}
+   var statsObjListString = JSON.stringify(obj).replace(/-_-/g,"---");
+   var statsObjList = JSON.parse(statsObjListString);
+   statsObjList.event_name = linkIdentifier;
+   window.arrObjList.push(statsObjList,window.arrObjList.length);
+   window.arrObjList.pop();
+   window.onload = function(){
+      if(typeof window.utag !== "undefined" && typeof window.utag.data !== "undefined"){
+         modifySiteID = checkMarketingData();
+         for(var i=0;i<window.arrObjList.length;i++){
+               data = JSON.parse(JSON.stringify(window.arrObjList[i]));
+                 data.event_name = window.arrObjList[i].event_name;
+                 data.evPageLoadingTime = utag.data["page_loadingTime"];
+                 data.evTriggerTime = utag.data["page_loadingTime"];
+                 data.IbmerVal = utag.data["IBMER_value"];
+                 data.evPageLocation = window.location.href.replace(/-_-/g,"---");
+                 data.categoryVal = utag.data["category_id"];
+                 data.cookie_sessionID = utag.data["cookie_sessionID"];
+                 data.evClientID = modifySiteID;
+                 data.site_id = utag.data['site_id'];
+                 //for generating product view tag
+                 if(window.arrObjList[i].event_name == "ibmStatsEvent_product" && typeof window.pageViewAttributes !== "undefined"){
+                     var x = window.pageViewAttributes.split("-_-");
+                     for(var k=0; k<= x.length; k++){
+                        var pr_y = "productTag_a"+k;
+                        if(x[k] !== "undefined" || x[k] !== "")   data[pr_y] = x[k];
+                     }
+                     if(typeof window.arrObjList[i].serviceType !== "undefined") data["productTag_serviceType"] = window.arrObjList[i].serviceType;
+                  }
+               utag.link(data);
+            }
+      }
+   }
 }
 
 function createUtagLinkObject(obj){

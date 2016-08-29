@@ -1,10 +1,8 @@
-/* $Id: ida_stats.js 18637 2016-08-04 05:40:00Z jleon@us.ibm.com $
- *
+/*
+ * Id         : /tm-v1.0/common/js/coremetrics/ida_stats.js
+ * Scope      : All IBM pages
  * Description: Script used to load Tag Management (Tealium) on IBM web pages
- * - ida_stats.js for v17+ pages
- * - ida_production.js for non-v17+ pages
- * - There are other versions of ida_stats.js for different projects, which should be listed at:
- *   http://ibm.biz/ida_stats-releasenotes
+ * 
  */
 (function() {
    var ghostFunctions = [
@@ -76,133 +74,8 @@
    }
 })();
 
-/*---------------------------------------------------Initialize all Digital Data Objects---------------------------------------------------------*/
-function initDDO() {
-   // 2016-07-14 - shazeeza,jleon: RTC Story# 958212
-   if (typeof (window.digitalData) == "undefined") {
-      window.digitalData = new Object();
-   }
-   if (typeof (window.digitalData.page) == "undefined") {
-      window.digitalData.page = new Object();
-   }
-   if (typeof (window.digitalData.page.attributes) == "undefined") {
-      window.digitalData.page.attributes = new Object();
-   }
-   if (typeof (window.digitalData.page.category) == "undefined") {
-      window.digitalData.page.category = new Object();
-   }
-   if (typeof (window.digitalData.page.category.ibm) == "undefined") {
-      window.digitalData.page.category.ibm = new Object();
-   }
-   if (typeof (window.digitalData.page.pageInfo) == "undefined") {
-      window.digitalData.page.pageInfo = new Object();
-   }
-   if (typeof (window.digitalData.page.pageInfo.ibm) == "undefined") {
-      window.digitalData.page.pageInfo.ibm = new Object();
-   }
-   if (typeof (window.digitalData.page.pageInfo.coremetrics) == "undefined") {
-      window.digitalData.page.pageInfo.coremetrics = new Object();
-   }
-   if (typeof (window.digitalData.page.pageInfo.tealium) == "undefined") {
-      window.digitalData.page.pageInfo.tealium = new Object();
-   }
-   if (typeof (window.digitalData.page.pageInfo.metrics) == "undefined") {
-      window.digitalData.page.pageInfo.metrics = new Object();
-   }
-   if (typeof (window.digitalData.user) == "undefined") {
-      window.digitalData.user = new Object();
-   }
-   if (typeof (window.digitalData.user.profile) == "undefined") {
-      window.digitalData.user.profile = new Object();
-   }
-   if (typeof (window.digitalData.user.segment) == "undefined") {
-      window.digitalData.user.segment = new Object();
-   }
-   window.digitalData = window.digitalData || {};
-   window.digitalData.page = window.digitalData.page || {};
-   window.digitalData.page.pageInfo = window.digitalData.page.pageInfo || {};
-   window.digitalData.page.pageInfo.ibm = window.digitalData.page.pageInfo.ibm || {};
-   window.digitalData.page.pageInfo.coremetrics = window.digitalData.page.pageInfo.coremetrics || {};
-   window.digitalData.page.pageInfo.tealium = window.digitalData.page.pageInfo.tealium || {};
-   window.digitalData.page.session = window.digitalData.page.session || {};
-   window.digitalData.page.category = window.digitalData.page.category || {};
-   window.digitalData.page.category.ibm = window.digitalData.page.category.ibm || {};
-   window.digitalData.page.attributes = window.digitalData.page.attributes || {};
-   window.digitalData.user = window.digitalData.user || {};
-   window.digitalData.user.profile = window.digitalData.user.profile || {};
-   window.digitalData.user.segment = window.digitalData.user.segment || {};
-
-   /*---------------------------------------------------Add SHA1 and SHA256 Hash Functions---------------------------------------------------------*/
-   // 2016-08-04 - jleon: RTC Story# 978510
-   if (typeof (window.digitalData.sha1) == "undefined") {
-      window.digitalData.sha1=function(d){var l=0,a=0,f=[],b,c,g,h,p,e,m=[b=1732584193,c=4023233417,~b,~c,3285377520],n=[],k=unescape(encodeURI(d));for(b=k.length;a<=b;)n[a>>2]|=(k.charCodeAt(a)||128)<<8*(3-a++%4);for(n[d=b+8>>2|15]=b<<3;l<=d;l+=16){b=m;for(a=0;80>a;b=[[(e=((k=b[0])<<5|k>>>27)+b[4]+(f[a]=16>a?~~n[l+a]:e<<1|e>>>31)+1518500249)+((c=b[1])&(g=b[2])|~c&(h=b[3])),p=e+(c^g^h)+341275144,e+(c&g|c&h|g&h)+882459459,p+1535694389][0|a++/20]|0,k,c<<30|c>>>2,g,h])e=f[a-3]^f[a-8]^f[a-14]^f[a-16];for(a=5;a;)m[--a]=m[a]+b[a]|0}for(d="";40>a;)d+=(m[a>>3]>>4*(7-a++%8)&15).toString(16);return d}; 
-   }
-   if (typeof (window.digitalData.sha256) == "undefined") {
-      window.digitalData.sha256=function(){function e(a,b){return a>>>b|a<<32-b}for(var b=1,a,m=[],n=[];18>++b;)for(a=b*b;312>a;a+=b)m[a]=1;b=1;for(a=0;313>b;)m[++b]||(n[a]=Math.pow(b,.5)%1*4294967296|0,m[a++]=Math.pow(b,1/3)%1*4294967296|0);return function(g){for(var l=n.slice(b=0),c=unescape(encodeURI(g)),h=[],d=c.length,k=[],f,p;b<d;)k[b>>2]|=(c.charCodeAt(b)&255)<<8*(3-b++%4);d*=8;k[d>>5]|=128<<24-d%32;k[p=d+64>>5|15]=d;for(b=0;b<p;b+=16){for(c=l.slice(a=0,8);64>a;c[4]+=f)h[a]=16>a?k[a+b]:(e(f=h[a-2],17)^e(f,19)^f>>>10)+(h[a-7]|0)+(e(f=h[a-15],7)^e(f,18)^f>>>3)+(h[a-16]|0),c.unshift((f=(c.pop()+(e(g=c[4],6)^e(g,11)^e(g,25))+((g&c[5]^~g&c[6])+m[a])|0)+(h[a++]|0))+(e(d=c[0],2)^e(d,13)^e(d,22))+(d&c[1]^c[1]&c[2]^c[2]&d));for(a=8;a--;)l[a]=c[a]+l[a]}for(c="";63>a;)c+=(l[++a>>3]>>4*(7-a%8)&15).toString(16);return c}}(); 
-   }
-
-   /*---------------------------------------------------Add parseQueryString function---------------------------------------------------------*/
-   // 2016-07-28 - jleon: RTC Story# 978510
-   if (typeof (window.digitalData.parseQueryString) == "undefined") {
-      window.digitalData.parseQueryString = function (fullURL) {
-         var paramsObject = {},
-         queryString = fullURL.substring(fullURL.indexOf("?") + 1),
-         queries, temp, i, l,
-         queries = queryString.split("&");
-         for (i = 0, l = queries.length; i < l; i++) {
-            temp = queries[i].split('=');
-            paramsObject[temp[0]] = temp[1];
-            if(paramsObject == "iwm" && temp[0] == "source") {
-               window.IWMSource = "?source="+temp[1];
-            }
-         }
-         return(paramsObject);
-      }
-   }
-
-   /*---------------------------------------------------Add calculateURLID function---------------------------------------------------------*/
-   // 2016-07-28 - jleon: RTC Story# 978510 (previous RTC Story# 902576)
-   if (typeof (window.digitalData.calculateURLID) == "undefined") {
-      window.digitalData.calculateURLID = function (fullURL) {
-         var parserURL = document.createElement('a');
-         parserURL.href = fullURL;
-         // IE 8 and 9 dont load the attributes "protocol" and "host" in case the source URL
-         // is just a pathname, that is, "/example" and not "http://domain.com/example".
-         parserURL.href = parserURL.href;
-         var pathName = parserURL.pathname.toLowerCase();
-
-         //--- START: Patch to define pageidQueryStrings for IWM and SSI pages. ##TODELETE## when standard is adopted
-         if (pathName.indexOf("/marketing/iwm/") !== -1 && typeof (window.digitalData.page.attributes.pageidQueryStrings) == "undefined") {
-            // Set PageID Query Strings for IWM Pages
-            window.digitalData.page.attributes.pageidQueryStrings = ["source","S_PKG"];
-         }
-         //--- END: Patch to define pageidQueryStrings for IWM and SSI pages. ##TODELETE## when standard is adopted
-
-         //remove some specified html versions from path name
-         var lastpart = pathName.substring(pathName.lastIndexOf('/') + 1, pathName.length);
-         // 2016-07-29 - jleon: RTC Story# XXXXXX - Updating list of omitted default pages
-         var omittedHTMLVersions = ["index.php","index.phtml", "index.shtml", "index.wss", "index.jsp", "index.jspa", "index.jsa", "index.htm", "index.html"];
-         for (var i = 0; i < omittedHTMLVersions.length; i++) {
-            if (omittedHTMLVersions[i] == lastpart.toLowerCase()) {
-               pathName = pathName.substring(0,pathName.lastIndexOf('/'));
-            }
-         }
-         //add different Query string parameters
-         if (window.digitalData.page.attributes.pageidQueryStrings) {
-            var addQSValue = "";
-            for (var k=0;k<window.digitalData.page.attributes.pageidQueryStrings.length;k++) {
-               var q = window.digitalData.page.attributes.pageidQueryStrings[k];
-               if (typeof window.params[q] !== "undefined") addQSValue += q + "=" + window.params[q] + "&";
-            }
-            addQSValue = addQSValue.replace(/&$/,"");
-            pathName = (addQSValue !== "") ? (pathName + "?" + addQSValue) : pathName;
-         }
-         //remove trailing slash, question mark, or hash(if any)
-         pathName = pathName.replace(/[(\/)(?)(#)(&)]+$/, "");
-         return(parserURL.host + pathName);
-      }
-   }
-}
+//----------------------Ensure that old browsers don't break when referencing the console-----------------------//
+if (!window.console) { window.console = {log: function(){}, error:function(){} }; }
 
 //----------------------ibmStats.event function for Tealium started---------------------------------------------//
 function storeIBMStatsEvent(data,obj,linkIdentifier){
@@ -327,20 +200,26 @@ function trackingConversionEvent(utagLinkIdentifier,obj){
    });
 }
 
-function checkMarketingData(){
-   var modify_siteId = null;
-   if(typeof window.utag !== "undefined" && typeof window.utag.data !== "undefined"){
-      modify_siteId = window.utag.data.concat_clientid;
-      var x = window.utag.data.concat_clientid.substring(0,window.utag.data.concat_clientid.indexOf('|'));
-      if(typeof window.ibm_global_data !== "undefined" && typeof ibm_global_data["Site ID"] != "undefined"){
-         if(utag.data['IBMER_value'] == "1"){
-            modify_siteId = x + "|" + "New_IBMER";
-         }else if (window.ibm_global_data["Site ID"] !== undefined){
-            modify_siteId = x + "|" + window.ibm_global_data["Site ID"];
+function checkMarketingData() {
+   try {
+      var modify_siteId = null;
+      if (typeof window.utag !== "undefined" && typeof window.utag.data !== "undefined") {
+         modify_siteId = window.utag.data.concat_clientid;
+         var x = window.utag.data.concat_clientid.substring(0,window.utag.data.concat_clientid.indexOf('|'));
+         if (typeof window.ibm_global_data !== "undefined" && typeof ibm_global_data["Site ID"] != "undefined") {
+            if (utag.data['IBMER_value'] == "1") {
+               modify_siteId = x + "|" + "New_IBMER";
+            }
+            else if (window.ibm_global_data["Site ID"] !== undefined) {
+               modify_siteId = x + "|" + window.ibm_global_data["Site ID"];
+            }
          }
       }
+      return modify_siteId;
+   } 
+   catch (error) {
+         console.error('+++TME-ERROR - ida_stats.js: ' + error);
    }
-   return modify_siteId;
 }
 
 function setCookie(name, value){
@@ -359,17 +238,6 @@ var v16elu = {
       NTPT_DOMAINLIST : ".ibm.co,.ibm.com,.lotuslive.com,.cognos.com,.webdialogs.com,.servicemanagementcenter.com,.xtify.com,.ibmcloud.com,.ibmdw.net,.bluemix.net,.smartercitiescloud.com",
       evhndlr : true,
       domainBlacklist : ".ibm.com,.mitre.org,.learnquest.com",
-
-      /*------------creates Coremetrics element tag(conversion of Unica event to Coremetrics)---------------------*/
-      /*create_cmElement : function(obj){
-		if(obj.ibmProductTag && obj.ibmProductTag == "true"){
-			window.onload = function(){
-				if (typeof (window.pageViewAttributes) != "undefined") var productAttr = window.pageViewAttributes.split("-_-", 21).join("-_-");
-				if(typeof v16elu.siteID !== "undefined" && v16elu.siteID.toLowerCase() == "ecom" && typeof obj.serviceType != "undefined") productAttr += "-_--_--_--_--_--_--_--_--_--_-" + obj.serviceType;
-				if (typeof cmCreateProductviewTag !== 'undefined') cmCreateProductviewTag(obj.proID,obj.proName,obj.proCategory,productAttr,obj.cm_vc);
-			}
-		}
-	},*/
 
       //-----------------------------function call on completely loading page--------------------------------//
       onPageLoad : function(){
@@ -433,11 +301,67 @@ var v16elu = {
                document.getElementsByTagName("head")[0].appendChild(s);
             },
             IBMISE_BOOTSTRAP = function (data) {
+               //IBMISP cookie value for non ibm.com
                if(data.IBMer)	window.NTPT_IBMer = data.IBMer;
-               if(data.IBMIXS)	window.IBMIXS = data.IBMIXS;//IBMISP cookie value for non ibm.com
+               if(data.IBMIXS)	window.IBMIXS = data.IBMIXS;
             }
             requestServerCall("//www.ibm.com/gateway/gp/getProfile/?cb=260:IBMISE_BOOTSTRAP&cc=us&lc=en");   
          }
+         //----------------------------- IBMDependencyRegistry --------------------------------//
+         /**
+          * Id      : IBMDependencyRegistry
+          * Author  : devarajk@us.ibm.com
+          * MemberOf: Tag Management Registry 
+          * Date    : 2016-08-23
+          * Description: 
+          */
+         //>>>>> Start of IBMDependencyRegistry
+         try {
+            (function() {
+               window.IBMDependencyRegistry = window.IBMDependencyRegistry || {
+                  isLoaded : {},
+                  listeners : [],
+                  check : function(dependencies) {
+                     for (var i = 0, l = dependencies.length; i < l; i++) {
+                        if (!this.isLoaded[dependencies[i]])
+                           return false;
+                     }
+                     return true;
+                  },
+                  on : function(dependencies, callback) {
+                     if (typeof callback !== 'function')
+                        return false;
+                     if (typeof dependencies === 'string')
+                        dependencies = [dependencies];
+                     if (this.check(dependencies)) {
+                        callback();
+                     } else {
+                        this.listeners.push({
+                           dependencies : dependencies,
+                           callback : callback
+                        });
+                     }
+                  },
+                  emit : function(name) {
+                     this.isLoaded[name] = 1;
+                     var toCall = [];
+                     for (var i = this.listeners.length - 1; i > -1; i--) {
+                        var listener = this.listeners[i];
+                        if (this.check(listener.dependencies)) {
+                           toCall.push(this.listeners.splice(i, 1)[0]);
+                        }
+                     }
+                     for (i = 0; i < toCall.length; i++) {
+                        toCall[i].callback();
+                     }
+                  }
+               };
+            })();
+         }
+         catch (error) {
+            console.log('Error in IBMDependencyRegistry. Error is: ' + error);
+         }
+         //>>>>> End of IBMDependencyRegistry
          //----------------------------- TEALIUM IMPLEMENTATION - START --------------------------------//
          (function(a,b,c,d) {
             a = '//tags.tiqcdn.com/utag/ibm/main/prod/utag.js';
@@ -484,23 +408,6 @@ ibmStats.event = function (obj) {
    createUtagLinkObject(obj);
    //v16elu.create_cmElement(obj);//for product view tag
 };
-
-/*---------------------------------------------------Initialize DDO and set URLID---------------------------------------------------------*/
-//2016-07-28 - jleon: RTC Story# 978510
-//Intialize Digital Data Object
-initDDO();
-
-//Parse Query String for current URL
-window.params = window.digitalData.parseQueryString(window.location.href);
-
-//Set URLID and PAGEID in DDO
-window.digitalData.page.pageInfo.urlID = window.digitalData.calculateURLID(window.location.href);
-if (typeof(window.digitalData.page.pageID) == "undefined" && typeof (window.digitalData.page.pageInfo.pageID) == "undefined") {
-   window.digitalData.page.pageInfo.pageID = window.digitalData.page.pageInfo.urlID;
-} 
-else if (typeof(window.digitalData.page.pageID) !== "undefined") {
-   window.digitalData.page.pageInfo.pageID = window.digitalData.page.pageID;
-}
 
 //---------------------------------- Ajax function to bind page view tag -----------------------------//
 bindPageViewWithAnalytics = function(){
