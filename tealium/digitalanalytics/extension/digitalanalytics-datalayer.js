@@ -1,12 +1,12 @@
 /*
- * Id            : tm-v1.0/tealium/digitalanalytics/extension/digitalanalytics-core-pre.js
- * Extension Name: digitalanalytics-core-pre.js
+ * Id            : tm-v1.0/tealium/digitalanalytics/extension/digitalanalytics-datalayer.js
+ * Extension Name: digitalanalytics-datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
  * 
  * =====|| NOTE: DO NOT MODIFY THIS SCRIPT IN TEALIUM, UPDATE SVN VERSION IN ECLIPSE
  */
-var tmeid="digitalanalytics-core-pre.js";
+var tmeid="digitalanalytics-datalayer.js";
 try {
    /*---------------------------------------------------Initialize all Digital Data Objects---------------------------------------------------------*/
    // Tealium UDO
@@ -166,7 +166,7 @@ try {
             return(parserURL.hostname + pathName);
          }
          catch (error) {
-            utag.DB('+++TME-ERROR - digitalanalytics-core-pre.js: ' + error);
+            utag.DB('+++TME-ERROR - digitalanalytics-datalayer.js: ' + error);
          }
       }
    }
@@ -180,7 +180,7 @@ try {
       var cookies = window.document.cookie.split(";"),
       name, value, i, l;
       for (i = 0, l = cookies.length; i < l; i++) {
-         name = cookies[i].substring(0,cookies[i].indexOf('=')).trimLeft();
+         name = cookies[i].substring(0,cookies[i].indexOf('=')).trim();
          value = cookies[i].substring(cookies[i].indexOf('=')+1);
          window.digitalData.util.cp[name] = window.decodeURIComponent(value)
       }
@@ -374,5 +374,5 @@ try {
    utag_data.referrerDomain   = window.digitalData.page.pageInfo.referrerDomain;
 }
 catch (error) {
-   console.error('+++TME-ERROR - digital-core-pre.js: ' + error);
+   console.error('+++TME-ERROR - digitalanalytics-datalayer.js: ' + error);
 }
