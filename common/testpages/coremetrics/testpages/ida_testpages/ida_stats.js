@@ -384,8 +384,12 @@ var v16elu = {
          }
          //>>>>> End of IBMDependencyRegistry
          //----------------------------- TEALIUM IMPLEMENTATION - START --------------------------------//
+         var fileref=document.createElement('script')
+         fileref.setAttribute("type","text/javascript")
+         fileref.setAttribute("src", "//tags.tiqcdn.com/utag/ibm/dev-sandbox/dev/utag.sync.js");
+         document.getElementsByTagName("head")[0].appendChild(fileref);
          (function(a,b,c,d) {
-            a = '//tags.tiqcdn.com/utag/ibm/digitalanalytics/dev/utag.js';
+            a = '//tags.tiqcdn.com/utag/ibm/dev-sandbox/dev/utag.js';
             b = document;
             c = 'script';
             d = b.createElement(c);
