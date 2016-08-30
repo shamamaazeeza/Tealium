@@ -2307,7 +2307,7 @@ function createUtagLinkObject(obj){
 	   if (window.IBMDependencyRegistry) {
 	      window.IBMDependencyRegistry.on('tealium.IBMSimpleEventRouter.loaded',
 	            function() {
-	               window.IBMSimpleEventRouter.idaEvent(f);
+	               window.IBMSimpleEventRouter.idaEvent(obj);
 	            });
 	   }
 	} 
@@ -2761,7 +2761,7 @@ ibmweb.eluminate = {
 		/* TEALIUM IMPLEMENTATION - START */
 
 		(function(a,b,c,d) {
-			a = '//tags.tiqcdn.com/utag/ibm/main/prod/utag.js';
+		   a = '//tags.tiqcdn.com/utag/ibm/digitalanalytics/dev/utag.js';
 			b = document;
 			c = 'script';
 			d = b.createElement(c);

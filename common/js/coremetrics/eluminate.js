@@ -2307,7 +2307,7 @@ function createUtagLinkObject(obj){
 	   if (window.IBMDependencyRegistry) {
 	      window.IBMDependencyRegistry.on('tealium.IBMSimpleEventRouter.loaded',
 	            function() {
-	               window.IBMSimpleEventRouter.idaEvent(f);
+	               window.IBMSimpleEventRouter.idaEvent(obj);
 	            });
 	   }
 	} 
