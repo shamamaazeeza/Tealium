@@ -133,7 +133,10 @@ try {
             // is just a pathname, that is, "/example" and not "http://domain.com/example".
             parserURL.href = parserURL.href;
             var pathName = parserURL.pathname.toLowerCase();
-
+            if (pathName[0] !== "/") {
+            // 2016-08-31 - jleon: TIE-163. Missing leading slash in pathname for IE
+               pathName = "/" + pathName;
+            }
             //--- START: Patch to define pageidQueryStrings for IWM and SSI pages. ##TODELETE## when standard is adopted
             if (pathName.indexOf("/marketing/iwm/") !== -1 && typeof(window.digitalData.page.attributes.pageidQueryStrings) == "undefined") {
                // Set PageID Query Strings for IWM Pages
