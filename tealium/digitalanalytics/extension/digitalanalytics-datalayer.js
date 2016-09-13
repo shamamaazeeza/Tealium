@@ -4,7 +4,7 @@
  * Scope         : Pre Loader
  * Execution     : N/A
  * 
- * =====|| NOTE: DO NOT MODIFY THIS SCRIPT IN TEALIUM, UPDATE SVN VERSION IN ECLIPSE
+ * =====|| NOTE: DO NOT MODIFY THIS SCRIPT IN TEALIUM, UPDATE GITHUB VERSION IN ECLIPSE
  */
 var tmeid="digitalanalytics-datalayer.js";
 try {
@@ -126,47 +126,58 @@ try {
    if (typeof(window.digitalData.util.calculateURLID) == "undefined") {
       window.digitalData.util.calculateURLID = function (fullURL) {
          try {
-            var parserURL = document.createElement('a');
-            // Get rid of 'm.ibm.com/http/' pattern for mobile, if exists
-            parserURL.href = fullURL.replace(/m\.ibm\.com\/https?\//,'');
-            // IE 8 and 9 dont load the attributes "protocol" and "host" in case the source URL
-            // is just a pathname, that is, "/example" and not "http://domain.com/example".
-            parserURL.href = parserURL.href;
-            var pathName = parserURL.pathname.toLowerCase();
-            if (pathName[0] !== "/") {
-            // 2016-08-31 - jleon: TIE-163. Missing leading slash in pathname for IE
-               pathName = "/" + pathName;
-            }
-            //--- START: Patch to define pageidQueryStrings for IWM and SSI pages. ##TODELETE## when standard is adopted
-            if (pathName.indexOf("/marketing/iwm/") !== -1 && typeof(window.digitalData.page.attributes.pageidQueryStrings) == "undefined") {
-               // Set PageID Query Strings for IWM Pages
-               window.digitalData.page.attributes.pageidQueryStrings = ["source","S_PKG"];
-            }
-            //--- END: Patch to define pageidQueryStrings for IWM and SSI pages. ##TODELETE## when standard is adopted
+            if (fullURL !== "") {
+               var parserURL = document.createElement('a');
+               // Get rid of 'm.ibm.com/http/' pattern for mobile, if exists
+               parserURL.href = fullURL.replace(/m\.ibm\.com\/https?\//,'');
+               // IE 8 and 9 dont load the attributes "protocol" and "host" in case the source URL
+               // is just a pathname, that is, "/example" and not "http://domain.com/example".
+               parserURL.href = parserURL.href;
+               var pathName = parserURL.pathname.toLowerCase();
+               if (pathName[0] !== "/") {
+                  // 2016-08-31 - jleon: TIE-163. Missing leading slash in address pathname method for IE
+                  pathName = "/" + pathName;
+               }
 
-            //remove some specified html versions from path name
-            var lastpart = pathName.substring(pathName.lastIndexOf('/') + 1, pathName.length);
-            // 2016-07-29 - jleon: RTC Story# XXXXXX - Updating list of omitted default pages
-            var omittedHTMLVersions = ["index.php","index.phtml", "index.shtml", "index.wss", "index.jsp", "index.jspa", "index.jsa", "index.htm", "index.html"];
-            for (var i = 0; i < omittedHTMLVersions.length; i++) {
-               if (omittedHTMLVersions[i] == lastpart.toLowerCase()) {
-                  pathName = pathName.substring(0,pathName.lastIndexOf('/'));
+               //--- START: Patch to define pageidQueryStrings for IWM and SSI pages. ##TODELETE## when standard is adopted
+               if (pathName.indexOf("/marketing/iwm/") !== -1 && typeof(window.digitalData.page.attributes.pageidQueryStrings) == "undefined") {
+                  // Set PageID Query Strings for IWM Pages
+                  window.digitalData.page.attributes.pageidQueryStrings = ["source","S_PKG"];
                }
-            }
-            //add different Query string parameters
-            var qs = window.digitalData.util.parseQueryString(parserURL.href);
-            if (window.digitalData.page.attributes.pageidQueryStrings) {
-               var addQSValue = "";
-               for (var k=0;k<window.digitalData.page.attributes.pageidQueryStrings.length;k++) {
-                  var q = window.digitalData.page.attributes.pageidQueryStrings[k];
-                  if (typeof(qs[q]) !== "undefined") addQSValue += q + "=" + qs[q] + "&";
+               else if (pathName.indexOf("/search/") === 0 && typeof(window.digitalData.page.attributes.pageidQueryStrings) == "undefined") {
+                  // 2016-09-05 - jleon: TME-165: pageID not set properly for dynamic pages
+                  // Set PageID Query Strings for Search Pages
+                  window.digitalData.page.attributes.pageidQueryStrings = ["q","cc","lang","hpp","o"];
                }
-               addQSValue = addQSValue.replace(/&$/,"");
-               pathName = (addQSValue !== "") ? (pathName + "?" + addQSValue) : pathName;
+               //--- END: Patch to define pageidQueryStrings for IWM and SSI pages. ##TODELETE## when standard is adopted
+
+               //remove some specified html versions from path name
+               var lastpart = pathName.substring(pathName.lastIndexOf('/') + 1, pathName.length);
+               // 2016-07-29 - jleon: RTC Story# XXXXXX - Updating list of omitted default pages
+               var omittedHTMLVersions = ["index.php","index.phtml", "index.shtml", "index.wss", "index.jsp", "index.jspa", "index.jsa", "index.htm", "index.html"];
+               for (var i = 0; i < omittedHTMLVersions.length; i++) {
+                  if (omittedHTMLVersions[i] == lastpart.toLowerCase()) {
+                     pathName = pathName.substring(0,pathName.lastIndexOf('/'));
+                  }
+               }
+               //add different Query string parameters
+               var qs = window.digitalData.util.parseQueryString(parserURL.href);
+               if (window.digitalData.page.attributes.pageidQueryStrings) {
+                  var addQSValue = "";
+                  for (var k=0;k<window.digitalData.page.attributes.pageidQueryStrings.length;k++) {
+                     var q = window.digitalData.page.attributes.pageidQueryStrings[k];
+                     if (typeof(qs[q]) !== "undefined") addQSValue += q + "=" + qs[q] + "&";
+                  }
+                  addQSValue = addQSValue.replace(/&$/,"");
+                  pathName = (addQSValue !== "") ? (pathName + "?" + addQSValue) : pathName;
+               }
+               //remove trailing slash, question mark, or hash(if any)
+               pathName = pathName.replace(/[(\/)(?)(#)(&)]+$/, "");
+               return(parserURL.hostname + pathName);
             }
-            //remove trailing slash, question mark, or hash(if any)
-            pathName = pathName.replace(/[(\/)(?)(#)(&)]+$/, "");
-            return(parserURL.hostname + pathName);
+            else {
+               return ("");
+            }
          }
          catch (error) {
             utag.DB('+++TME-ERROR - digitalanalytics-datalayer.js: ' + error);
@@ -219,36 +230,68 @@ try {
    }
 
    /*---------------------------------------------------Set referring URL---------------------------------------------------------*/
-   var referrerURL = document.createElement('a');
-   // Get rid of 'm.ibm.com/http/' pattern for mobile, if exists
-   referrerURL.href = window.document.referrer.replace(/m\.ibm\.com\/https?\//,'');
-   // IE 8 and 9 dont load the attributes "protocol" and "host" in case the source URL
-   // is just a pathname, that is, "/example" and not "http://domain.com/example".
-   referrerURL.href = referrerURL.href;
-   window.digitalData.util.referrer.hash     = referrerURL.hash;
-   window.digitalData.util.referrer.host     = referrerURL.host;
-   window.digitalData.util.referrer.hostname = referrerURL.hostname;
-   window.digitalData.util.referrer.href     = referrerURL.href;
-   window.digitalData.util.referrer.origin   = referrerURL.origin;
-   window.digitalData.util.referrer.pathname = referrerURL.pathname;
-   window.digitalData.util.referrer.port     = referrerURL.port;
-   window.digitalData.util.referrer.protocol = referrerURL.protocol;
-   window.digitalData.util.referrer.search   = referrerURL.search;
-
+   if (window.document.referrer !== "" ) {
+      // 2016-09-16 - jleon: BMP-1480 - making sure that the referrer is set, otherwise createElement will take by default the current URL
+      var referrerURL = document.createElement('a');
+      // Get rid of 'm.ibm.com/http/' pattern for mobile, if exists
+      referrerURL.href = window.document.referrer.replace(/m\.ibm\.com\/https?\//,'');
+      // IE 8 and 9 dont load the attributes "protocol" and "host" in case the source URL
+      // is just a pathname, that is, "/example" and not "http://domain.com/example".
+      referrerURL.href = referrerURL.href;
+      window.digitalData.util.referrer.hash     = referrerURL.hash;
+      window.digitalData.util.referrer.host     = referrerURL.host;
+      window.digitalData.util.referrer.hostname = referrerURL.hostname;
+      window.digitalData.util.referrer.href     = referrerURL.href;
+      window.digitalData.util.referrer.origin   = referrerURL.origin;
+      window.digitalData.util.referrer.pathname = referrerURL.pathname;
+      window.digitalData.util.referrer.port     = referrerURL.port;
+      window.digitalData.util.referrer.protocol = referrerURL.protocol;
+      window.digitalData.util.referrer.search   = referrerURL.search;
+   }
+   else {
+      window.digitalData.util.referrer.hash     = "";
+      window.digitalData.util.referrer.host     = "";
+      window.digitalData.util.referrer.hostname = "";
+      window.digitalData.util.referrer.href     = "";
+      window.digitalData.util.referrer.origin   = "";
+      window.digitalData.util.referrer.pathname = "";
+      window.digitalData.util.referrer.port     = "";
+      window.digitalData.util.referrer.protocol = "";
+      window.digitalData.util.referrer.search   = "";
+   }
    /*---------------------------------------------------Set PAGEID/URLID in DDO---------------------------------------------------------------*/
+   if (typeof(window.digitalData.page.pageInfo.urlID) !== "undefined" && typeof(window.digitalData.page.pageInfo.pageID) !== "undefined" 
+      && window.digitalData.page.pageInfo.pageID === window.digitalData.page.pageInfo.urlID) {
+      // urlID has been previously defined and assigned to pageID, need to undefine pageID to make sure that it is set properly
+      window.digitalData.page.pageInfo.pageID = undefined;
+   }
    window.digitalData.page.pageInfo.urlID = window.digitalData.util.calculateURLID(window.location.href);
    if (typeof(window.digitalData.page.pageID) == "undefined" && typeof(window.digitalData.page.pageInfo.pageID) == "undefined") {
+      // If the pageID is not provided by the page, then set it to the calculated value in urlID
       window.digitalData.page.pageInfo.pageID = window.digitalData.page.pageInfo.urlID;
    } 
    else if (typeof(window.digitalData.page.pageID) !== "undefined") {
+      // Support for old DDO definition of the pageID
       window.digitalData.page.pageInfo.pageID = window.digitalData.page.pageID;
    }
 
    /*---------------------------------------------------Set referral URLID and referral domain in DDO---------------------------------------------------------------*/
    window.digitalData.page.pageInfo.referrer   = window.digitalData.util.referrer.href;
    window.digitalData.page.pageInfo.referrerID = window.digitalData.util.calculateURLID(window.digitalData.util.referrer.href);
-   // Get the main domain from the referrer hostname
-   window.digitalData.page.pageInfo.referrerDomain = window.digitalData.util.referrer.hostname.split('.').splice(-2,2).join('.');
+   // Get the sub domain or root domain from the referrer hostname
+   var referrerParts = window.digitalData.util.referrer.hostname.split('.');
+   if (referrerParts.length < 2) {
+      // if the hostname has less than 2 parts, then it is valid (localhost)
+      window.digitalData.page.pageInfo.referrerDomain = "";
+   }
+   else if (referrerParts.length > 2) {
+      // if the hostname has three or more parts, then substract one to get the subdomain or root domain
+      window.digitalData.page.pageInfo.referrerDomain = referrerParts.splice(-1 * (referrerParts.length - 1),referrerParts.length - 1).join('.');
+   }
+   else {
+      // if the hostname has only two parts, assume it is the root domain of the site
+      window.digitalData.page.pageInfo.referrerDomain = window.digitalData.util.referrer.hostname;
+   }
 
    /*-------------------------------------------------setting IBMER value--------------------------------------------------------*/
    if (window.document.domain.indexOf("ibm.com") !== -1) {
