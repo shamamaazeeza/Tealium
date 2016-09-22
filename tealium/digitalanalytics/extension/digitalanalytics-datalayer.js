@@ -139,17 +139,22 @@ try {
                   pathName = "/" + pathName;
                }
 
-               //--- START: Patch to define pageidQueryStrings for IWM and SSI pages. ##TODELETE## when standard is adopted
-               if (pathName.indexOf("/marketing/iwm/") !== -1 && typeof(window.digitalData.page.attributes.pageidQueryStrings) == "undefined") {
-                  // Set PageID Query Strings for IWM Pages
-                  window.digitalData.page.attributes.pageidQueryStrings = ["source","S_PKG"];
-               }
-               else if (pathName.indexOf("/search/") === 0 && typeof(window.digitalData.page.attributes.pageidQueryStrings) == "undefined") {
-                  // 2016-09-05 - jleon: TME-165: pageID not set properly for dynamic pages
-                  // Set PageID Query Strings for Search Pages
-                  window.digitalData.page.attributes.pageidQueryStrings = ["q","cc","lang","hpp","o"];
-               }
-               //--- END: Patch to define pageidQueryStrings for IWM and SSI pages. ##TODELETE## when standard is adopted
+               //--- START: Patch to define pageidQueryStrings for IWM and Search pages. ##TODELETE## when standard is adopted
+               // 2016-09-16 - shruti: Code optimization. Used JSON instead of if-else
+               var pageParameters = [{"pathNameSubstring": "/marketing/iwm/",       
+                                      "qsParameter"      : ["source","S_PKG"]},
+                                     {"pathNameSubstring": "/search/",       
+                                      "qsParameter"      : ["q","cc","lang","hpp","o"]}];
+               // process each entry to look for matches
+               for (var i = 0; i < pageParameters.length; i++) {
+                  var t = pageParameters[i];               
+                  if (pathName.indexOf(t.pathNameSubstring) === 0 && typeof(window.digitalData.page.attributes.pageidQueryStrings) == "undefined") {               
+                     // Set PageID Query Strings 
+                     window.digitalData.page.attributes.pageidQueryStrings = t.qsParameter;
+                     break;
+                  }
+               }               
+               //--- END: Patch to define pageidQueryStrings for IWM and Search pages. ##TODELETE## when standard is adopted
 
                //remove some specified html versions from path name
                var lastpart = pathName.substring(pathName.lastIndexOf('/') + 1, pathName.length);
@@ -376,6 +381,10 @@ try {
    else if (typeof(window.digitalData.page.category) !== "undefined" && typeof(window.digitalData.page.category.categoryID) !== "undefined" && window.digitalData.page.category.categoryID.toLowerCase() == "cuf04") {
       // Set siteID based on OLD DDO format Category ID for OSOL pages
       window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.page.category.primaryCategory;
+   }
+   else if (typeof(window.digitalData.util.meta["ibm.wtmcategory"]) !== "undefined" && window.digitalData.util.meta["ibm.wtmcategory"].substring(0, 5) == "SOFDC") {
+      // 2016-09-21 - matej: Set siteID based on Category metatag for developerWorks
+      window.digitalData.page.pageInfo.ibm.siteID = "DEVWRKS";
    }
    else if (typeof(window.digitalData.util.meta["ibm.wtmsite"]) !== "undefined") {
       // set siteID based on metadata element IBM.WTMSite
