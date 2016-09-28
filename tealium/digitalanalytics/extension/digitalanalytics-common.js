@@ -8,6 +8,12 @@
  */
 var tmeid="digitalanalytics-common.js";
 try {
+   // Ensure that the digitalData Object has not been reset by the page
+   if (typeof(window.digitalData.page.isDataLayerReady) === "undefined") {
+      window.datalayer.update();
+      console.log('+++TME > digitalanalytics-common.js: digitalData was reset, recreating datalayer');
+   }
+   
    if (typeof (window.digitalData.page.pageInfo.version) !== "undefined") {
       utag.data["js_page.digitalData.page.pageInfo.version1"] = window.digitalData.page.pageInfo.version;
    }
@@ -174,7 +180,7 @@ try {
    includeCustomAttributes(utag.data.site_id);
 }
 catch (error) {
-   console.error('+++TME-ERROR - digitalanalytics-common.js: ' + error);
+   console.error('+++TME-ERROR > digitalanalytics-common.js: ' + error);
 }
 
 /*
