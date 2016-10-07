@@ -8,6 +8,18 @@
  */
 var tmeid="digitalanalytics-datalayer.js";
 
+function isChrome53() {
+   var raw = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
+   raw = raw ? parseInt(raw[2], 10) : false;
+   if (typeof window.chrome !== 'undefined' && raw === 53) {
+       return true;
+   } 
+   else {
+       return false;
+   }
+};
+
+
 /*---------------------------------------------------Initialize all Digital Data Objects---------------------------------------------------------*/
 var datalayer = {
       pageidQueryStringsDefault : [{"pathNameSubstring": "/marketing/iwm/",       
@@ -18,6 +30,14 @@ var datalayer = {
       testDomains : ["dev.nwtw.ibm.com","testdata.coremetrics.com","localhost","wwwbeta-sso.toronto.ca.ibm.com"],
       
       util : {
+         /*---------------------------------------------------Function for any overrides to the data layer---------------------------------------------------*/
+         override : function () {
+            // Disable coremetrics if the browser is Chrome 53 - Code initially provided by Tealium
+            if (window.isChrome53()) {
+               window.digitalData.page.pageInfo.coremetrics.enabled = "false"; 
+            }
+         },
+
          /*---------------------------------------------------Add SHA256 Hash Functions---------------------------------------------------------*/
          // 2016-08-04 - jleon: RTC Story# 978510 - https://github.com/jbt/js-crypto
          sha256 : function() {function e(a,b){return a>>>b|a<<32-b}for(var b=1,a,m=[],n=[];18>++b;)for(a=b*b;312>a;a+=b)m[a]=1;b=1;for(a=0;313>b;)m[++b]||(n[a]=Math.pow(b,.5)%1*4294967296|0,m[a++]=Math.pow(b,1/3)%1*4294967296|0);return function(g){for(var l=n.slice(b=0),c=unescape(encodeURI(g)),h=[],d=c.length,k=[],f,p;b<d;)k[b>>2]|=(c.charCodeAt(b)&255)<<8*(3-b++%4);d*=8;k[d>>5]|=128<<24-d%32;k[p=d+64>>5|15]=d;for(b=0;b<p;b+=16){for(c=l.slice(a=0,8);64>a;c[4]+=f)h[a]=16>a?k[a+b]:(e(f=h[a-2],17)^e(f,19)^f>>>10)+(h[a-7]|0)+(e(f=h[a-15],7)^e(f,18)^f>>>3)+(h[a-16]|0),c.unshift((f=(c.pop()+(e(g=c[4],6)^e(g,11)^e(g,25))+((g&c[5]^~g&c[6])+m[a])|0)+(h[a++]|0))+(e(d=c[0],2)^e(d,13)^e(d,22))+(d&c[1]^c[1]&c[2]^c[2]&d));for(a=8;a--;)l[a]=c[a]+l[a]}for(c="";63>a;)c+=(l[++a>>3]>>4*(7-a%8)&15).toString(16);return c}}(),
@@ -119,7 +139,33 @@ var datalayer = {
                console.error('+++TME-ERROR > digitalanalytics-datalayer.js > calculateURLID: ' + error);
             }
          },
-      
+
+         /*---------------------------------------------------Add parseEventName function---------------------------------------------------------*/   
+         parseEventName : function(eventName) {
+            /*
+             * eventName contains two parameters separated by a colon: <product_name>:<tactic_code>
+             * This function will ensure that the string is not greater than 256 characters, and ensuring that the second parameter is complete
+             */ 
+            try {
+               if (eventName.length <= 256) {
+                  eventName = eventName.replace(/\s+/g, '-').toUpperCase();
+               }
+               else {
+                  var eventNameParts = eventName.split(':');
+                  if (eventNameParts.length === 1) {
+                     eventName = eventNameParts[0].substring(0,256).replace(/\s+/g, '-').toUpperCase();
+                  }
+                  else {
+                     eventName = eventNameParts[0].substring(0,256-eventNameParts[1].length-1).replace(/\s+/g, '-').toUpperCase() + ':' + eventNameParts[1].replace(/\s+/g, '-').toUpperCase();
+                  }
+               }
+               return(eventName);
+            }
+            catch (error) {
+               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > parseEventName: ' + error);
+            }
+         },
+         
          /*---------------------------------------------------Read Cookies function---------------------------------------------------------*/
          readCookies : function () {
             try {
@@ -355,6 +401,18 @@ var datalayer = {
                   // set siteID from DDO value
                   window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.page.pageInfo.ibm.siteID;
                }
+               else if (typeof(window.digitalData.util.meta["ibm.wtmsite"]) !== "undefined") {
+                  // set siteID based on metadata element IBM.WTMSite
+                  window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.util.meta["ibm.wtmsite"];
+               }
+               else if (typeof(window.digitalData.util.meta["wtmsite"]) !== "undefined") {
+                  // set siteID based on metadata element WTMSite
+                  window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.util.meta["wtmsite"];
+               }
+               else if (typeof(window.digitalData.page.site) !== "undefined" && typeof(window.digitalData.page.site.siteID) !== "undefined") {
+                  // set siteID from OLD DDO format value
+                  window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.page.site.siteID;
+               }
                else if (window.location.href.toLowerCase().indexOf("www-935.ibm.com/services/") !== -1 && window.location.pathname.toLowerCase().match(/\/gbs\/|\/business-consulting\//)) {
                   // GBS siteID based on URL patterns
                   window.digitalData.page.pageInfo.ibm.siteID = "GBS";
@@ -367,42 +425,33 @@ var datalayer = {
                   // INDUSTRIES siteID based on URL patterns
                   window.digitalData.page.pageInfo.ibm.siteID = "INDUSTRIES";
                }
-               else if (typeof(window.digitalData.page.site) !== "undefined" && typeof(window.digitalData.page.site.siteID) !== "undefined") {
-                  // set siteID from OLD DDO format value
-                  window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.page.site.siteID;
+               else if (typeof(window.digitalData.page.category.primaryCategory) !== "undefined" && window.digitalData.page.category.primaryCategory.toLowerCase() == "cuf04") {
+                  // Set siteID based on Category id for OSOL pages
+                  window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.page.category.primaryCategory
+               }
+               else if (typeof(window.digitalData.page.category.categoryID) !== "undefined" && window.digitalData.page.category.categoryID.toLowerCase() == "cuf04") {
+                  // Set siteID based on OLD DDO format Category ID for OSOL pages
+                  window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.page.category.primaryCategory;
                }
                else if (typeof(window.digitalData.page.category.primaryCategory) !== "undefined" && window.digitalData.page.category.primaryCategory.substring(0, 5) == "SOFDC") {
                   // Set siteID based on Category id for developerWorks
                   window.digitalData.page.pageInfo.ibm.siteID = "DEVWRKS"
                }
-               else if (typeof(window.digitalData.page.category.primaryCategory) !== "undefined" && window.digitalData.page.category.primaryCategory.toLowerCase() == "cuf04") {
-                  // Set siteID based on Category id for OSOL pages
-                  window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.page.category.primaryCategory
-               }
-               else if (typeof(window.digitalData.page.category) !== "undefined" && typeof(window.digitalData.page.category.categoryID) !== "undefined" && window.digitalData.page.category.categoryID.substring(0, 5) == "SOFDC") {
+               else if (typeof(window.digitalData.page.category.categoryID) !== "undefined" && window.digitalData.page.category.categoryID.substring(0, 5) == "SOFDC") {
                   // Set siteID based on OLD DDO format Category ID
                   window.digitalData.page.pageInfo.ibm.siteID = "DEVWRKS";
-               }
-               else if (typeof(window.digitalData.page.category) !== "undefined" && typeof(window.digitalData.page.category.categoryID) !== "undefined" && window.digitalData.page.category.categoryID.toLowerCase() == "cuf04") {
-                  // Set siteID based on OLD DDO format Category ID for OSOL pages
-                  window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.page.category.primaryCategory;
                }
                else if (typeof(window.digitalData.util.meta["ibm.wtmcategory"]) !== "undefined" && window.digitalData.util.meta["ibm.wtmcategory"].substring(0, 5) == "SOFDC") {
                   // 2016-09-21 - matej: Set siteID based on Category metatag for developerWorks
                   window.digitalData.page.pageInfo.ibm.siteID = "DEVWRKS";
                }
-               else if (typeof(window.digitalData.util.meta["ibm.wtmsite"]) !== "undefined") {
-                  // set siteID based on metadata element IBM.WTMSite
-                  window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.util.meta["ibm.wtmsite"];
-               }
-               else if (typeof(window.digitalData.util.meta["wtmsite"]) !== "undefined") {
-                  // set siteID based on metadata element IBM.WTMSite
-                  window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.util.meta["wtmsite"];
-               }
                else {
                   // Default: set siteID to IBMTESTWWW as last resort
                   window.digitalData.page.pageInfo.ibm.siteID = "IBMTESTWWW";
                }
+               // Saving initial siteID
+               window.digitalData.page.pageInfo.ibm.iniSiteID = window.digitalData.page.pageInfo.ibm.siteID;
+               
             }
             catch (error) {
                console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setSiteID: ' + error);
@@ -482,14 +531,27 @@ var datalayer = {
 
             /*---------------------------------------------------Set Site ID---------------------------------------------------------*/
             this.util.setSiteID();
+            if (window.digitalData.user.segment.isIBMer) {
+               window.digitalData.page.pageInfo.ibm.iniSiteID = window.digitalData.page.pageInfo.ibm.iniSiteID + "_I"
+            }
 
             /*---------------------------------------------------setting Client ID---------------------------------------------------------*/
             this.util.setClientID();
 
-            /*---------------------------------------------------Set UDO Variables---------------------------------------------------------*/
+            /*---------------------------------------------------Set Data Layer Ready---------------------------------------------------------*/
+            window.digitalData.page.isDataLayerReady = true;
+
+            /*---------------------------------------------------Load Coremetrics Tags by Default---------------------------------------------------------*/
+            window.digitalData.page.pageInfo.coremetrics.enabled = "true";
+
+            /*---------------------------------------------------Override---------------------------------------------------------*/
+            this.util.override();
+            
+           /*---------------------------------------------------Set UDO Variables---------------------------------------------------------*/
             if (typeof(window.utag) !== "undefined" && typeof(window.utag.data) !== "undefined") {
                utag.data.concat_clientid  = window.digitalData.page.pageInfo.ibm.cmClientID;
                utag.data.site_id          = window.digitalData.page.pageInfo.ibm.siteID;
+               utag.data.iniSiteID        = window.digitalData.page.pageInfo.ibm.iniSiteID;
                utag.data.page_id          = window.digitalData.page.pageInfo.pageID;   
                utag.data.urlID            = window.digitalData.page.pageInfo.urlID;
                utag.data.pageProd         = window.digitalData.page.pageInfo.urlID;
@@ -502,10 +564,6 @@ var datalayer = {
                utag.data.referrerID       = window.digitalData.page.pageInfo.referrerID;
                utag.data.referrerDomain   = window.digitalData.page.pageInfo.referrerDomain;
             }
-
-            /*---------------------------------------------------Set Data Layer Ready---------------------------------------------------------*/
-            window.digitalData.page.isDataLayerReady = true;
-
          }
          catch (error) {
             console.error('+++TME-ERROR > digitalanalytics-datalayer.js > update: ' + error);
@@ -637,13 +695,26 @@ var datalayer = {
 
             /*---------------------------------------------------Set Site ID---------------------------------------------------------*/
             this.util.setSiteID();
+            if (window.digitalData.user.segment.isIBMer) {
+               window.digitalData.page.pageInfo.ibm.iniSiteID = window.digitalData.page.pageInfo.ibm.iniSiteID + "_I"
+            }
 
             /*---------------------------------------------------setting Client ID---------------------------------------------------------*/
             this.util.setClientID();
 
+            /*---------------------------------------------------Set Data Layer Ready---------------------------------------------------------*/
+            window.digitalData.page.isDataLayerReady = true;
+
+            /*---------------------------------------------------Load Coremetrics Tags by Default---------------------------------------------------------*/
+            window.digitalData.page.pageInfo.coremetrics.enabled = "true";
+
+            /*---------------------------------------------------Override---------------------------------------------------------*/
+            this.util.override();
+            
             /*---------------------------------------------------Set UDO Variables---------------------------------------------------------*/
             utag_data.concat_clientid  = window.digitalData.page.pageInfo.ibm.cmClientID;
             utag_data.site_id          = window.digitalData.page.pageInfo.ibm.siteID;
+            utag_data.iniSiteID        = window.digitalData.page.pageInfo.ibm.iniSiteID;
             utag_data.page_id          = window.digitalData.page.pageInfo.pageID;   
             utag_data.urlID            = window.digitalData.page.pageInfo.urlID;
             utag_data.pageProd         = window.digitalData.page.pageInfo.urlID;
@@ -655,10 +726,6 @@ var datalayer = {
             utag_data.referrer         = window.digitalData.page.pageInfo.referrer;
             utag_data.referrerID       = window.digitalData.page.pageInfo.referrerID;
             utag_data.referrerDomain   = window.digitalData.page.pageInfo.referrerDomain;
-
-            /*---------------------------------------------------Set Data Layer Ready---------------------------------------------------------*/
-            window.digitalData.page.isDataLayerReady = true;
-
          }
          catch (error) {
             console.error('+++TME-ERROR > digitalanalytics-datalayer.js > init: ' + error);
