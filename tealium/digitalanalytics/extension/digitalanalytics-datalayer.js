@@ -25,7 +25,13 @@ var datalayer = {
       pageidQueryStringsDefault : [{"pathNameSubstring": "/marketing/iwm/",       
                                     "qsParameter"      : ["source","S_PKG"]},
                                    {"pathNameSubstring": "/search/",       
-                                    "qsParameter"      : ["q","cc","lang","hpp","o"]}],
+                                    "qsParameter"      : ["q","cc","lang","hpp","o"]},
+			                          {"pathNameSubstring": "/common/ssi/",       
+                                    "qsParameter"      : ["letternum","supplier","htmlfid","docURL","MPPEFSCH"]},
+				                       {"pathNameSubstring": "/support/docview.wss",       
+                                    "qsParameter"      : ["uid"]},
+				                       {"pathNameSubstring": "/support/fixcentral/",       
+                                    "qsParameter"      : ["product"]}],
      
       testDomains : ["dev.nwtw.ibm.com","testdata.coremetrics.com","localhost","wwwbeta-sso.toronto.ca.ibm.com"],
       
