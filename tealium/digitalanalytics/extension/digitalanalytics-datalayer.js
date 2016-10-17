@@ -8,42 +8,22 @@
  */
 var tmeid="digitalanalytics-datalayer.js";
 
-function isChrome53() {
-   var raw = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
-   raw = raw ? parseInt(raw[2], 10) : false;
-   if (typeof window.chrome !== 'undefined' && raw === 53) {
-       return true;
-   } 
-   else {
-       return false;
-   }
-};
-
-
 /*---------------------------------------------------Initialize all Digital Data Objects---------------------------------------------------------*/
 var datalayer = {
       pageidQueryStringsDefault : [{"pathNameSubstring": "/marketing/iwm/",       
                                     "qsParameter"      : ["source","S_PKG"]},
                                    {"pathNameSubstring": "/search/",       
                                     "qsParameter"      : ["q","cc","lang","hpp","o"]},
-			           {"pathNameSubstring": "/common/ssi/",       
+                                   {"pathNameSubstring": "/common/ssi/",       
                                     "qsParameter"      : ["letternum","supplier","htmlfid","docURL","MPPEFSCH"]},
-				   {"pathNameSubstring": "/support/docview.wss",       
+                                   {"pathNameSubstring": "/support/docview.wss",       
                                     "qsParameter"      : ["uid"]},
-				   {"pathNameSubstring": "/support/fixcentral/",       
+                                   {"pathNameSubstring": "/support/fixcentral/",       
                                     "qsParameter"      : ["product"]}],
      
       testDomains : ["dev.nwtw.ibm.com","testdata.coremetrics.com","localhost","wwwbeta-sso.toronto.ca.ibm.com"],
       
       util : {
-         /*---------------------------------------------------Function for any overrides to the data layer---------------------------------------------------*/
-         override : function () {
-            // Disable coremetrics if the browser is Chrome 53 - Code initially provided by Tealium
-            if (window.isChrome53()) {
-               window.digitalData.page.pageInfo.coremetrics.enabled = "false"; 
-            }
-         },
-
          /*---------------------------------------------------Add SHA256 Hash Functions---------------------------------------------------------*/
          // 2016-08-04 - jleon: RTC Story# 978510 - https://github.com/jbt/js-crypto
          sha256 : function() {function e(a,b){return a>>>b|a<<32-b}for(var b=1,a,m=[],n=[];18>++b;)for(a=b*b;312>a;a+=b)m[a]=1;b=1;for(a=0;313>b;)m[++b]||(n[a]=Math.pow(b,.5)%1*4294967296|0,m[a++]=Math.pow(b,1/3)%1*4294967296|0);return function(g){for(var l=n.slice(b=0),c=unescape(encodeURI(g)),h=[],d=c.length,k=[],f,p;b<d;)k[b>>2]|=(c.charCodeAt(b)&255)<<8*(3-b++%4);d*=8;k[d>>5]|=128<<24-d%32;k[p=d+64>>5|15]=d;for(b=0;b<p;b+=16){for(c=l.slice(a=0,8);64>a;c[4]+=f)h[a]=16>a?k[a+b]:(e(f=h[a-2],17)^e(f,19)^f>>>10)+(h[a-7]|0)+(e(f=h[a-15],7)^e(f,18)^f>>>3)+(h[a-16]|0),c.unshift((f=(c.pop()+(e(g=c[4],6)^e(g,11)^e(g,25))+((g&c[5]^~g&c[6])+m[a])|0)+(h[a++]|0))+(e(d=c[0],2)^e(d,13)^e(d,22))+(d&c[1]^c[1]&c[2]^c[2]&d));for(a=8;a--;)l[a]=c[a]+l[a]}for(c="";63>a;)c+=(l[++a>>3]>>4*(7-a%8)&15).toString(16);return c}}(),
@@ -146,32 +126,6 @@ var datalayer = {
             }
          },
 
-         /*---------------------------------------------------Add parseEventName function---------------------------------------------------------*/   
-         parseEventName : function(eventName) {
-            /*
-             * eventName contains two parameters separated by a colon: <product_name>:<tactic_code>
-             * This function will ensure that the string is not greater than 256 characters, and ensuring that the second parameter is complete
-             */ 
-            try {
-               if (eventName.length <= 256) {
-                  eventName = eventName.replace(/\s+/g, '-').toUpperCase();
-               }
-               else {
-                  var eventNameParts = eventName.split(':');
-                  if (eventNameParts.length === 1) {
-                     eventName = eventNameParts[0].substring(0,256).replace(/\s+/g, '-').toUpperCase();
-                  }
-                  else {
-                     eventName = eventNameParts[0].substring(0,256-eventNameParts[1].length-1).replace(/\s+/g, '-').toUpperCase() + ':' + eventNameParts[1].replace(/\s+/g, '-').toUpperCase();
-                  }
-               }
-               return(eventName);
-            }
-            catch (error) {
-               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > parseEventName: ' + error);
-            }
-         },
-         
          /*---------------------------------------------------Read Cookies function---------------------------------------------------------*/
          readCookies : function () {
             try {
@@ -287,6 +241,27 @@ var datalayer = {
             }
          },
          
+         /*---------------------------------------------------Set Whether Coremetrics should run---------------------------------------------------------------*/
+         setCoremetricsEnabled : function () {
+            try {
+               if (typeof(window.digitalData.page.pageInfo.coremetrics.enabled) === "boolean") {
+                  // boolean value, convert to String
+                  window.digitalData.page.pageInfo.coremetrics.enabled = window.digitalData.page.pageInfo.coremetrics.enabled.toString();
+               }
+               else if (typeof(window.digitalData.page.pageInfo.coremetrics.enabled) === "string") {
+                  // ensure value is lower case
+                  window.digitalData.page.pageInfo.coremetrics.enabled = window.digitalData.page.pageInfo.coremetrics.enabled.toLowerCase();
+               }
+               else {
+                  // Default value - Load Coremetrics
+                  window.digitalData.page.pageInfo.coremetrics.enabled = "true";
+               }
+            }
+            catch (error) {
+               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setCoremetricsEnabled: ' + error);
+            }
+         },
+       
          /*---------------------------------------------------Set PAGEID/URLID in DDO---------------------------------------------------------------*/
          setPageID : function () {
             try {
@@ -544,15 +519,12 @@ var datalayer = {
             /*---------------------------------------------------setting Client ID---------------------------------------------------------*/
             this.util.setClientID();
 
-            /*---------------------------------------------------Set Data Layer Ready---------------------------------------------------------*/
+            /*---------------------------------------------------Load Coremetrics Tags by Default---------------------------------------------------------*/
+            this.util.setCoremetricsEnabled();
+
+           /*---------------------------------------------------Set Data Layer Ready---------------------------------------------------------*/
             window.digitalData.page.isDataLayerReady = true;
 
-            /*---------------------------------------------------Load Coremetrics Tags by Default---------------------------------------------------------*/
-            window.digitalData.page.pageInfo.coremetrics.enabled = "true";
-
-            /*---------------------------------------------------Override---------------------------------------------------------*/
-            this.util.override();
-            
            /*---------------------------------------------------Set UDO Variables---------------------------------------------------------*/
             if (typeof(window.utag) !== "undefined" && typeof(window.utag.data) !== "undefined") {
                utag.data.concat_clientid  = window.digitalData.page.pageInfo.ibm.cmClientID;
@@ -708,15 +680,12 @@ var datalayer = {
             /*---------------------------------------------------setting Client ID---------------------------------------------------------*/
             this.util.setClientID();
 
+            /*---------------------------------------------------Load Coremetrics Tags by Default---------------------------------------------------------*/
+            this.util.setCoremetricsEnabled();
+
             /*---------------------------------------------------Set Data Layer Ready---------------------------------------------------------*/
             window.digitalData.page.isDataLayerReady = true;
 
-            /*---------------------------------------------------Load Coremetrics Tags by Default---------------------------------------------------------*/
-            window.digitalData.page.pageInfo.coremetrics.enabled = "true";
-
-            /*---------------------------------------------------Override---------------------------------------------------------*/
-            this.util.override();
-            
             /*---------------------------------------------------Set UDO Variables---------------------------------------------------------*/
             utag_data.concat_clientid  = window.digitalData.page.pageInfo.ibm.cmClientID;
             utag_data.site_id          = window.digitalData.page.pageInfo.ibm.siteID;
@@ -739,6 +708,7 @@ var datalayer = {
       },
 };
 
+/*---------------------------------------------------MAIN FUNCTION---------------------------------------------------------*/
 try {
    window.datalayer.init();
 }

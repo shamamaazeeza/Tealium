@@ -1,237 +1,160 @@
 /*
- * Id         : /tm-v1.0/common/testpages/coremetrics/ida_production.js
+ * Id         : /tm-v1.0/common/js/coremetrics/ida_production.js
  * Scope      : All IBM pages
  * Description: Script used to load Tag Management (Tealium) on IBM web pages
  * 
  */
 (function() {
-   var ghostFunctions = [
-                         'cmCreatePageviewTag',
-                         'cmCreateProductviewTag',
-                         'cmCreateShopAction5Tag',
-                         'cmDisplayShops',
-                         'cmCreateShopAction9Tag',
-                         'cmCreateOrderTag',
-                         'cmCreateRegistrationTag',
-                         'cmCreateElementTag',
-                         'cmCreateConversionEventTag',
-                         'cmCreateManualPageviewTag',
-                         'cmCreateManualLinkClickTag',
-                         'cmCreateManualImpressionTag',
-                         'cmCreateCustomTag',
-                         'cmSetupOther',
-                         'cmSetCurrencyCode',
-                         'cmDisplayShop9s',
-                         'cmDisplayShop5s'
-                         ],
-                         queue = [];
+	/* 
+	 * List of ghost functions that may not be defined at point of execution
+	 * Create a shell function that will push into a queue each call made before the real function is created.
+	 * Once the functions are defined, then execute each the functions from the queue.
+	 */
+	var ghostFunctions = [
+		'cmCreatePageviewTag',
+		'cmCreateProductviewTag',
+		'cmCreateShopAction5Tag',
+		'cmDisplayShops',
+		'cmCreateShopAction9Tag',
+		'cmCreateOrderTag',
+		'cmCreateRegistrationTag',
+		'cmCreateElementTag',
+		'cmCreateConversionEventTag',
+		'cmCreateManualPageviewTag',
+		'cmCreateManualLinkClickTag',
+		'cmCreateManualImpressionTag',
+		'cmCreateCustomTag',
+		'cmSetupOther',
+		'cmSetCurrencyCode',
+		'cmDisplayShop9s',
+		'cmDisplayShop5s',
+		'ibmStats.event',
+		'bindPageViewWithAnalytics'];
+	window.ghostQueue = [];
 
-   (function init() {
-      if (!isOriginSetLoaded()) {
-         for (var i = 0; i < ghostFunctions.length; i++) {
-            createGhostFunction(ghostFunctions[i]);
-         }
+	/* This gets executed right on code load. Sets the ghost functions and wait for the real ones */
+	(function init() {
+		if (!isOriginSetLoaded()) {
+			for (var i = 0; i < ghostFunctions.length; i++) {
+				createGhostFunction(ghostFunctions[i]);
+			}
+			listenForOriginSet();
+		}
+	})();
 
-         listenForOriginSet();
-      }
-   })();
+	/* Checks that ALL functions are properly defined, and no longer ghost functions */
+	function isOriginSetLoaded() {
+		for (var i = 0; i < ghostFunctions.length; i++) {
+			if (ghostFunctions[i].indexOf('.') === -1) {
+				// window level function
+				if (typeof(window[ghostFunctions[i]]) !== 'function' || window[ghostFunctions[i]].isGhost) {
+					return false;
+				}
+			}
+			else {
+				// Second level function or object method. ONLY FIRST LEVEL METHOD IS SUPPORTED
+				if (typeof(window[ghostFunctions[i].split('.')[0]]) !== "undefined") {
+					if (typeof(window[ghostFunctions[i].split('.')[0]][ghostFunctions[i].split('.')[1]]) !== 'function' 
+						|| window[ghostFunctions[i].split('.')[0]][ghostFunctions[i].split('.')[1]].isGhost) {
+						return false;
+					}
+				}
+				else {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 
-   function isOriginSetLoaded() {
-      for (var i = 0; i < ghostFunctions.length; i++) {
-         if (typeof(window[ghostFunctions[i]]) !== 'function' || window[ghostFunctions[i]].isGhost) {
-            return false;
-         }
-      }
+	/* 
+	 * Creates each of the ghost functions. Every time the function is called, 
+	 * it will push the call into the queue for later execution
+	 */
+	function createGhostFunction(ghostFunctionName) {
+		if (ghostFunctionName.indexOf('.') === -1) {
+			// window level function
+			window[ghostFunctionName] = function() {
+				window.ghostQueue.push({
+					functionName: ghostFunctionName,
+					args: arguments
+				});
+			}
+			window[ghostFunctionName].isGhost = true;
+		}
+		else {
+			// Second level function or object method. ONLY FIRST LEVEL METHOD IS SUPPORTED
+			// Make sure that the window level object is defined
+			window[ghostFunctionName.split('.')[0]] = window[ghostFunctionName.split('.')[0]] || {};
+			// Assign the ghost function
+			window[ghostFunctionName.split('.')[0]][ghostFunctionName.split('.')[1]] = function() {
+				window.ghostQueue.push({
+					functionName: ghostFunctionName,
+					args: arguments
+				});
+			}
+			window[ghostFunctionName.split('.')[0]][ghostFunctionName.split('.')[1]].isGhost = true;
+		}
+	}
 
-      return true;
-   }
+	/* 
+	 * This is the timeout loop, it will wait for 50ms before asking whether ALL the functions remain ghost
+	 * Otherwise, it will execute each of the calls in the ghostQueue
+	 */
+	function listenForOriginSet() {
+		setTimeout(function() {
+			if (isOriginSetLoaded()) {
+				delegateQueue();
+			}
+			else {
+				listenForOriginSet();
+			}
+		}, 50);
+	}
 
-   function createGhostFunction(ghostFunctionName) {
-      window[ghostFunctionName] = function() {
-         queue.push({
-            functionName: ghostFunctionName,
-            args: arguments
-         });
-      }
-
-      window[ghostFunctionName].isGhost = true;
-   }
-
-   function listenForOriginSet() {
-      setTimeout(function() {
-         if (isOriginSetLoaded()) {
-            delegateQueue();
-         } else {
-            listenForOriginSet();
-         }
-      }, 50);
-   }
-
-   function delegateQueue() {
-      for (var i = 0; i < queue.length; i++) {
-         window[queue[i].functionName].apply(this, queue[i].args);
-      }
-   }
+	/* Function that executes each called ghost function in the ghostQueue */
+	function delegateQueue() {
+		for (var i = 0; i < window.ghostQueue.length; i++) {
+			if (window.ghostQueue[i].functionName.indexOf('.') === -1) {
+				// window level function
+				window[window.ghostQueue[i].functionName].apply(this, window.ghostQueue[i].args);
+			}
+			else {
+				// Second level function or object method. ONLY FIRST LEVEL METHOD IS SUPPORTED
+				window[window.ghostQueue[i].functionName.split('.')[0]][window.ghostQueue[i].functionName.split('.')[1]].apply(this, window.ghostQueue[i].args);
+			}
+		}
+	}
 })();
 
 //----------------------Ensure that old browsers don't break when referencing the console-----------------------//
 if (!window.console) { window.console = {log: function(){}, error:function(){} }; }
 
-//----------------------ibmStats.event function for Tealium started---------------------------------------------//
-function storeIBMStatsEvent(data,obj,linkIdentifier){
-   var statsObjListString = JSON.stringify(obj).replace(/-_-/g,"---");
-   var statsObjList = JSON.parse(statsObjListString);
-   statsObjList.event_name = linkIdentifier;
-   window.arrObjList.push(statsObjList,window.arrObjList.length);
-   window.arrObjList.pop();
-   window.onload = function(){
-      if(typeof window.utag !== "undefined" && typeof window.utag.data !== "undefined"){
-         modifySiteID = checkMarketingData();
-         for(var i=0;i<window.arrObjList.length;i++){
-            data = JSON.parse(JSON.stringify(window.arrObjList[i]));
-            data.event_name = window.arrObjList[i].event_name;
-            data.evPageLoadingTime = utag.data["page_loadingTime"];
-            data.evTriggerTime = utag.data["page_loadingTime"];
-            data.IbmerVal = utag.data["IBMER_value"];
-            data.evPageLocation = window.location.href.replace(/-_-/g,"---");
-            data.categoryVal = utag.data["category_id"];
-            data.evClientID = modifySiteID;
-            data.site_id = utag.data['site_id'];
-            //for generating product view tag
-            if(window.arrObjList[i].event_name == "ibmStatsEvent_product" && typeof window.pageViewAttributes !== "undefined"){
-               var x = window.pageViewAttributes.split("-_-");
-               for(var k=0; k<= x.length; k++){
-                  var pr_y = "productTag_a"+k;
-                  if(x[k] !== "undefined" || x[k] !== "")	data[pr_y] = x[k];
-               }
-               if(typeof window.arrObjList[i].serviceType !== "undefined") data["productTag_serviceType"] = window.arrObjList[i].serviceType;
-            }
-            utag.link(data);
-         }
-      }
-   }
-}
-
-function createUtagLinkObject(obj){
-   var pageLocation = window.location.href.replace(/-_-/g,"---"),
-   eventTriggerTime = new Date().getTime(),
-   linkIdentifier = "ibmStatsEvent_element",
-   data = new Object();
-
-   // RTC: Story# 958230, Defect# 967620, and Defect# 967890. Adding code snippet in Support of Conversion Events.
-   if (obj.type) {
-      if (!obj.executionPath && obj.eventCategoryGroup) {
-         /* ibmEvGroup is set based on either executionPath or eventCategory Group */
-         obj.executionPath = obj.eventCategoryGroup;
-      }
-
-      if (obj.type == "conversion" ) {
-         obj.ibmConversion = "true";
-      }
-
-      obj.convtype      = obj.eventAction;
-      obj.ibmEV         = obj.primaryCategory;
-      obj.ibmEvAction   = obj.eventName;
-      obj.ibmEvGroup    = obj.executionPath;
-      obj.ibmEvModule   = obj.eventCallBackCode;
-      obj.ibmEvSection  = obj.execPathReturnCode;
-   }
-
-   if(obj.ibmConversion && obj.ibmConversion == "true"){
-      if (!obj.point && obj.convtype && obj.convtype == "1") obj.point = '10';
-      if (!obj.point && obj.convtype && obj.convtype == "2") obj.point = '20';
-      linkIdentifier = "ibmStatsEvent_conversion";
-   }else if(obj.ibmProductTag && obj.ibmProductTag == "true"){
-      linkIdentifier = "ibmStatsEvent_product";
-   }
-   if(!obj.ibmConversion && !obj.ibmProductTag) {
-      obj.ibmEvActionAttribute = obj.ibmEvAction;
-      if(obj.ibmEvAction && typeof obj.ibmEvAction !== "undefined" && obj.ibmEvAction.length > 50){
-         obj.ibmEvAction = obj.ibmEvAction.substring(0,22) + "..." + obj.ibmEvAction.substring(obj.ibmEvAction.length - 25, obj.ibmEvAction.length);
-      }
-   }
-   if(typeof window.utag !== "undefined" && typeof window.utag.data !== "undefined" && linkIdentifier !== "ibmStatsEvent_product"){
-      modifySiteID = checkMarketingData();
-      if(typeof window.ibm_global_data !== "undefined" && typeof ibm_global_data["Site ID"] != "undefined" && 
-            typeof obj.ibmEV !== "undefined" && (obj.ibmEV.toLowerCase().indexOf("rich_media_service") !== -1 || obj.ibmEV.toLowerCase().indexOf("video player") !== -1)){
-         obj.ibmEV = "VIDEO - " + modifySiteID.substring(modifySiteID.indexOf('|')+1,modifySiteID.length);
-         if(obj.ibmEvAction.toLowerCase() == "start" || obj.ibmEvAction.toLowerCase() == "played"){
-            obj.ibmEvName = obj.ibmEvName + " - Play";
-            obj.convtype = 1;
-            trackingConversionEvent(linkIdentifier,obj);
-         }else if (obj.ibmEvAction.toLowerCase() == "finish" || obj.ibmEvAction.toLowerCase() == "ended"){
-            obj.ibmEvName = obj.ibmEvName + " - End";
-            obj.convtype = 2;
-            trackingConversionEvent(linkIdentifier,obj);
-         }
-      }
-      var statsObjListString = JSON.stringify(obj).replace(/-_-/g,"---");
-      data = JSON.parse(statsObjListString);
-      data.event_name = linkIdentifier;
-      data.evPageLoadingTime = utag.data["page_loadingTime"];
-      data.IbmerVal = utag.data["IBMER_value"];
-      data.evPageLocation = pageLocation;
-      data.evTriggerTime = eventTriggerTime;
-      data.categoryVal = utag.data["category_id"];
-      data.evClientID = modifySiteID;
-      data.site_id = utag.data['site_id'];
-      utag.link(data);
-   }else{
-      storeIBMStatsEvent(data,obj,linkIdentifier);
-   }
-   //--------------------------------------------Call Event IBMDependencyRegistry---------------------------------------------//
-   /**
-    * Id      : IBMDependencyRegistry
-    * Author  : devarajk@us.ibm.com
-    * MemberOf: Tag Management Registry 
-    * Date    : 2016-08-23
-    * Description: 
-    */
-   //>>>>> Start of Call IBMDependencyRegistry
+/*---------------------------------------------------Add parseEventName function---------------------------------------------------------*/   
+window.parseEventName = function(eventName) {
+   /*
+    * eventName contains two parameters separated by a colon: <product_name>:<tactic_code>
+    * This function will ensure that the string is not greater than 256 characters, and ensuring that the second parameter is complete
+    */ 
    try {
-      if (window.IBMDependencyRegistry) {
-         window.IBMDependencyRegistry.on('tealium.IBMSimpleEventRouter.loaded',
-               function() {
-                  window.IBMSimpleEventRouter.idaEvent(obj);
-               });
+      if (eventName.length <= 256) {
+         eventName = eventName.replace(/\s+/g, '-').toUpperCase();
       }
-   } 
-   catch (error) {
-      console.log('Error occurred in IBMDependencyRegistry event registration. Error is: ' + error);
-   }
-   //>>>>> End of Call IBMDependencyRegistry
-}
-
-function trackingConversionEvent(utagLinkIdentifier,obj){
-   utagLinkIdentifier = "ibmStatsEvent_conversion";
-   utag.link({
-      event_name : utagLinkIdentifier,
-      ibmEV : obj.ibmEV,
-      ibmEvAction : obj.ibmEvName,
-      convtype : obj.convtype,
-      evClientID : modifySiteID
-   });
-}
-
-function checkMarketingData() {
-   try {
-      var modify_siteId = window.utag.data.concat_clientid;
-      var x = window.utag.data.concat_clientid.substring(0,window.utag.data.concat_clientid.indexOf('|'));
-      if (typeof window.ibm_global_data !== "undefined" && typeof ibm_global_data["Site ID"] != "undefined") {
-         if (utag.data['IBMER_value'] == "1") {
-            modify_siteId = x + "|" + "New_IBMER";
-         } 
-         else if (window.ibm_global_data["Site ID"] !== undefined) {
-            modify_siteId = x + "|" + window.ibm_global_data["Site ID"];
+      else {
+         var eventNameParts = eventName.split(':');
+         if (eventNameParts.length === 1) {
+            eventName = eventNameParts[0].substring(0,256).replace(/\s+/g, '-').toUpperCase();
+         }
+         else {
+            eventName = eventNameParts[0].substring(0,256-eventNameParts[1].length-1).replace(/\s+/g, '-').toUpperCase() + ':' + eventNameParts[1].replace(/\s+/g, '-').toUpperCase();
          }
       }
-      return modify_siteId;
-   } 
+      return(eventName);
+   }
    catch (error) {
-      console.error('+++TME-ERROR - ida_production.js: ' + error);
+      console.error('+++TME-ERROR > ida_production.js > parseEventName: ' + error);
    }
 }
-//----------------------ibmStats.event function for Tealium ended---------------------------------------------//
 
 var v16elu = {
 
@@ -239,22 +162,6 @@ var v16elu = {
       NTPT_DOMAINLIST : ".ibm.co,.ibm.com,.lotuslive.com,.cognos.com,.webdialogs.com,.servicemanagementcenter.com,.xtify.com,.ibmcloud.com,.ibmdw.net,.bluemix.net,.smartercitiescloud.com",
       evhndlr : true,
       domainBlacklist : ".ibm.com,.mitre.org,.learnquest.com",
-
-      //-----------------------------function call on completely loading page--------------------------------//
-      onPageLoad : function(){
-         if(window.utag && window.utag.sender) v16elu.storeTealiumPageviewData();
-         if(typeof window.demandBase !== "undefined"){
-            window.demandBase.event_name = "demandbaseElement";
-            window.demandBase.ibmEV = "Demandbase";
-            window.demandBase.ibmEvAction = "CompanyData";
-            window.demandBase.ibmEvAttr = "Demandbase";
-            window.demandBase.evPageLoadingTime = utag.data["page_loadingTime"];
-            window.demandBase.evTriggerTime = utag.data["page_loadingTime"];
-            window.demandBase.IbmerVal = utag.data["IBMER_value"];
-            window.demandBase.evPageLocation = window.location.href.replace(/-_-/g,"---");
-            utag.link(window.demandBase);
-         }
-      },
 
       //------------------------------function call to store all page view attributes in Tealium-------------//
       storeTealiumPageviewData : function(){
@@ -278,6 +185,22 @@ var v16elu = {
          }
          for(var i=1;i<=arr.length;i++){
             window.pageViewAttributes += arr[i] + "-_-";
+         }
+      },
+
+      //-----------------------------function call on completely loading page--------------------------------//
+      onPageLoad : function(){
+         if(window.utag && window.utag.sender) v16elu.storeTealiumPageviewData();
+         if(typeof window.demandBase !== "undefined"){
+            window.demandBase.event_name = "demandbaseElement";
+            window.demandBase.ibmEV = "Demandbase";
+            window.demandBase.ibmEvAction = "CompanyData";
+            window.demandBase.ibmEvAttr = "Demandbase";
+            window.demandBase.evPageLoadingTime = utag.data["page_loadingTime"];
+            window.demandBase.evTriggerTime = utag.data["page_loadingTime"];
+            window.demandBase.IbmerVal = utag.data["IBMER_value"];
+            window.demandBase.evPageLocation = window.location.href.replace(/-_-/g,"---");
+            utag.link(window.demandBase);
          }
       },
 
@@ -308,8 +231,8 @@ var v16elu = {
             },
             IBMISE_BOOTSTRAP = function (data) {
                //IBMISP cookie value for non ibm.com
-               if(data.IBMer)	window.NTPT_IBMer = data.IBMer;
-               if(data.IBMIXS)	window.IBMIXS = data.IBMIXS;
+               if(data.IBMer) window.NTPT_IBMer = data.IBMer;
+               if(data.IBMIXS)   window.IBMIXS = data.IBMIXS;
             }
             requestServerCall("//www.ibm.com/gateway/gp/getProfile/?cb=260:IBMISE_BOOTSTRAP&cc=us&lc=en");   
          }
@@ -365,9 +288,10 @@ var v16elu = {
             })();
          }
          catch (error) {
-            console.log('Error in IBMDependencyRegistry. Error is: ' + error);
+            console.log('+++TME-ERROR > ida_production.js > IBMDependencyRegistry: ' + error);
          }
          //>>>>> End of IBMDependencyRegistry
+         
          //----------------------------- TEALIUM IMPLEMENTATION - START --------------------------------//
          (function(a,b,c,d) {
             a = '//tags.tiqcdn.com/utag/ibm/main/prod/utag.js';
@@ -383,7 +307,7 @@ var v16elu = {
                if(typeof window.utag !== "undefined" && typeof window.utag.data !== "undefined"){
                   v16elu.siteID = window.utag.data["siteID_value"];
                   if(v16elu.siteID.toLowerCase() == "ecom"){
-                     window.cmTagQueue.push(['cmSetupNormalization', 'krypto-_-krypto']);	
+                     window.cmTagQueue.push(['cmSetupNormalization', 'krypto-_-krypto']); 
                   }
 
                   if(v16elu.siteID.toLowerCase() == "p4sc") {
@@ -400,27 +324,13 @@ var v16elu = {
             window.addEventListener('load', v16elu.onPageLoad, false);
          }
          else if (window.attachEvent) {
+        	 // Support for IE* and older versions
             window.attachEvent('onload', v16elu.onPageLoad );
          }
       }
 };
 
 /*---------------------------------------------------MAIN FUNCTION---------------------------------------------------------*/
-var ibmStats = ibmStats || {};
-var modifySiteID = "";
-window.arrObjList = new Array();
-ibmStats.event = function (obj) {
-   //creates Coremetrics element tag(conversion of Unica event to Coremetrics)
-   createUtagLinkObject(obj);
-   //v16elu.create_cmElement(obj);//for product view tag
-};
-
-//---------------------------------- Ajax function to bind page view tag -----------------------------//
-bindPageViewWithAnalytics = function(){
-   if(typeof window.utag !== "undefined") utag.view(utag.data);
-}
-
-
 if (navigator.platform.search('AIX') < 0) {
    if (typeof(window.ida_eluminate_enabled) !=='undefined' || typeof(window.tealium_enabled) !=='undefined') {
       // we search if this variable is set on false
