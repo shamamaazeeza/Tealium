@@ -44,29 +44,35 @@ try {
 function tagLoadedCallback() {
     try {
         var retroactive = true;
-        if (window.EVENT_FORM_REGISTRATION_COMPLETED){ 
-            window.IBMSimpleEventRouter.addListener(window.EVENT_FORM_REGISTRATION_COMPLETED.name, tagLoadEventsCallback, retroactive); 
+        if (window.CONTACT_LIVECHAT_ACCEPTED){ 
+            window.IBMSimpleEventRouter.addListener(window.CONTACT_LIVECHAT_ACCEPTED.name, tagLoadEventsCallback, retroactive); 
+        } 
+        if (window.LIVECHAT_ACCEPTED){ 
+            window.IBMSimpleEventRouter.addListener(window.LIVECHAT_ACCEPTED.name, tagLoadEventsCallback, retroactive); 
+        } 
+        if (window.CONTACT_SCHEDULING_COMPLETED){ 
+            window.IBMSimpleEventRouter.addListener(window.CONTACT_SCHEDULING_COMPLETED.name, tagLoadEventsCallback, retroactive); 
+        } 
+        if (window.DEMO_REGISTRATION_COMPLETED){ 
+            window.IBMSimpleEventRouter.addListener(window.DEMO_REGISTRATION_COMPLETED.name, tagLoadEventsCallback, retroactive); 
+        } 
+        if (window.DOWNLOAD_REGISTRATION_COMPLETED){ 
+            window.IBMSimpleEventRouter.addListener(window.DOWNLOAD_REGISTRATION_COMPLETED.name, tagLoadEventsCallback, retroactive); 
         } 
         if (window.EVENT_REGISTRATION_COMPLETED){ 
             window.IBMSimpleEventRouter.addListener(window.EVENT_REGISTRATION_COMPLETED.name, tagLoadEventsCallback, retroactive); 
         } 
-        if (window.EVENT_LIVECHAT_ACCEPTED){ 
-            window.IBMSimpleEventRouter.addListener(window.EVENT_LIVECHAT_ACCEPTED.name, tagLoadEventsCallback, retroactive); 
+        if (window.EXTERNAL_LINK){ 
+            window.IBMSimpleEventRouter.addListener(window.EXTERNAL_LINK.name, tagLoadEventsCallback, retroactive); 
         } 
-        if (window.EVENT_EXTERNAL_LINK){ 
-            window.IBMSimpleEventRouter.addListener(window.EVENT_EXTERNAL_LINK.name, tagLoadEventsCallback, retroactive); 
+        if (window.FORM_REGISTRATION_COMPLETED){ 
+            window.IBMSimpleEventRouter.addListener(window.FORM_REGISTRATION_COMPLETED.name, tagLoadEventsCallback, retroactive); 
         } 
-        if (window.EVENT_TRIAL_SIGNUP_COMPLETED){ 
-            window.IBMSimpleEventRouter.addListener(window.EVENT_TRIAL_SIGNUP_COMPLETED.name, tagLoadEventsCallback, retroactive); 
+        if (window.SIGNUP_REGISTRATION_COMPLETED){ 
+            window.IBMSimpleEventRouter.addListener(window.SIGNUP_REGISTRATION_COMPLETED.name, tagLoadEventsCallback, retroactive); 
         } 
-        if (window.EVENT_DEMO_COMPLETED){ 
-            window.IBMSimpleEventRouter.addListener(window.EVENT_DEMO_COMPLETED.name, tagLoadEventsCallback, retroactive); 
-        } 
-        if (window.EVENT_OTHER_FORMS_COMPLETED){ 
-            window.IBMSimpleEventRouter.addListener(window.EVENT_OTHER_FORMS_COMPLETED.name, tagLoadEventsCallback, retroactive); 
-        } 
-        if (window.EVENT_DOWNLOAD_COMPLETED){ 
-            window.IBMSimpleEventRouter.addListener(window.EVENT_DOWNLOAD_COMPLETED.name, tagLoadEventsCallback, retroactive); 
+        if (window.TRIAL_REGISTRATION_COMPLETED){ 
+            window.IBMSimpleEventRouter.addListener(window.TRIAL_REGISTRATION_COMPLETED.name, tagLoadEventsCallback, retroactive); 
         } 
     } catch(error) {
         window.TealiumLog.error('Error in tagLoadedCallback function. Error is: ' + error); 
@@ -99,28 +105,34 @@ function getPrefixName(event) {
         var prefix = '';
         if (!event || !event.name) return prefix;
         switch (event.name) {
-            case window.EVENT_FORM_REGISTRATION_COMPLETED.name:
-                prefix = 'MRS';
+            case window.CONTACT_LIVECHAT_ACCEPTED.name:
+                prefix = 'LC';
+                break;
+            case window.LIVECHAT_ACCEPTED.name:
+                prefix = 'LC';
+                break;        
+            case window.CONTACT_SCHEDULING_COMPLETED.name:
+                prefix = 'SCD';
+                break;   
+            case window.DEMO_REGISTRATION_COMPLETED.name:
+                prefix = 'IBMID';
+                break;   
+            case window.DOWNLOAD_REGISTRATION_COMPLETED.name:
+                prefix = 'IBMID';
                 break;
             case window.EVENT_REGISTRATION_COMPLETED.name:
-                prefix = 'EVT';
-                break;        
-            case window.EVENT_LIVECHAT_ACCEPTED.name:
-                prefix = 'LC';
-                break;   
-            case window.EVENT_EXTERNAL_LINK.name:
-                prefix = 'EXTL';
-                break;   
-            case window.EVENT_TRIAL_SIGNUP_COMPLETED.name:
-                prefix = 'IBMID';
-                break;
-            case window.EVENT_DEMO_COMPLETED.name:
                 prefix = 'IBMID';
                 break;    
-            case window.EVENT_OTHER_FORMS_COMPLETED.name:
+            case window.EXTERNAL_LINK.name:
+                prefix = 'EXTL';
+                break;
+            case window.FORM_REGISTRATION_COMPLETED.name:
+                prefix = 'MRS';
+                break;
+            case window.SIGNUP_REGISTRATION_COMPLETED.name:
                 prefix = 'IBMID';
                 break;
-            case window.EVENT_DOWNLOAD_COMPLETED.name:
+            case window.TRIAL_REGISTRATION_COMPLETED.name:
                 prefix = 'IBMID';
                 break;
         }
