@@ -6,77 +6,93 @@
  * 
  * =====|| NOTE: DO NOT MODIFY THIS SCRIPT IN TEALIUM, UPDATE GITHUB VERSION IN ECLIPSE
  */
- try {   
-    //MRS 
-    var EVENT_FORM_REGISTRATION_COMPLETED = {
-        name: 'EVENT_FORM_REGISTRATION_COMPLETED',
-        ibmEV: ['iwmcompletion','IWM', 'iwmstart', 'Social Login'],
-        convtype: '2'
-    };   
-
+ try {
     //LiveChat
-    var EVENT_LIVECHAT_ACCEPTED = {
-        name: 'EVENT_LIVECHAT_ACCEPTED',
+    var CONTACT_LIVECHAT_ACCEPTED = {
+        name: 'CONTACT_LIVECHAT_ACCEPTED',
         type: 'conversion',
         primaryCategory: 'LVADVISOR:CHAT',
         eventAction: '2'
-    };
+    }
 
-    //ExternalLink
-    var EVENT_EXTERNAL_LINK = {
-        name: 'EVENT_EXTERNAL_LINK',
-        ibmEV: 'EXT-LNK',
+    //LiveChat
+    var LIVECHAT_ACCEPTED = {
+        name: 'LIVECHAT_ACCEPTED',
+        ibmEV: 'LVADVISOR:CHAT',
         convtype: '2'
-    };
+    }
+
+    var CONTACT_SCHEDULING_COMPLETED = {
+        name: 'CONTACT_SCHEDULING_COMPLETED',
+        type: 'conversion',
+        primaryCategory: 'LVADVISOR:SCHDLR',
+        eventAction: '2'
+    }
+
+    //Demo
+    var DEMO_REGISTRATION_COMPLETED = {
+        name: 'DEMO_REGISTRATION_COMPLETED',
+        type: 'conversion',
+        primaryCategory: 'DEMO',
+        eventAction: '2'
+    }
+
+    //Download
+    var DOWNLOAD_REGISTRATION_COMPLETED = {
+        name: 'DOWNLOAD_REGISTRATION_COMPLETED',
+        type: 'conversion',
+        primaryCategory: 'DOWNLOAD',
+        eventAction: '2'
+    }
 
     //GRP and AST
     var EVENT_REGISTRATION_COMPLETED = {
         name: 'EVENT_REGISTRATION_COMPLETED',
         ibmEV: 'Event Registration',
+        convtype: '2'   
+    }
+
+    //External Link
+    var EXTERNAL_LINK = {
+        name: 'EXTERNAL_LINK',
+        ibmEV: 'EXT-LNK',
         convtype: '2'
-    };
+    }
 
-    //IBM ID Trial Registration
-    var EVENT_TRIAL_SIGNUP_COMPLETED = {
-        name: 'EVENT_TRIAL_SIGNUP_COMPLETED',
-        type: 'conversion',
-        primaryCategory: 'TRIAL-SIGNUP',
-        eventAction: '2'
-    };
+    //MRS 
+    var FORM_REGISTRATION_COMPLETED = {
+        name: 'FORM_REGISTRATION_COMPLETED',
+        ibmEV: ['iwmcompletion','IWM', 'iwmstart', 'Social Login'],
+        convtype: '2'
+    }
 
-    //IBM ID Demo Completed
-    var EVENT_DEMO_COMPLETED = {
-        name: 'EVENT_DEMO_COMPLETED',
-        type: 'conversion',
-        primaryCategory: 'DEMO',
-        eventAction: '2'
-    };
-
-    //IBM ID Other forms completed
-    var EVENT_OTHER_FORMS_COMPLETED = {
-        name: 'EVENT_OTHER_FORMS_COMPLETED',
+    //Other forms
+    var SIGNUP_REGISTRATION_COMPLETED = {
+        name: 'SIGNUP_REGISTRATION_COMPLETED',
         type: 'conversion',
         primaryCategory: 'DEFAULT-SIGNUP',
         eventAction: '2'
-    };
-
-    //IBM ID Download Completed
-    var EVENT_DOWNLOAD_COMPLETED = {
-        name: 'EVENT_DOWNLOAD_COMPLETED',
+    }
+    
+    //Trial Registration
+    var TRIAL_REGISTRATION_COMPLETED = {
+        name: 'TRIAL_REGISTRATION_COMPLETED',
         type: 'conversion',
-        primaryCategory: 'DOWNLOAD',
+        primaryCategory: 'TRIAL-SIGNUP',
         eventAction: '2'
-    };    
+    }
 
     var CONVERSION_EVENTS = [];
-    CONVERSION_EVENTS.push(EVENT_FORM_REGISTRATION_COMPLETED);
-    CONVERSION_EVENTS.push(EVENT_LIVECHAT_ACCEPTED);
-    CONVERSION_EVENTS.push(EVENT_EXTERNAL_LINK);
+    CONVERSION_EVENTS.push(CONTACT_LIVECHAT_ACCEPTED);
+    CONVERSION_EVENTS.push(LIVECHAT_ACCEPTED);
+    CONVERSION_EVENTS.push(CONTACT_SCHEDULING_COMPLETED);
+    CONVERSION_EVENTS.push(DEMO_REGISTRATION_COMPLETED);
+    CONVERSION_EVENTS.push(DOWNLOAD_REGISTRATION_COMPLETED);
     CONVERSION_EVENTS.push(EVENT_REGISTRATION_COMPLETED);
-    CONVERSION_EVENTS.push(EVENT_TRIAL_SIGNUP_COMPLETED);
-    CONVERSION_EVENTS.push(EVENT_DEMO_COMPLETED);
-    CONVERSION_EVENTS.push(EVENT_OTHER_FORMS_COMPLETED);
-    CONVERSION_EVENTS.push(EVENT_DOWNLOAD_COMPLETED);
+    CONVERSION_EVENTS.push(EXTERNAL_LINK);
+    CONVERSION_EVENTS.push(FORM_REGISTRATION_COMPLETED);
+    CONVERSION_EVENTS.push(SIGNUP_REGISTRATION_COMPLETED);
+    CONVERSION_EVENTS.push(TRIAL_REGISTRATION_COMPLETED);
 
     (function() {
         window.IBMSimpleEventRouter = window.IBMSimpleEventRouter || {
@@ -162,13 +178,13 @@
                         if (Array.isArray(convEvent[prop])) {
                             var valMatch = false;
                             convEvent[prop].forEach(function(val) {
-                                if (event[prop] === val) valMatch = true;
+                                if (event[prop].toString().toLowerCase() === val.toString().toLowerCase()) valMatch = true;
                             });
                             if (!valMatch) {
                                 eventMatch = false;
                                 break;
                             }
-                        } else if (event[prop] !== convEvent[prop]){
+                        } else if (event[prop].toString().toLowerCase() !== convEvent[prop].toString().toLowerCase()){
                             eventMatch = false;
                             break;
                         }
@@ -182,4 +198,5 @@
     })();
 } catch (error) {
     window.TealiumLog.error('Error in IBMSimpleEventRouter. Error is: ' + error);
-}
+}  
+
