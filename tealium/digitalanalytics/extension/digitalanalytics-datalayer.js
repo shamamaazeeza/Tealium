@@ -414,6 +414,10 @@ var datalayer = {
                   // Set siteID based on OLD DDO format Category ID for OSOL pages
                   window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.page.category.primaryCategory;
                }
+               else if (typeof(window.digitalData.util.meta["ibm.wtmcategory"]) !== "undefined" && window.digitalData.util.meta["ibm.wtmcategory"].toLowerCase() == "cuf04") {
+                   // Set siteID based on metadata Category ID for OSOL pages
+                   window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.util.meta["ibm.wtmcategory"];
+                }
                else if (typeof(window.digitalData.page.category.primaryCategory) !== "undefined" && window.digitalData.page.category.primaryCategory.substring(0, 5) == "SOFDC") {
                   // Set siteID based on Category id for developerWorks
                   window.digitalData.page.pageInfo.ibm.siteID = "DEVWRKS"
