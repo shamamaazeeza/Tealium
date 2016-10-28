@@ -150,7 +150,7 @@ var datalayer = {
                         window.digitalData.util.cp["utag_main_" + temp[0]] = temp[1].split(";")[0];
                      }
                   }
-                  // Set value for Coremetrics Cookie to Digital Object
+                  // Set value for Coremetrics Cookie ID to Digital Object
                   if (typeof(digitalData.util.cp.CoreID6) !== "undefined") { 
                 	  window.digitalData.user.profile.cmid = window.digitalData.util.cp.CoreID6.split("&")[0];
                   }

@@ -13,7 +13,7 @@ try {
       window.datalayer.update();
       console.log('+++TME > digitalanalytics-common.js: digitalData was reset, recreating datalayer');
    }
-   // Ensure that we capture the CoreID6 cookie id
+   // Ensure that we capture the CoreID6 cookie ID
    if (typeof(window.digitalData.user.profile.cmid) === "undefined") {
 	   window.datalayer.util.readCookies();
 	   console.log('+++TME > digitalanalytics-common.js: Reading CoreID6');
