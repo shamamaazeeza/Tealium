@@ -14,15 +14,19 @@ try {
       console.log('+++TME > digitalanalytics-common.js: digitalData was reset, recreating datalayer');
    }
    // Ensure that we capture the CoreID6 cookie ID
-   if (typeof(window.digitalData.user.profile.cmid) === "undefined") {
+   if (typeof(window.digitalData.page.pageInfo.coremetrics.visitorID) === "undefined") {
 	   window.datalayer.util.readCookies();
-	   console.log('+++TME > digitalanalytics-common.js: Reading CoreID6');
+	   console.log('+++TME > digitalanalytics-common.js: Reading cookies');
    }
    if (typeof (window.digitalData.page.pageInfo.version) !== "undefined") {
       utag.data["js_page.digitalData.page.pageInfo.version1"] = window.digitalData.page.pageInfo.version;
    }
    utag.data["dom.title"] = document.title;
-   utag.data.cookie_domain = document.domain.split('.').splice(-2, 2).join('.');
+
+   // Destination URL Domain
+   window.digitalData.page.pageInfo.destinationDomain = document.domain.split('.').splice(-2, 2).join('.');
+   utag.data.cookie_domain = window.digitalData.page.pageInfo.destinationDomain;
+   
    if(get_meta_tag("IBM.WTMConfig") == null) utag.data["meta.IBM.WTMConfig"] = "null";
 
    /*---------------------------------------------------setting onsite Search Term---------------------------------------------------------*/
@@ -66,41 +70,7 @@ try {
       if (docLinks[i].getAttribute("rel") != null && docLinks[i].getAttribute("rel") == "canonical") 
          utag.data.canonicalURL = docLinks[i].getAttribute("href");
    }
-
-   /*---------------------------------------------------setting page category---------------------------------------------------------*/
-   window.IBMPageCategory = new String();
-   if (typeof window.digitalData.page.category.primaryCategory !== "undefined") {
-      window.IBMPageCategory = window.digitalData.page.category.primaryCategory;
-   } else if (typeof window.digitalData.page.category.categoryID !== "undefined"){//for old DDO structure
-      window.IBMPageCategory = window.digitalData.page.category.categoryID;
-   }else {
-      window.IBMPageCategory = String(get_meta_tag("IBM.WTMCategory"));
-   }
-   // set category ID value from page URL(requested for Watson pages)
-   if(typeof window.digitalData.util.qp.Category !== "undefined") window.IBMPageCategory = decodeURIComponent(window.digitalData.util.qp.Category);
-
-   if (document.domain.indexOf("ibm.com") !== -1 && String(document.cookie).match(/(^| )(w3ibmProfile|w3_sauid|PD-W3-SSO-|OSCw3Session|IBM_W3SSO_ACCESS)=/)) {
-      if(utag.data.site_id.substring(0,3) == "EST" || utag.data.site_id.toLowerCase() == "serveng" || utag.data.site_id.toLowerCase() == "extconnections" 
-         || utag.data.site_id.toLowerCase() == "extconnectionstest"){
-         window.IBMPageCategory += "IBMER";
-      }else{
-         window.IBMPageCategory = "IBMER";
-      }
-   }else if(document.domain.indexOf("ibm.com") == -1 && window.NTPT_IBMer == "true"){//for non ibm.com
-      window.IBMPageCategory += "IBMER";
-   }
-   if(typeof(utag.data.site_id) !== "undefined" && utag.data.site_id.toLowerCase() == "error") window.IBMPageCategory = "error";
-   if (utag.data.site_id.substring(0,4).toLowerCase() == "ecom") window.IBMPageCategory = utag.data.site_id + window.IBMPageCategory;
-   // adding DC.Language value category id for Support Content delivery pages
-   if((typeof utag.data.site_id !== "undefined") && (utag.data.site_id.toLowerCase() == "estdbl" || utag.data.site_id.toLowerCase() == "estkcs" || utag.data.site_id.toLowerCase() == "estqst")){
-      if(get_meta_tag("DC.Language") !== null) window.IBMPageCategory += "-" + get_meta_tag("DC.Language");
-      else if(window.digitalData.page.pageInfo.language) window.IBMPageCategory += "-" + window.digitalData.page.pageInfo.language;
-   }
-   utag.data.category_id = window.IBMPageCategory;
-
-   // 2016-07-14 - shazeeza: RTC Story# 958212
-   window.digitalData.page.category.primaryCategory = utag.data.category_id;
-
+ 
    /*---------------------------------------------------setting Marketing attribute---------------------------------------------------------*/
    var marketingAttributes = "",
    vendor = "NA",
@@ -153,12 +123,13 @@ try {
    if (marketingAttributes.lastIndexOf("&") == marketingAttributes.length - 1) {
       marketingAttributes = marketingAttributes.substring(0, marketingAttributes.length - 1);
    }
-   utag.data.destinationURL = document.URL + marketingAttributes;
+   window.digitalData.page.pageInfo.destinationURL = document.URL + marketingAttributes;
+   utag.data.destinationURL = window.digitalData.page.pageInfo.destinationURL;
 
-   /*--------------------------------------------initialize window.digitalData.page.attributes.extraFields if needed------------------*/
-   if (typeof (window.digitalData.page.attributes.extraFields) == "undefined") {
+   /*--------------------------------------------initialize window.digitalData.page.attribute.extraFields if needed------------------*/
+   if (typeof (window.digitalData.page.attribute.extraFields) == "undefined") {
       if(typeof (window.CM_EXTRA) != "undefined" && window.CM_EXTRA != ""){
-         window.digitalData.page.attributes.extraFields = "";
+         window.digitalData.page.attribute.extraFields = "";
          var separators = ['&', '='],
          tokens = CM_EXTRA.split(new RegExp(separators.join('|'), 'g')),
          arr1 = CM_EXTRA.split('&'),
@@ -166,7 +137,7 @@ try {
          for(var i=0; i<arr1.length; i++){
             var ex = "extrafields"+(i+1);
             utag.data[ex] = arr1[i].split('=')[1];
-            window.digitalData.page.attributes.extraFields += arr1[i].split('=')[1]+"-_-";
+            window.digitalData.page.attribute.extraFields += arr1[i].split('=')[1]+"-_-";
          }
       }
    }
@@ -436,9 +407,9 @@ function get_meta_tag(name){
 function checkJSON(name){
    name = name.toLowerCase().replace('.', '_');
    if (window.digitalData.page) {
-      for (var len in window.digitalData.page.attributes) {
-         if (window.digitalData.page.attributes.hasOwnProperty(len) && len.toLowerCase() == name) {
-            return window.digitalData.page.attributes[len];
+      for (var len in window.digitalData.page.attribute) {
+         if (window.digitalData.page.attribute.hasOwnProperty(len) && len.toLowerCase() == name) {
+            return window.digitalData.page.attribute[len];
          }
       }
    }

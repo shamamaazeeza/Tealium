@@ -87,9 +87,9 @@ var datalayer = {
                   // process each entry to look for matches
                   for (var i = 0; i < datalayer.pageidQueryStringsDefault.length; i++) {
                      var t = datalayer.pageidQueryStringsDefault[i];               
-                     if (pathName.indexOf(t.pathNameSubstring) === 0 && typeof(window.digitalData.page.attributes.pageidQueryStrings) == "undefined") {               
+                     if (pathName.indexOf(t.pathNameSubstring) === 0 && typeof(window.digitalData.page.attribute.pageidQueryStrings) == "undefined") {               
                         // Set PageID Query Strings 
-                        window.digitalData.page.attributes.pageidQueryStrings = t.qsParameter;
+                        window.digitalData.page.attribute.pageidQueryStrings = t.qsParameter;
                         break;
                      }
                   }              
@@ -106,10 +106,10 @@ var datalayer = {
                   }
                   //add different Query string parameters
                   var qs = this.parseQueryString(parserURL.href);
-                  if (window.digitalData.page.attributes.pageidQueryStrings) {
+                  if (window.digitalData.page.attribute.pageidQueryStrings) {
                      var addQSValue = "";
-                     for (var k=0;k<window.digitalData.page.attributes.pageidQueryStrings.length;k++) {
-                        var q = window.digitalData.page.attributes.pageidQueryStrings[k];
+                     for (var k=0;k<window.digitalData.page.attribute.pageidQueryStrings.length;k++) {
+                        var q = window.digitalData.page.attribute.pageidQueryStrings[k];
                         if (typeof(qs[q]) !== "undefined") addQSValue += q + "=" + qs[q] + "&";
                      }
                      addQSValue = addQSValue.replace(/&$/,"");
@@ -152,7 +152,7 @@ var datalayer = {
                   }
                   // Set value for Coremetrics Cookie ID to Digital Object
                   if (typeof(digitalData.util.cp.CoreID6) !== "undefined") { 
-                	  window.digitalData.user.profile.cmid = window.digitalData.util.cp.CoreID6.split("&")[0];
+                	  window.digitalData.page.pageInfo.coremetrics.visitorID = window.digitalData.util.cp.CoreID6.split("&")[0];
                   }
                }
             }
@@ -244,7 +244,7 @@ var datalayer = {
                console.error('+++TME-ERROR > digitalanalytics-datalayer.js > getReferringURL: ' + error);
             }
          },
-         
+
          /*---------------------------------------------------Set Whether Coremetrics should run---------------------------------------------------------------*/
          setCoremetricsEnabled : function () {
             try {
@@ -452,14 +452,70 @@ var datalayer = {
             try {
                // If the siteID prefix or suffix is "test" or if the full domain of the hostname is in the testDomains array then set Client ID to 80200000 (test instance)
                if (window.digitalData.page.pageInfo.ibm.siteID.toLowerCase().match(/^test|test$/) || (datalayer.testDomains.indexOf(document.location.hostname.replace(/^[^\.]+./,"")) !== -1)) {
-                  window.digitalData.page.pageInfo.ibm.cmClientID = "80200000|" + window.digitalData.page.pageInfo.ibm.siteID;
+                  window.digitalData.page.pageInfo.coremetrics.clientID = "80200000|" + window.digitalData.page.pageInfo.ibm.siteID;
                }
                else {
-                  window.digitalData.page.pageInfo.ibm.cmClientID = "50200000|" + window.digitalData.page.pageInfo.ibm.siteID;
+                  window.digitalData.page.pageInfo.coremetrics.clientID = "50200000|" + window.digitalData.page.pageInfo.ibm.siteID;
                }
             }
             catch (error) {
                console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setClientID: ' + error);
+            }
+         },
+
+         /*---------------------------------------------------setting Category ID---------------------------------------------------------*/
+         setCategoryID : function () {
+            try {
+            	window.IBMPageCategory = new String();
+            	if (typeof window.digitalData.page.category.primaryCategory !== "undefined") {
+            		window.IBMPageCategory = window.digitalData.page.category.primaryCategory;
+            	}
+            	else if (typeof window.digitalData.page.category.categoryID !== "undefined") {
+            		// for old DDO structure
+            		window.IBMPageCategory = window.digitalData.page.category.categoryID;
+            	}
+            	else {
+            		window.IBMPageCategory = String(get_meta_tag("IBM.WTMCategory"));
+            	}
+            	// set category ID value from page URL(requested for Watson pages)
+            	if(typeof window.digitalData.util.qp.Category !== "undefined") {
+            		window.IBMPageCategory = decodeURIComponent(window.digitalData.util.qp.Category);
+            	}
+
+            	if (document.domain.indexOf("ibm.com") !== -1 && String(document.cookie).match(/(^| )(w3ibmProfile|w3_sauid|PD-W3-SSO-|OSCw3Session|IBM_W3SSO_ACCESS)=/)) {
+            		if (window.digitalData.page.pageInfo.ibm.siteID.substring(0,3) == "EST" || window.digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "serveng" 
+            			|| window.digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "extconnections"  || window.digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "extconnectionstest") {
+            			window.IBMPageCategory += "IBMER";
+            		}
+            		else {
+            			window.IBMPageCategory = "IBMER";
+            		}
+            	}
+            	else if (document.domain.indexOf("ibm.com") == -1 && window.NTPT_IBMer == "true") {
+            		// for non ibm.com
+            		window.IBMPageCategory += "IBMER";
+            	}
+            	if (typeof(window.digitalData.page.pageInfo.ibm.siteID) !== "undefined" && window.digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "error") {
+            		window.IBMPageCategory = "error";
+            	}
+            	if (window.digitalData.page.pageInfo.ibm.siteID.substring(0,4).toLowerCase() == "ecom") {
+            		window.IBMPageCategory = window.digitalData.page.pageInfo.ibm.siteID + window.IBMPageCategory;
+            	}
+            	// adding DC.Language value category id for Support Content delivery pages
+            	if ((typeof window.digitalData.page.pageInfo.ibm.siteID !== "undefined") && (window.digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estdbl" 
+            		|| window.digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estkcs" || window.digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estqst")) {
+            		if (get_meta_tag("DC.Language") !== null) {
+            			window.IBMPageCategory += "-" + get_meta_tag("DC.Language");
+            		}
+            		else if (window.digitalData.page.pageInfo.language) {
+            			window.IBMPageCategory += "-" + window.digitalData.page.pageInfo.language;
+            		}
+            	}
+            	// 2016-07-14 - shazeeza: RTC Story# 958212
+            	window.digitalData.page.category.primaryCategory = window.IBMPageCategory;
+            }
+            catch (error) {
+               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setCategoryID: ' + error);
             }
          },
       },
@@ -472,7 +528,7 @@ var datalayer = {
             window.digitalData.page            = window.digitalData.page || {};
             window.digitalData.user            = window.digitalData.user || {};
             window.digitalData.util            = window.digitalData.util || {};
-            window.digitalData.page.attributes = window.digitalData.page.attributes || {};
+            window.digitalData.page.attribute  = window.digitalData.page.attribute || {};
             window.digitalData.page.category   = window.digitalData.page.category || {};
             window.digitalData.page.pageInfo   = window.digitalData.page.pageInfo || {};
             window.digitalData.page.session    = window.digitalData.page.session || {};
@@ -527,15 +583,25 @@ var datalayer = {
             /*---------------------------------------------------setting Client ID---------------------------------------------------------*/
             this.util.setClientID();
 
+            /*---------------------------------------------------setting Category ID---------------------------------------------------------*/
+            this.util.setCategoryID();
+
             /*---------------------------------------------------Load Coremetrics Tags by Default---------------------------------------------------------*/
             this.util.setCoremetricsEnabled();
+
+            /*---------------------------------------------------Set Destination URL---------------------------------------------------------*/
+            window.digitalData.page.pageInfo.destinationURL = window.location.href || "";
+
+            /*---------------------------------------------------Set Page Name---------------------------------------------------------*/
+            window.digitalData.page.pageInfo.pageName = document.title || "";
 
            /*---------------------------------------------------Set Data Layer Ready---------------------------------------------------------*/
             window.digitalData.page.isDataLayerReady = true;
 
            /*---------------------------------------------------Set UDO Variables---------------------------------------------------------*/
             if (typeof(window.utag) !== "undefined" && typeof(window.utag.data) !== "undefined") {
-               utag.data.concat_clientid  = window.digitalData.page.pageInfo.ibm.cmClientID;
+               utag.data.concat_clientid  = window.digitalData.page.pageInfo.coremetrics.clientID;
+        	   utag.data.category_id      = window.digitalData.page.category.primaryCategory;
                utag.data.site_id          = window.digitalData.page.pageInfo.ibm.siteID;
                utag.data.iniSiteID        = window.digitalData.page.pageInfo.ibm.iniSiteID;
                utag.data.page_id          = window.digitalData.page.pageInfo.pageID;   
@@ -586,8 +652,8 @@ var datalayer = {
             window.digitalData.util = window.digitalData.util || {};
 
             // digitalData level 2
-            if (typeof(window.digitalData.page.attributes) == "undefined") {
-               window.digitalData.page.attributes = new Object();
+            if (typeof(window.digitalData.page.attribute) == "undefined") {
+               window.digitalData.page.attribute = new Object();
             }
             if (typeof(window.digitalData.page.category) == "undefined") {
                window.digitalData.page.category = new Object();
@@ -616,7 +682,7 @@ var datalayer = {
             if (typeof(window.digitalData.util.referrer) == "undefined") {
                window.digitalData.util.referrer = new Object();
             }
-            window.digitalData.page.attributes = window.digitalData.page.attributes || {};
+            window.digitalData.page.attribute = window.digitalData.page.attribute || {};
             window.digitalData.page.category   = window.digitalData.page.category || {};
             window.digitalData.page.pageInfo   = window.digitalData.page.pageInfo || {};
             window.digitalData.page.session    = window.digitalData.page.session || {};
@@ -688,14 +754,24 @@ var datalayer = {
             /*---------------------------------------------------setting Client ID---------------------------------------------------------*/
             this.util.setClientID();
 
+            /*---------------------------------------------------setting Category ID---------------------------------------------------------*/
+            this.util.setCategoryID();
+
             /*---------------------------------------------------Load Coremetrics Tags by Default---------------------------------------------------------*/
             this.util.setCoremetricsEnabled();
+
+            /*---------------------------------------------------Set Destination URL---------------------------------------------------------*/
+            window.digitalData.page.pageInfo.destinationURL = window.location.href || "";
+
+            /*---------------------------------------------------Set Page Name---------------------------------------------------------*/
+            window.digitalData.page.pageInfo.pageName = document.title || "";
 
             /*---------------------------------------------------Set Data Layer Ready---------------------------------------------------------*/
             window.digitalData.page.isDataLayerReady = true;
 
             /*---------------------------------------------------Set UDO Variables---------------------------------------------------------*/
-            utag_data.concat_clientid  = window.digitalData.page.pageInfo.ibm.cmClientID;
+            utag_data.concat_clientid  = window.digitalData.page.pageInfo.coremetrics.clientID;
+            utag_data.category_id      = window.digitalData.page.category.primaryCategory;
             utag_data.site_id          = window.digitalData.page.pageInfo.ibm.siteID;
             utag_data.iniSiteID        = window.digitalData.page.pageInfo.ibm.iniSiteID;
             utag_data.page_id          = window.digitalData.page.pageInfo.pageID;   
