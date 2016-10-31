@@ -11,24 +11,24 @@ try {
    // Ensure that the digitalData Object has not been reset by the page
    if (typeof(window.digitalData.page.isDataLayerReady) === "undefined") {
       window.datalayer.update();
-      console.log('+++TME > digitalanalytics-common.js: digitalData was reset, recreating datalayer');
+      utag.DB('+++TME > digitalanalytics-common.js: digitalData was reset, recreating datalayer');
    }
    // Ensure that we capture the CoreID6 cookie ID
    if (typeof(window.digitalData.page.pageInfo.coremetrics.visitorID) === "undefined") {
 	   window.datalayer.util.readCookies();
-	   console.log('+++TME > digitalanalytics-common.js: Reading cookies');
+	   utag.DB('+++TME > digitalanalytics-common.js: Reading cookies');
    }
    if (typeof (window.digitalData.page.pageInfo.version) !== "undefined") {
       utag.data["js_page.digitalData.page.pageInfo.version1"] = window.digitalData.page.pageInfo.version;
    }
    utag.data["dom.title"] = document.title;
 
-   // Destination URL Domain
-   window.digitalData.page.pageInfo.destinationDomain = document.domain.split('.').splice(-2, 2).join('.');
-   utag.data.cookie_domain = window.digitalData.page.pageInfo.destinationDomain;
+   // Just in case, make sure the category_id is properly set based on the ibm_global_data object
+   if (typeof(window.ibm_global_data) !== "undefined" && typeof(window.ibm_global_data["Content Category (CDF)"]) !== "undefined" && utag.data.category_id !== window.ibm_global_data["Content Category (CDF)"]) {
+	   utag.data.category_id = window.digitalData.page.category.primaryCategory = window.ibm_global_data["Content Category (CDF)"];
+	   utag.DB('+++TME > digitalanalytics-common.js: Updating category ID from ibm_global_data');
+   }
    
-   if(get_meta_tag("IBM.WTMConfig") == null) utag.data["meta.IBM.WTMConfig"] = "null";
-
    /*---------------------------------------------------setting onsite Search Term---------------------------------------------------------*/
    if (typeof (window.digitalData.page.pageInfo.onsiteSearchTerm) == "undefined") {
       if (get_meta_tag("IBM.SearchTerm") !== null) {

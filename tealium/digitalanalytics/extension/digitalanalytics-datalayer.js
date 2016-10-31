@@ -475,7 +475,7 @@ var datalayer = {
             		window.IBMPageCategory = window.digitalData.page.category.categoryID;
             	}
             	else {
-            		window.IBMPageCategory = String(get_meta_tag("IBM.WTMCategory"));
+            		window.IBMPageCategory = window.digitalData.util.meta["ibm.wtmcategory"] || "null";
             	}
             	// set category ID value from page URL(requested for Watson pages)
             	if(typeof window.digitalData.util.qp.Category !== "undefined") {
@@ -592,6 +592,9 @@ var datalayer = {
             /*---------------------------------------------------Set Destination URL---------------------------------------------------------*/
             window.digitalData.page.pageInfo.destinationURL = window.location.href || "";
 
+            /*---------------------------------------------------Set Destination URL Domain---------------------------------------------------------*/
+            window.digitalData.page.pageInfo.destinationDomain = document.domain.split('.').splice(-2, 2).join('.') || "";
+
             /*---------------------------------------------------Set Page Name---------------------------------------------------------*/
             window.digitalData.page.pageInfo.pageName = document.title || "";
 
@@ -600,21 +603,22 @@ var datalayer = {
 
            /*---------------------------------------------------Set UDO Variables---------------------------------------------------------*/
             if (typeof(window.utag) !== "undefined" && typeof(window.utag.data) !== "undefined") {
-               utag.data.concat_clientid  = window.digitalData.page.pageInfo.coremetrics.clientID;
-        	   utag.data.category_id      = window.digitalData.page.category.primaryCategory;
-               utag.data.site_id          = window.digitalData.page.pageInfo.ibm.siteID;
-               utag.data.iniSiteID        = window.digitalData.page.pageInfo.ibm.iniSiteID;
-               utag.data.page_id          = window.digitalData.page.pageInfo.pageID;   
-               utag.data.urlID            = window.digitalData.page.pageInfo.urlID;
-               utag.data.pageProd         = window.digitalData.page.pageInfo.urlID;
-               utag.data.page_loadingTime = window.digitalData.page.session.pageloadEpoch;
-               utag.data.cookie_sessionID = window.digitalData.page.session.uSessionID;
-               utag.data.uPageViewID      = window.digitalData.page.session.uPageViewID;
-               utag.data.profileID        = window.digitalData.user.profile.uuid;
-               utag.data.IBMER_value      = window.digitalData.user.segment.isIBMer;
-               utag.data.referrer         = window.digitalData.page.pageInfo.referrer;
-               utag.data.referrerID       = window.digitalData.page.pageInfo.referrerID;
-               utag.data.referrerDomain   = window.digitalData.page.pageInfo.referrerDomain;
+                utag.data.category_id      = window.digitalData.page.category.primaryCategory;
+                utag.data.concat_clientid  = window.digitalData.page.pageInfo.coremetrics.clientID;
+                utag_data.cookie_domain    = window.digitalData.page.pageInfo.destinationDomain;
+                utag.data.site_id          = window.digitalData.page.pageInfo.ibm.siteID;
+                utag.data.iniSiteID        = window.digitalData.page.pageInfo.ibm.iniSiteID;
+                utag.data.page_id          = window.digitalData.page.pageInfo.pageID;   
+                utag.data.referrer         = window.digitalData.page.pageInfo.referrer;
+                utag.data.referrerID       = window.digitalData.page.pageInfo.referrerID;
+                utag.data.referrerDomain   = window.digitalData.page.pageInfo.referrerDomain;
+                utag.data.urlID            = window.digitalData.page.pageInfo.urlID;
+                utag.data.pageProd         = window.digitalData.page.pageInfo.urlID;
+                utag.data.page_loadingTime = window.digitalData.page.session.pageloadEpoch;
+                utag.data.cookie_sessionID = window.digitalData.page.session.uSessionID;
+                utag.data.uPageViewID      = window.digitalData.page.session.uPageViewID;
+                utag.data.profileID        = window.digitalData.user.profile.uuid;
+                utag.data.IBMER_value      = window.digitalData.user.segment.isIBMer;
             }
          }
          catch (error) {
@@ -763,6 +767,9 @@ var datalayer = {
             /*---------------------------------------------------Set Destination URL---------------------------------------------------------*/
             window.digitalData.page.pageInfo.destinationURL = window.location.href || "";
 
+            /*---------------------------------------------------Set Destination URL Domain---------------------------------------------------------*/
+            window.digitalData.page.pageInfo.destinationDomain = document.domain.split('.').splice(-2, 2).join('.') || "";
+
             /*---------------------------------------------------Set Page Name---------------------------------------------------------*/
             window.digitalData.page.pageInfo.pageName = document.title || "";
 
@@ -770,11 +777,15 @@ var datalayer = {
             window.digitalData.page.isDataLayerReady = true;
 
             /*---------------------------------------------------Set UDO Variables---------------------------------------------------------*/
-            utag_data.concat_clientid  = window.digitalData.page.pageInfo.coremetrics.clientID;
             utag_data.category_id      = window.digitalData.page.category.primaryCategory;
+            utag_data.concat_clientid  = window.digitalData.page.pageInfo.coremetrics.clientID;
+            utag_data.cookie_domain    = window.digitalData.page.pageInfo.destinationDomain;
             utag_data.site_id          = window.digitalData.page.pageInfo.ibm.siteID;
             utag_data.iniSiteID        = window.digitalData.page.pageInfo.ibm.iniSiteID;
             utag_data.page_id          = window.digitalData.page.pageInfo.pageID;   
+            utag_data.referrer         = window.digitalData.page.pageInfo.referrer;
+            utag_data.referrerID       = window.digitalData.page.pageInfo.referrerID;
+            utag_data.referrerDomain   = window.digitalData.page.pageInfo.referrerDomain;
             utag_data.urlID            = window.digitalData.page.pageInfo.urlID;
             utag_data.pageProd         = window.digitalData.page.pageInfo.urlID;
             utag_data.page_loadingTime = window.digitalData.page.session.pageloadEpoch;
@@ -782,9 +793,6 @@ var datalayer = {
             utag_data.uPageViewID      = window.digitalData.page.session.uPageViewID;
             utag_data.profileID        = window.digitalData.user.profile.uuid;
             utag_data.IBMER_value      = window.digitalData.user.segment.isIBMer;
-            utag_data.referrer         = window.digitalData.page.pageInfo.referrer;
-            utag_data.referrerID       = window.digitalData.page.pageInfo.referrerID;
-            utag_data.referrerDomain   = window.digitalData.page.pageInfo.referrerDomain;
          }
          catch (error) {
             console.error('+++TME-ERROR > digitalanalytics-datalayer.js > init: ' + error);
