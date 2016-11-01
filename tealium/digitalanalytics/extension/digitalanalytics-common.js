@@ -16,7 +16,7 @@ try {
    // Ensure that we capture the CoreID6 cookie ID
    if (typeof(window.digitalData.page.pageInfo.coremetrics.visitorID) === "undefined") {
 	   window.datalayer.util.readCookies();
-	   utag.DB('+++TME > digitalanalytics-common.js: Reading cookies');
+	   utag.DB('+++TME > digitalanalytics-common.js: Reading first-party cookies');
    }
    if (typeof (window.digitalData.page.pageInfo.version) !== "undefined") {
       utag.data["js_page.digitalData.page.pageInfo.version1"] = window.digitalData.page.pageInfo.version;
