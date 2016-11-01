@@ -22,13 +22,8 @@ try {
       utag.data["js_page.digitalData.page.pageInfo.version1"] = window.digitalData.page.pageInfo.version;
    }
    utag.data["dom.title"] = document.title;
+   if(get_meta_tag("IBM.WTMConfig") == null) utag.data["meta.IBM.WTMConfig"] = "null";
 
-   // Just in case, make sure the category_id is properly set based on the ibm_global_data object
-   if (typeof(window.ibm_global_data) !== "undefined" && typeof(window.ibm_global_data["Content Category (CDF)"]) !== "undefined" && utag.data.category_id !== window.ibm_global_data["Content Category (CDF)"]) {
-	   utag.data.category_id = window.digitalData.page.category.primaryCategory = window.ibm_global_data["Content Category (CDF)"];
-	   utag.DB('+++TME > digitalanalytics-common.js: Updating category ID from ibm_global_data');
-   }
-   
    /*---------------------------------------------------setting onsite Search Term---------------------------------------------------------*/
    if (typeof (window.digitalData.page.pageInfo.onsiteSearchTerm) == "undefined") {
       if (get_meta_tag("IBM.SearchTerm") !== null) {
@@ -70,7 +65,41 @@ try {
       if (docLinks[i].getAttribute("rel") != null && docLinks[i].getAttribute("rel") == "canonical") 
          utag.data.canonicalURL = docLinks[i].getAttribute("href");
    }
- 
+
+   /*---------------------------------------------------setting page category---------------------------------------------------------*/
+   window.IBMPageCategory = new String();
+   if (typeof window.digitalData.page.category.primaryCategory !== "undefined") {
+      window.IBMPageCategory = window.digitalData.page.category.primaryCategory;
+   } else if (typeof window.digitalData.page.category.categoryID !== "undefined"){//for old DDO structure
+      window.IBMPageCategory = window.digitalData.page.category.categoryID;
+   }else {
+      window.IBMPageCategory = String(get_meta_tag("IBM.WTMCategory"));
+   }
+   // set category ID value from page URL(requested for Watson pages)
+   if(typeof window.digitalData.util.qp.Category !== "undefined") window.IBMPageCategory = decodeURIComponent(window.digitalData.util.qp.Category);
+
+   if (document.domain.indexOf("ibm.com") !== -1 && String(document.cookie).match(/(^| )(w3ibmProfile|w3_sauid|PD-W3-SSO-|OSCw3Session|IBM_W3SSO_ACCESS)=/)) {
+      if(utag.data.site_id.substring(0,3) == "EST" || utag.data.site_id.toLowerCase() == "serveng" || utag.data.site_id.toLowerCase() == "extconnections" 
+         || utag.data.site_id.toLowerCase() == "extconnectionstest"){
+         window.IBMPageCategory += "IBMER";
+      }else{
+         window.IBMPageCategory = "IBMER";
+      }
+   }else if(document.domain.indexOf("ibm.com") == -1 && window.NTPT_IBMer == "true"){//for non ibm.com
+      window.IBMPageCategory += "IBMER";
+   }
+   if(typeof(utag.data.site_id) !== "undefined" && utag.data.site_id.toLowerCase() == "error") window.IBMPageCategory = "error";
+   if (utag.data.site_id.substring(0,4).toLowerCase() == "ecom") window.IBMPageCategory = utag.data.site_id + window.IBMPageCategory;
+   // adding DC.Language value category id for Support Content delivery pages
+   if((typeof utag.data.site_id !== "undefined") && (utag.data.site_id.toLowerCase() == "estdbl" || utag.data.site_id.toLowerCase() == "estkcs" || utag.data.site_id.toLowerCase() == "estqst")){
+      if(get_meta_tag("DC.Language") !== null) window.IBMPageCategory += "-" + get_meta_tag("DC.Language");
+      else if(window.digitalData.page.pageInfo.language) window.IBMPageCategory += "-" + window.digitalData.page.pageInfo.language;
+   }
+   utag.data.category_id = window.IBMPageCategory;
+
+   // 2016-07-14 - shazeeza: RTC Story# 958212
+   window.digitalData.page.category.primaryCategory = utag.data.category_id;
+
    /*---------------------------------------------------setting Marketing attribute---------------------------------------------------------*/
    var marketingAttributes = "",
    vendor = "NA",

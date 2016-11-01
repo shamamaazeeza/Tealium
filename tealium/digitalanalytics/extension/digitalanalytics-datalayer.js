@@ -474,62 +474,6 @@ var datalayer = {
                console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setClientID: ' + error);
             }
          },
-
-         /*---------------------------------------------------setting Category ID---------------------------------------------------------*/
-         setCategoryID : function () {
-            try {
-            	window.IBMPageCategory = new String();
-            	if (typeof window.digitalData.page.category.primaryCategory !== "undefined") {
-            		window.IBMPageCategory = window.digitalData.page.category.primaryCategory;
-            	}
-            	else if (typeof window.digitalData.page.category.categoryID !== "undefined") {
-            		// for old DDO structure
-            		window.IBMPageCategory = window.digitalData.page.category.categoryID;
-            	}
-            	else {
-            		window.IBMPageCategory = window.digitalData.util.meta["ibm.wtmcategory"] || "null";
-            	}
-            	// set category ID value from page URL(requested for Watson pages)
-            	if(typeof window.digitalData.util.qp.Category !== "undefined") {
-            		window.IBMPageCategory = decodeURIComponent(window.digitalData.util.qp.Category);
-            	}
-
-            	if (document.domain.indexOf("ibm.com") !== -1 && String(document.cookie).match(/(^| )(w3ibmProfile|w3_sauid|PD-W3-SSO-|OSCw3Session|IBM_W3SSO_ACCESS)=/)) {
-            		if (window.digitalData.page.pageInfo.ibm.siteID.substring(0,3) == "EST" || window.digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "serveng" 
-            			|| window.digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "extconnections"  || window.digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "extconnectionstest") {
-            			window.IBMPageCategory += "IBMER";
-            		}
-            		else {
-            			window.IBMPageCategory = "IBMER";
-            		}
-            	}
-            	else if (document.domain.indexOf("ibm.com") == -1 && window.NTPT_IBMer == "true") {
-            		// for non ibm.com
-            		window.IBMPageCategory += "IBMER";
-            	}
-            	if (typeof(window.digitalData.page.pageInfo.ibm.siteID) !== "undefined" && window.digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "error") {
-            		window.IBMPageCategory = "error";
-            	}
-            	if (window.digitalData.page.pageInfo.ibm.siteID.substring(0,4).toLowerCase() == "ecom") {
-            		window.IBMPageCategory = window.digitalData.page.pageInfo.ibm.siteID + window.IBMPageCategory;
-            	}
-            	// adding DC.Language value category id for Support Content delivery pages
-            	if ((typeof window.digitalData.page.pageInfo.ibm.siteID !== "undefined") && (window.digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estdbl" 
-            		|| window.digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estkcs" || window.digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estqst")) {
-            		if (get_meta_tag("DC.Language") !== null) {
-            			window.IBMPageCategory += "-" + get_meta_tag("DC.Language");
-            		}
-            		else if (window.digitalData.page.pageInfo.language) {
-            			window.IBMPageCategory += "-" + window.digitalData.page.pageInfo.language;
-            		}
-            	}
-            	// 2016-07-14 - shazeeza: RTC Story# 958212
-            	window.digitalData.page.category.primaryCategory = window.IBMPageCategory;
-            }
-            catch (error) {
-               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setCategoryID: ' + error);
-            }
-         },
       },
 
       /*---------------------------------------------------Init Function for DataLayer---------------------------------------------------------*/
@@ -596,9 +540,6 @@ var datalayer = {
             /*---------------------------------------------------setting Client ID---------------------------------------------------------*/
             this.util.setClientID();
 
-            /*---------------------------------------------------setting Category ID---------------------------------------------------------*/
-            this.util.setCategoryID();
-
             /*---------------------------------------------------Load Coremetrics Tags by Default---------------------------------------------------------*/
             this.util.setCoremetricsEnabled();
 
@@ -619,13 +560,12 @@ var datalayer = {
             catch (error) {
                 console.warn('+++TME-WARNING > digitalanalytics-datalayer.js > update > IBMCore not ready: ' + error);
              }
-            
+
             /*---------------------------------------------------Set Data Layer Ready---------------------------------------------------------*/
             window.digitalData.page.isDataLayerReady = true;
 
             /*---------------------------------------------------Set UDO Variables---------------------------------------------------------*/
             if (typeof(window.utag) !== "undefined" && typeof(window.utag.data) !== "undefined") {
-                utag.data.category_id      = window.digitalData.page.category.primaryCategory;
                 utag.data.concat_clientid  = window.digitalData.page.pageInfo.coremetrics.clientID;
                 utag_data.cookie_domain    = window.digitalData.page.pageInfo.destinationDomain;
                 utag.data.site_id          = window.digitalData.page.pageInfo.ibm.siteID;
@@ -784,9 +724,6 @@ var datalayer = {
             /*---------------------------------------------------setting Client ID---------------------------------------------------------*/
             this.util.setClientID();
 
-            /*---------------------------------------------------setting Category ID---------------------------------------------------------*/
-            this.util.setCategoryID();
-
             /*---------------------------------------------------Load Coremetrics Tags by Default---------------------------------------------------------*/
             this.util.setCoremetricsEnabled();
 
@@ -805,14 +742,13 @@ var datalayer = {
             	IBMCore.common.util.user.subscribe("userIpDataReady", "customjs", datalayer.util.setUserInfo).runAsap(datalayer.util.setUserInfo);
             }
             catch (error) {
-                console.warn('+++TME-WARNING > digitalanalytics-datalayer.js > init > IBMCore not ready: ' + error);
+                console.warn('+++TME-WARNING > digitalanalytics-datalayer.js > update > IBMCore not ready: ' + error);
              }
-            
+
             /*---------------------------------------------------Set Data Layer Ready---------------------------------------------------------*/
             window.digitalData.page.isDataLayerReady = true;
 
             /*---------------------------------------------------Set UDO Variables---------------------------------------------------------*/
-            utag_data.category_id      = window.digitalData.page.category.primaryCategory;
             utag_data.concat_clientid  = window.digitalData.page.pageInfo.coremetrics.clientID;
             utag_data.cookie_domain    = window.digitalData.page.pageInfo.destinationDomain;
             utag_data.site_id          = window.digitalData.page.pageInfo.ibm.siteID;
