@@ -546,6 +546,7 @@ var datalayer = {
             window.digitalData.page.session    = window.digitalData.page.session || {};
             window.digitalData.user.profile    = window.digitalData.user.profile || {};
             window.digitalData.user.segment    = window.digitalData.user.segment || {};
+            window.digitalData.user.userInfo   = window.digitalData.user.userInfo || {};
             window.digitalData.util.cp         = window.digitalData.util.cp || {};
             window.digitalData.util.meta       = window.digitalData.util.meta || {};
             window.digitalData.util.qp         = window.digitalData.util.qp || {};
@@ -695,6 +696,9 @@ var datalayer = {
             if (typeof(window.digitalData.user.segment) == "undefined") {
                window.digitalData.user.segment = new Object();
             }
+            if (typeof(window.digitalData.user.userInfo) == "undefined") {
+                window.digitalData.user.userInfo = new Object();
+             }
             if (typeof(window.digitalData.util.cp) == "undefined") {
                window.digitalData.util.cp = new Object();
             }
@@ -713,6 +717,7 @@ var datalayer = {
             window.digitalData.page.session    = window.digitalData.page.session || {};
             window.digitalData.user.profile    = window.digitalData.user.profile || {};
             window.digitalData.user.segment    = window.digitalData.user.segment || {};
+            window.digitalData.user.userInfo   = window.digitalData.user.userInfo || {};
             window.digitalData.util.cp         = window.digitalData.util.cp || {};
             window.digitalData.util.meta       = window.digitalData.util.meta || {};
             window.digitalData.util.qp         = window.digitalData.util.qp || {};
