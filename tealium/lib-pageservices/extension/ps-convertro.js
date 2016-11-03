@@ -65,6 +65,9 @@ function tagLoadedCallback() {
         if (window.EXTERNAL_LINK){ 
             window.IBMSimpleEventRouter.addListener(window.EXTERNAL_LINK.name, tagLoadEventsCallback, retroactive); 
         } 
+        if (window.EXTERNAL_LINK_V2){ 
+            window.IBMSimpleEventRouter.addListener(window.EXTERNAL_LINK_V2.name, tagLoadEventsCallback, retroactive); 
+        } 
         if (window.FORM_REGISTRATION_COMPLETED){ 
             window.IBMSimpleEventRouter.addListener(window.FORM_REGISTRATION_COMPLETED.name, tagLoadEventsCallback, retroactive); 
         } 
@@ -124,6 +127,9 @@ function getPrefixName(event) {
                 prefix = 'IBMID';
                 break;    
             case window.EXTERNAL_LINK.name:
+                prefix = 'EXTL';
+                break;
+            case window.EXTERNAL_LINK_V2.name:
                 prefix = 'EXTL';
                 break;
             case window.FORM_REGISTRATION_COMPLETED.name:

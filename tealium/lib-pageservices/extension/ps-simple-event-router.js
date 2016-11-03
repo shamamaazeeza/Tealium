@@ -52,11 +52,19 @@
         convtype: '2'   
     }
 
-    //External Link
+    //External Link V1
     var EXTERNAL_LINK = {
         name: 'EXTERNAL_LINK',
         ibmEV: 'EXT-LNK',
         convtype: '2'
+    }
+
+    //External Link V2
+    var EXTERNAL_LINK_V2 = {
+        name: 'EXTERNAL_LINK_V2',
+        type: 'conversion',
+        primaryCategory: 'EXT-LNK',
+        eventAction: '2'
     }
 
     //MRS 
@@ -90,6 +98,7 @@
     CONVERSION_EVENTS.push(DOWNLOAD_REGISTRATION_COMPLETED);
     CONVERSION_EVENTS.push(EVENT_REGISTRATION_COMPLETED);
     CONVERSION_EVENTS.push(EXTERNAL_LINK);
+    CONVERSION_EVENTS.push(EXTERNAL_LINK_V2);
     CONVERSION_EVENTS.push(FORM_REGISTRATION_COMPLETED);
     CONVERSION_EVENTS.push(SIGNUP_REGISTRATION_COMPLETED);
     CONVERSION_EVENTS.push(TRIAL_REGISTRATION_COMPLETED);
