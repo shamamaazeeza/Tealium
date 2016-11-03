@@ -103,8 +103,6 @@ function createUtagLinkObject(obj) {
 
 		// RTC: Story# 958230, Defect# 967620, and Defect# 967890. Adding code snippet in Support of Conversion Events.
 		if (obj.type) {
-			obj.event_type = obj.type;
-
 			if (!obj.executionPath && obj.eventCategoryGroup && obj.eventCategoryGroup === "LVADVISOR") {
 				/* ibmEvGroup is set based on either executionPath or eventCategory Group for LVADVISOR*/
 				obj.executionPath = obj.eventCategoryGroup;
@@ -135,15 +133,33 @@ function createUtagLinkObject(obj) {
 				obj.point = obj.eventPoints;
 			}
 		}
+		else {
+			// OLD event object definition - set values to new object definition
+			obj.eventAction        = obj.convtype       || "";
+			obj.primaryCategory    = obj.ibmEV          || "";
+			obj.eventName          = obj.ibmEvAction    || "";
+			obj.eventCategoryGroup = obj.ibmEvName      || "";
+			obj.executionPath      = obj.ibmEvGroup     || "";
+			obj.eventCallBackCode  = obj.ibmEvModule    || "";
+			obj.execPathReturnCode = obj.ibmEvSection   || "";
+			obj.targetURL          = obj.ibmEvTarget    || "";
+			obj.targetTitle        = obj.ibmEvLinkTitle || "";
+			obj.targetSize         = obj.ibmEvFileSize  || "";
+			// set default for type
+			obj.type = "element"
+		}
 
 		if(obj.ibmConversion && obj.ibmConversion == "true") {
 			if (!obj.point && obj.convtype && obj.convtype == "1") obj.point = '10';
 			if (!obj.point && obj.convtype && obj.convtype == "2") obj.point = '20';
 			obj.event_name = "ibmStatsEvent_conversion";
+			obj.type = "conversion"
 		} 
 		else if(obj.ibmProductTag && obj.ibmProductTag == "true") {
 			obj.event_name = "ibmStatsEvent_product";
+			obj.type = "product"
 		}
+		obj.event_type = obj.type;
 
 		if(!obj.ibmConversion && !obj.ibmProductTag) {
 			obj.ibmEvActionAttribute = obj.ibmEvAction;
