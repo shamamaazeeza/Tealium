@@ -560,7 +560,7 @@ var datalayer = {
                 	jQuery(document).trigger('datalayer_ready');
                 }
                 catch (error) {
-                	console.warn('+++TME-ERROR > digitalanalytics-datalayer.js > finalizeDataLayer > jQuery not initialized: ' + error);
+                	console.log('+++TME-LOG > digitalanalytics-datalayer.js > finalizeDataLayer > jQuery not initialized: ' + error);
                 }
             }
             catch (error) {
@@ -651,7 +651,7 @@ var datalayer = {
             	IBMCore.common.util.user.subscribe("userIpDataReady", "customjs", datalayer.util.setUserInfo).runAsap(datalayer.util.setUserInfo);
             }
             catch (error) {
-                console.warn('+++TME-WARNING > digitalanalytics-datalayer.js > update > IBMCore not ready: ' + error);
+                console.log('+++TME-LOG > digitalanalytics-datalayer.js > update > IBMCore not ready: ' + error);
              }
 
             /*---------------------------------------------------Load Coremetrics Tags by Default---------------------------------------------------------*/
@@ -877,7 +877,7 @@ try {
 			IBMCore.common.util.user.subscribe("userIpDataReady", "customjs", datalayer.util.setUserInfo).runAsap(datalayer.util.setUserInfo);
 		}
 		catch (error) {
-			console.warn('+++TME-WARNING > digitalanalytics-datalayer.js > update > IBMCore not ready: ' + error);
+			console.log('+++TME-LOG > digitalanalytics-datalayer.js > update > IBMCore not ready: ' + error);
 		}
 	}
 	else if (typeof(ibmweb) !== "undefined") {
@@ -887,7 +887,7 @@ try {
 		// Set this first in case the user info is already ready when you set the listener.
 		userInfoTimeout = setTimeout(function() {
 			ibmweb.queue.remove(userInfoQueue);
-			console.warn('+++TME-WARNING > digitalanalytics-datalayer.js > User Info took too long');
+			console.log('+++TME-LOG > digitalanalytics-datalayer.js > User Info took too long');
 		}, 3000);
 
 		// Set a listener to wait till the user IP data has been loaded, then call your function when it's available.
@@ -900,7 +900,7 @@ try {
 			datalayer.util.setUserInfoV17(); });
 	}
 	else {
-		console.warn('+++TME-WARNING > digitalanalytics-datalayer.js > User Info not available');
+		console.log('+++TME-LOG > digitalanalytics-datalayer.js > User Info not available');
 	}
 
 	// Set Data Layer Ready
@@ -915,7 +915,7 @@ try {
 		// jQuery(document).on('dle_ready', datalayer.util.finalizeDataLayer);
 	}
 	catch (error) {
-		console.warn('+++TME-ERROR > digitalanalytics-datalayer.js > jQuery not initialized: ' + error);
+		console.log('+++TME-LOG > digitalanalytics-datalayer.js > jQuery not initialized: ' + error);
 	}
 }
 catch (error) {
