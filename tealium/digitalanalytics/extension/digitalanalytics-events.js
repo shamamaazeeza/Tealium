@@ -61,7 +61,7 @@ function storeIBMStatsEvent(obj) {
 
 		data.page_loadingTime  = window.digitalData.page.session.pageloadEpoch;
 		data.IBMER_value       = window.digitalData.user.segment.isIBMer;
-		data.destinationURL    = window.digitalData.page.pageInfo.destinationURL;
+		data.destinationURL    = window.digitalData.page.pageInfo.destinationURL.replace(/-_-/g,"---");
 		data.uPageViewID       = window.digitalData.page.session.uPageViewID;
 		data.category_id       = window.digitalData.page.category.primaryCategory;
 		data.concat_clientid   = modifySiteID;
@@ -159,7 +159,10 @@ function createUtagLinkObject(obj) {
 			obj.event_name = "ibmStatsEvent_product";
 			obj.type = "product"
 		}
-		obj.event_type = obj.type;
+		
+		// Normalize main variables
+		obj.eventType            = obj.type;
+		obj.eventPrimaryCategory = obj.primaryCategory;
 
 		if(!obj.ibmConversion && !obj.ibmProductTag) {
 			obj.ibmEvActionAttribute = obj.ibmEvAction;
@@ -187,7 +190,7 @@ function createUtagLinkObject(obj) {
 			data = JSON.parse(statsObjListString);
 			data.page_loadingTime  = window.digitalData.page.session.pageloadEpoch;
 			data.IBMER_value       = window.digitalData.user.segment.isIBMer;
-			data.destinationURL    = window.digitalData.page.pageInfo.destinationURL;
+			data.destinationURL    = window.digitalData.page.pageInfo.destinationURL.replace(/-_-/g,"---");
 			data.uPageViewID       = window.digitalData.page.session.uPageViewID;
 			data.category_id       = window.digitalData.page.category.primaryCategory;
 			data.concat_clientid   = modifySiteID;

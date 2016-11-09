@@ -257,6 +257,22 @@ var datalayer = {
         	 }
          },        
 
+         /*---------------------------------------------------Set setUserInfo from DemandBase for v17---------------------------------------------------------------*/
+         setUserInfoV17 : function () {
+        	 try {
+                 // Ensure the parent objects is present, and initialize the referrer object
+                 window.digitalData.user = window.digitalData.user || {};
+        		 window.digitalData.user.userInfo = ibmweb.comusr.getInfo();
+        		 
+        		 // Make sure that we set the registry country to the regular country if it is not set
+        		 window.digitalData.user.userInfo.registry_country_code = window.digitalData.user.userInfo.registry_country_code || window.digitalData.user.userInfo.country;
+        		 
+        	 }
+        	 catch (error) {
+        		 console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setUserInfoV17 > ibmweb not ready: ' + error);
+        	 }
+         },        
+
          /*---------------------------------------------------Set Whether Coremetrics should run---------------------------------------------------------------*/
          setCoremetricsEnabled : function () {
             try {
@@ -530,6 +546,27 @@ var datalayer = {
                console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setCategoryID: ' + error);
             }
          },
+
+         /*---------------------------------------------------setting Category ID---------------------------------------------------------*/
+         finalizeDataLayer : function () {
+            try {
+            	// Update Cookies
+            	this.readCookies();
+            	
+                // Set Data Layer Ready and trigger Event
+                window.digitalData.page.isDataLayerReady = true;        	
+                try {
+                	// Trigger Event for Data Layer Ready
+                	jQuery(document).trigger('datalayer_ready');
+                }
+                catch (error) {
+                	console.warn('+++TME-ERROR > digitalanalytics-datalayer.js > finalizeDataLayer > jQuery not initialized: ' + error);
+                }
+            }
+            catch (error) {
+               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > finalizeDataLayer: ' + error);
+            }
+         },
       },
 
       /*---------------------------------------------------Init Function for DataLayer---------------------------------------------------------*/
@@ -629,6 +666,7 @@ var datalayer = {
                 utag.data.category_id      = window.digitalData.page.category.primaryCategory;
                 utag.data.concat_clientid  = window.digitalData.page.pageInfo.coremetrics.clientID;
                 utag_data.cookie_domain    = window.digitalData.page.pageInfo.destinationDomain;
+                utag.data.destinationURL   = window.digitalData.page.pageInfo.destinationURL;
                 utag.data.site_id          = window.digitalData.page.pageInfo.ibm.siteID;
                 utag.data.iniSiteID        = window.digitalData.page.pageInfo.ibm.iniSiteID;
                 utag.data.page_id          = window.digitalData.page.pageInfo.pageID;   
@@ -797,26 +835,15 @@ var datalayer = {
             /*---------------------------------------------------Set Page Name---------------------------------------------------------*/
             window.digitalData.page.pageInfo.pageName = document.title || "";
 
-            /*---------------------------------------------------Set userInfo from DemandBase---------------------------------------------------------*/
-            try {
-                // Subscribe to the user IP data ready event and call the callback when it happens, or if it already happened ".asap" one.
-            	IBMCore.common.util.user.subscribe("userIpDataReady", "customjs", datalayer.util.setUserInfo).runAsap(datalayer.util.setUserInfo);
-            }
-            catch (error) {
-                console.warn('+++TME-WARNING > digitalanalytics-datalayer.js > update > IBMCore not ready: ' + error);
-             }
-
             /*---------------------------------------------------Load Coremetrics Tags by Default---------------------------------------------------------*/
             this.util.setCoremetricsEnabled();
             window.digitalData.page.pageInfo.coremetrics.isEluminateLoaded = false;
-
-            /*---------------------------------------------------Set Data Layer Ready---------------------------------------------------------*/
-            window.digitalData.page.isDataLayerReady = true;
 
             /*---------------------------------------------------Set UDO Variables---------------------------------------------------------*/
             utag_data.category_id      = window.digitalData.page.category.primaryCategory;
             utag_data.concat_clientid  = window.digitalData.page.pageInfo.coremetrics.clientID;
             utag_data.cookie_domain    = window.digitalData.page.pageInfo.destinationDomain;
+            utag_data.destinationURL   = window.digitalData.page.pageInfo.destinationURL;
             utag_data.site_id          = window.digitalData.page.pageInfo.ibm.siteID;
             utag_data.iniSiteID        = window.digitalData.page.pageInfo.ibm.iniSiteID;
             utag_data.page_id          = window.digitalData.page.pageInfo.pageID;   
@@ -839,7 +866,57 @@ var datalayer = {
 
 /*---------------------------------------------------MAIN FUNCTION---------------------------------------------------------*/
 try {
-   window.datalayer.init();
+	// Initialize Data Layer
+	window.datalayer.init();
+
+	// Set userInfo from DemandBase
+	if (typeof(IBMCore) !== "undefined") {
+		// v18+
+		try {
+			// Subscribe to the user IP data ready event and call the callback when it happens, or if it already happened ".asap" one.
+			IBMCore.common.util.user.subscribe("userIpDataReady", "customjs", datalayer.util.setUserInfo).runAsap(datalayer.util.setUserInfo);
+		}
+		catch (error) {
+			console.warn('+++TME-WARNING > digitalanalytics-datalayer.js > update > IBMCore not ready: ' + error);
+		}
+	}
+	else if (typeof(ibmweb) !== "undefined") {
+		// v17 and older
+		
+		// Set a timeout to kill the listener if it takes too long.
+		// Set this first in case the user info is already ready when you set the listener.
+		userInfoTimeout = setTimeout(function() {
+			ibmweb.queue.remove(userInfoQueue);
+			console.warn('+++TME-WARNING > digitalanalytics-datalayer.js > User Info took too long');
+		}, 3000);
+
+		// Set a listener to wait till the user IP data has been loaded, then call your function when it's available.
+		var userInfoQueue = ibmweb.queue.push(function () {
+			return ibmweb.comusr.isLoaded();
+		}, function () {
+			// Clear timeout since it returned in time.
+			clearTimeout(userInfoTimeout);
+			// Get user info now that it's ready.
+			datalayer.util.setUserInfoV17(); });
+	}
+	else {
+		console.warn('+++TME-WARNING > digitalanalytics-datalayer.js > User Info not available');
+	}
+
+	// Set Data Layer Ready
+	window.digitalData.page.isDataLayerReady = true;
+
+	// Trigger Event for digitalData Object Ready
+	try {
+		jQuery(document).trigger('ddo_ready');
+		jQuery(document).trigger('datalayer_ready');
+
+		// Set Listener for DLE Readiness
+		// jQuery(document).on('dle_ready', datalayer.util.finalizeDataLayer);
+	}
+	catch (error) {
+		console.warn('+++TME-ERROR > digitalanalytics-datalayer.js > jQuery not initialized: ' + error);
+	}
 }
 catch (error) {
    console.error('+++TME-ERROR > digitalanalytics-datalayer.js: ' + error);
