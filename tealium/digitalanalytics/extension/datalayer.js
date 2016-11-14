@@ -1,26 +1,35 @@
 /*
- * Id            : tm-v1.0/tealium/digitalanalytics/extension/digitalanalytics-datalayer.js
- * Extension Name: digitalanalytics-datalayer.js
+ * Id            : tm-v1.0/tealium/digitalanalytics/extension/datalayer.js
+ * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
  * 
  * =====|| NOTE: DO NOT MODIFY THIS SCRIPT IN TEALIUM, UPDATE GITHUB VERSION IN ECLIPSE
  */
-var tmeid="digitalanalytics-datalayer.js";
+var tmeid="datalayer.js";
 
 /*---------------------------------------------------Initialize all Digital Data Objects---------------------------------------------------------*/
 var datalayer = {
-      pageidQueryStringsDefault : [{"pathNameSubstring": "/marketing/iwm/",       
-                                    "qsParameter"      : ["source","S_PKG"]},
-                                   {"pathNameSubstring": "/search/",       
-                                    "qsParameter"      : ["q","cc","lang","hpp","o"]},
-                                   {"pathNameSubstring": "/common/ssi/",       
-                                    "qsParameter"      : ["letternum","supplier","htmlfid","docURL","MPPEFSCH"]},
-                                   {"pathNameSubstring": "/support/docview.wss",       
-                                    "qsParameter"      : ["uid"]},
-                                   {"pathNameSubstring": "/support/fixcentral/",       
-                                    "qsParameter"      : ["product"]}],
-     
+	  pageidQueryStringsDefault : [
+		  // Registration Forms - IWM
+    	  {"pathNameSubstring": "/marketing/iwm/",               "qsParameter" : ["source","S_PKG"]},
+		  // Registration Forms - IBMid
+          {"pathNameSubstring": "/account/us-en/signup",         "qsParameter" : ["a", "trail", "CatalogName", "quantity", "partNumber", "source", "pkg"]},
+          // Enterprise Search
+          {"pathNameSubstring": "/search/",                      "qsParameter" : ["q","cc","lang","hpp","o"]},
+          // MAM
+          {"pathNameSubstring": "/common/ssi/",                  "qsParameter" : ["infotype","subtype","htmlfid","letternum","supplier","docURL","MPPEFSCH"]},
+          // eSupport
+          {"pathNameSubstring": "/support/docview.wss",          "qsParameter" : ["uid"]},
+          {"pathNameSubstring": "/support/fixcentral/",          "qsParameter" : ["product"]},
+          // IBM ID - SSO
+          {"pathNameSubstring": "/account/profile",              "qsParameter" : ["page", "okURL"]},
+          // Event Registration
+          {"pathNameSubstring": "/events/wwe/grp",               "qsParameter" : ["openform:cmd","OpenForm:cmd","OpenPage:cmd","seminar","locale"]},
+          // Case Studies
+          {"pathNameSubstring": "/software/businesscasestudies", "qsParameter" : ["synkey"]},
+      ],
+      
       testDomains : ["dev.nwtw.ibm.com","testdata.coremetrics.com","localhost","wwwbeta-sso.toronto.ca.ibm.com"],
       
       util : {
@@ -41,7 +50,7 @@ var datalayer = {
                }
             }
             catch (error) {
-               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setPageLoadEpoch: ' + error);
+               console.error('+++DBDM-ERROR > datalayer.js > setPageLoadEpoch: ' + error);
             }
          },
 
@@ -60,7 +69,7 @@ var datalayer = {
                return(paramsObject);
             }
             catch (error) {
-               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > parseQueryString: ' + error);
+               console.error('+++DBDM-ERROR > datalayer.js > parseQueryString: ' + error);
             }
          },
 
@@ -73,7 +82,7 @@ var datalayer = {
                   var parserURL = document.createElement('a');
                   // Get rid of 'm.ibm.com/http/' pattern for mobile, if exists
                   parserURL.href = fullURL.replace(/m\.ibm\.com\/https?\//,'');
-                  // IE 8 and 9 dont load the attributes "protocol" and "host" in case the source URL
+                  // IE 8 and 9 don't load the attributes "protocol" and "host" in case the source URL
                   // is just a pathname, that is, "/example" and not "http://domain.com/example".
                   parserURL.href = parserURL.href;
                   var pathName = parserURL.pathname.toLowerCase();
@@ -84,7 +93,7 @@ var datalayer = {
 
                   //--- START: Patch to define pageidQueryStrings for IWM and Search pages.
                   // 2016-09-16 - shruti: Code optimization. Used JSON instead of if-else
-                  // process each entry to look for matches
+                  // process each entry to look for matches based on the default value previously defined
                   for (var i = 0; i < datalayer.pageidQueryStringsDefault.length; i++) {
                      var t = datalayer.pageidQueryStringsDefault[i];               
                      if (pathName.indexOf(t.pathNameSubstring) === 0 && typeof(window.digitalData.page.attribute.pageidQueryStrings) == "undefined") {               
@@ -95,7 +104,7 @@ var datalayer = {
                   }              
                   //--- END: Patch to define pageidQueryStrings for IWM and Search pages. ##TODELETE## when standard is adopted
 
-                  //remove some specified html versions from path name
+                  // Remove some specified index pages from path name
                   var lastpart = pathName.substring(pathName.lastIndexOf('/') + 1, pathName.length);
                   // 2016-07-29 - jleon: RTC Story# XXXXXX - Updating list of omitted default pages
                   var omittedHTMLVersions = ["index.php","index.phtml", "index.shtml", "index.wss", "index.jsp", "index.jspa", "index.jsa", "index.htm", "index.html"];
@@ -104,17 +113,25 @@ var datalayer = {
                         pathName = pathName.substring(0,pathName.lastIndexOf('/'));
                      }
                   }
-                  //add different Query string parameters
+                  
+                  // Add different Query string parameters
                   var qs = this.parseQueryString(parserURL.href);
                   if (window.digitalData.page.attribute.pageidQueryStrings) {
                      var addQSValue = "";
-                     for (var k=0;k<window.digitalData.page.attribute.pageidQueryStrings.length;k++) {
+                     for (var k=0; k < window.digitalData.page.attribute.pageidQueryStrings.length; k++) {
                         var q = window.digitalData.page.attribute.pageidQueryStrings[k];
-                        if (typeof(qs[q]) !== "undefined") addQSValue += q + "=" + qs[q] + "&";
+                        // 2016-11-13 - jleon: Adding logic to identify query string that are commands to the web app, which are not pair-values
+                        if (q.indexOf(":cmd") !== -1 && qs.hasOwnProperty(q.split(":")[0])) {
+                        	addQSValue += q.split(":")[0] + "&";
+                        }
+                        else if (typeof(qs[q]) !== "undefined") {
+                        	addQSValue += q + "=" + qs[q] + "&";
+                        }
                      }
                      addQSValue = addQSValue.replace(/&$/,"");
                      pathName = (addQSValue !== "") ? (pathName + "?" + addQSValue) : pathName;
                   }
+                  
                   //remove trailing slash, question mark, or hash(if any)
                   pathName = pathName.replace(/[(\/)(?)(#)(&)]+$/, "");
                   returnValue = parserURL.hostname + pathName;
@@ -122,7 +139,7 @@ var datalayer = {
                return(returnValue);
             }
             catch (error) {
-               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > calculateURLID: ' + error);
+               console.error('+++DBDM-ERROR > datalayer.js > calculateURLID: ' + error);
             }
          },
 
@@ -157,7 +174,7 @@ var datalayer = {
                }
             }
             catch (error) {
-               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > readCookies: ' + error);
+               console.error('+++DBDM-ERROR > datalayer.js > readCookies: ' + error);
             }
          },
          
@@ -177,7 +194,7 @@ var datalayer = {
                }
             }
             catch (error) {
-               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > readMetaData: ' + error);
+               console.error('+++DBDM-ERROR > datalayer.js > readMetaData: ' + error);
             }
          },
 
@@ -199,7 +216,7 @@ var datalayer = {
                }
             }
             catch (error) {
-               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > readQueryStrings: ' + error);
+               console.error('+++DBDM-ERROR > datalayer.js > readQueryStrings: ' + error);
             }
          },
          
@@ -241,7 +258,7 @@ var datalayer = {
                }
             }
             catch (error) {
-               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > getReferringURL: ' + error);
+               console.error('+++DBDM-ERROR > datalayer.js > getReferringURL: ' + error);
             }
          },
 
@@ -253,7 +270,7 @@ var datalayer = {
         		 window.digitalData.user.userInfo = IBMCore.common.util.user.getInfo();
         	 }
         	 catch (error) {
-        		 console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setUserInfo > IBMCore not ready: ' + error);
+        		 console.error('+++DBDM-ERROR > datalayer.js > setUserInfo > IBMCore not ready: ' + error);
         	 }
          },        
 
@@ -269,7 +286,7 @@ var datalayer = {
         		 
         	 }
         	 catch (error) {
-        		 console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setUserInfoV17 > ibmweb not ready: ' + error);
+        		 console.error('+++DBDM-ERROR > datalayer.js > setUserInfoV17 > ibmweb not ready: ' + error);
         	 }
          },        
 
@@ -290,7 +307,7 @@ var datalayer = {
                }
             }
             catch (error) {
-               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setCoremetricsEnabled: ' + error);
+               console.error('+++DBDM-ERROR > datalayer.js > setCoremetricsEnabled: ' + error);
             }
          },
        
@@ -313,7 +330,7 @@ var datalayer = {
                }
             }
             catch (error) {
-               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setPageID: ' + error);
+               console.error('+++DBDM-ERROR > datalayer.js > setPageID: ' + error);
             }
          },
 
@@ -338,7 +355,7 @@ var datalayer = {
                }
             }
             catch (error) {
-               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setReferringURL: ' + error);
+               console.error('+++DBDM-ERROR > datalayer.js > setReferringURL: ' + error);
             }
          },
 
@@ -366,7 +383,7 @@ var datalayer = {
                }
             }
             catch (error) {
-               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setIBMer: ' + error);
+               console.error('+++DBDM-ERROR > datalayer.js > setIBMer: ' + error);
             }
          },
          
@@ -386,7 +403,7 @@ var datalayer = {
                }
             }
             catch (error) {
-               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setProfileID: ' + error);
+               console.error('+++DBDM-ERROR > datalayer.js > setProfileID: ' + error);
             }
          },
 
@@ -399,7 +416,7 @@ var datalayer = {
                window.digitalData.page.session.uPageViewID = this.sha256(window.digitalData.page.session.uSessionID + '-' + window.digitalData.page.session.pageloadEpoch);
             }
             catch (error) {
-               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setSessionID: ' + error);
+               console.error('+++DBDM-ERROR > datalayer.js > setSessionID: ' + error);
             }
          },
          
@@ -471,7 +488,7 @@ var datalayer = {
                
             }
             catch (error) {
-               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setSiteID: ' + error);
+               console.error('+++DBDM-ERROR > datalayer.js > setSiteID: ' + error);
             }
          },
 
@@ -487,7 +504,7 @@ var datalayer = {
                }
             }
             catch (error) {
-               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setClientID: ' + error);
+               console.error('+++DBDM-ERROR > datalayer.js > setClientID: ' + error);
             }
          },
 
@@ -543,7 +560,7 @@ var datalayer = {
             	window.digitalData.page.category.primaryCategory = window.IBMPageCategory;
             }
             catch (error) {
-               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > setCategoryID: ' + error);
+               console.error('+++DBDM-ERROR > datalayer.js > setCategoryID: ' + error);
             }
          },
 
@@ -560,11 +577,11 @@ var datalayer = {
                 	jQuery(document).trigger('datalayer_ready');
                 }
                 catch (error) {
-                	console.log('+++TME-LOG > digitalanalytics-datalayer.js > finalizeDataLayer > jQuery not initialized: ' + error);
+                	console.log('+++DBDM-LOG > datalayer.js > finalizeDataLayer > jQuery not initialized: ' + error);
                 }
             }
             catch (error) {
-               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > finalizeDataLayer: ' + error);
+               console.error('+++DBDM-ERROR > datalayer.js > finalizeDataLayer: ' + error);
             }
          },
       },
@@ -645,18 +662,21 @@ var datalayer = {
             /*---------------------------------------------------Set Page Name---------------------------------------------------------*/
             window.digitalData.page.pageInfo.pageName = document.title || "";
 
+            /*---------------------------------------------------Set DLE ID for Page---------------------------------------------------------*/
+            window.digitalData.page.pageInfo.dleID = this.util.sha256(window.digitalData.page.pageInfo.urlID);
+
+            /*---------------------------------------------------Load Coremetrics Tags by Default---------------------------------------------------------*/
+            this.util.setCoremetricsEnabled();
+            window.digitalData.page.pageInfo.coremetrics.isEluminateLoaded = window.digitalData.page.pageInfo.coremetrics.isEluminateLoaded || false;
+
             /*---------------------------------------------------Set userInfo from DemandBase---------------------------------------------------------*/
             try {
                 // Subscribe to the user IP data ready event and call the callback when it happens, or if it already happened ".asap" one.
             	IBMCore.common.util.user.subscribe("userIpDataReady", "customjs", datalayer.util.setUserInfo).runAsap(datalayer.util.setUserInfo);
             }
             catch (error) {
-                console.log('+++TME-LOG > digitalanalytics-datalayer.js > update > IBMCore not ready: ' + error);
+                console.log('+++DBDM-LOG > datalayer.js > update > IBMCore not ready: ' + error);
              }
-
-            /*---------------------------------------------------Load Coremetrics Tags by Default---------------------------------------------------------*/
-            this.util.setCoremetricsEnabled();
-            window.digitalData.page.pageInfo.coremetrics.isEluminateLoaded = window.digitalData.page.pageInfo.coremetrics.isEluminateLoaded || false;
 
             /*---------------------------------------------------Set Data Layer Ready---------------------------------------------------------*/
             window.digitalData.page.isDataLayerReady = true;
@@ -683,7 +703,7 @@ var datalayer = {
             }
          }
          catch (error) {
-            console.error('+++TME-ERROR > digitalanalytics-datalayer.js > update: ' + error);
+            console.error('+++DBDM-ERROR > datalayer.js > update: ' + error);
          }
       },
 
@@ -835,6 +855,9 @@ var datalayer = {
             /*---------------------------------------------------Set Page Name---------------------------------------------------------*/
             window.digitalData.page.pageInfo.pageName = document.title || "";
 
+            /*---------------------------------------------------Set DLE ID for Page---------------------------------------------------------*/
+            window.digitalData.page.pageInfo.dleID = this.util.sha256(window.digitalData.page.pageInfo.urlID);
+
             /*---------------------------------------------------Load Coremetrics Tags by Default---------------------------------------------------------*/
             this.util.setCoremetricsEnabled();
             window.digitalData.page.pageInfo.coremetrics.isEluminateLoaded = false;
@@ -859,7 +882,7 @@ var datalayer = {
             utag_data.IBMER_value      = window.digitalData.user.segment.isIBMer;
          }
          catch (error) {
-            console.error('+++TME-ERROR > digitalanalytics-datalayer.js > init: ' + error);
+            console.error('+++DBDM-ERROR > datalayer.js > init: ' + error);
          }
       },
 };
@@ -877,7 +900,7 @@ try {
 			IBMCore.common.util.user.subscribe("userIpDataReady", "customjs", datalayer.util.setUserInfo).runAsap(datalayer.util.setUserInfo);
 		}
 		catch (error) {
-			console.log('+++TME-LOG > digitalanalytics-datalayer.js > update > IBMCore not ready: ' + error);
+			console.log('+++DBDM-LOG > datalayer.js > update > IBMCore not ready: ' + error);
 		}
 	}
 	else if (typeof(ibmweb) !== "undefined") {
@@ -887,7 +910,7 @@ try {
 		// Set this first in case the user info is already ready when you set the listener.
 		userInfoTimeout = setTimeout(function() {
 			ibmweb.queue.remove(userInfoQueue);
-			console.log('+++TME-LOG > digitalanalytics-datalayer.js > User Info took too long');
+			console.log('+++DBDM-LOG > datalayer.js > User Info took too long');
 		}, 3000);
 
 		// Set a listener to wait till the user IP data has been loaded, then call your function when it's available.
@@ -900,7 +923,7 @@ try {
 			datalayer.util.setUserInfoV17(); });
 	}
 	else {
-		console.log('+++TME-LOG > digitalanalytics-datalayer.js > User Info not available');
+		console.log('+++DBDM-LOG > datalayer.js > User Info not available');
 	}
 
 	// Set Data Layer Ready
@@ -915,9 +938,9 @@ try {
 		// jQuery(document).on('dle_ready', datalayer.util.finalizeDataLayer);
 	}
 	catch (error) {
-		console.log('+++TME-LOG > digitalanalytics-datalayer.js > jQuery not initialized: ' + error);
+		console.log('+++DBDM-LOG > datalayer.js > jQuery not initialized: ' + error);
 	}
 }
 catch (error) {
-   console.error('+++TME-ERROR > digitalanalytics-datalayer.js: ' + error);
+   console.error('+++DBDM-ERROR > datalayer.js: ' + error);
 }
