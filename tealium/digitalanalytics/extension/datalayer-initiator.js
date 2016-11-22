@@ -3,7 +3,7 @@
  * Extension Name: datalayer-initiator.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2016.11.14.2322
+ * Version       : 2016.11.22.1038
  *
  * This script creates a calls the init function of the datalayer to initiate it
  * 
@@ -11,7 +11,6 @@
  *        https://github.ibm.com/tag-management/tm-v1.0.git
  *        
  */
-
 var tmeid="datalayer-initiator.js";
 
 /*---------------------------------------------------MAIN FUNCTION---------------------------------------------------------*/
@@ -60,12 +59,12 @@ try {
    try {
       jQuery(document).trigger('ddo_ready');
       jQuery(document).trigger('datalayer_ready');
-
+      window.jQueryVersion = utag_data.jQueryVersion = jQuery.fn.jquery;
       // Set Listener for DLE Readiness
-      // jQuery(document).on('dle_ready', datalayer.util.finalizeDataLayer);
+      if (jQuery.fn.jquery >= "1.7") jQuery(document).on('dle_ready', datalayer.util.finalizeDataLayer);
    }
    catch (error) {
-      console.log('+++DBDM-LOG > datalayer-initiator.js > jQuery not initialized: ' + error);
+      console.log('+++DBDM-LOG > datalayer-initiator.js > jQuery not present: ' + error);
    }
 }
 catch (error) {

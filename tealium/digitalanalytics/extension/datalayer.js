@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2016.11.14.2322
+ * Version       : 2016.11.22.1038
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -12,12 +12,11 @@
  *        https://github.ibm.com/tag-management/tm-v1.0.git
  *        
  */
-
 var tmeid="datalayer.js";
 
-/*---------------------------------------------------Initialize all Digital Data Objects---------------------------------------------------------*/
+/*--------------------Initialize all Digital Data Objects--------------------*/
 var datalayer = {
-      pageidQueryStringsDefault : [
+      PAGEIDQUERYSTRINGSDEFAULT : [
          // Registration Forms - IWM
          {"pathNameSubstring": "/marketing/iwm/",               "qsParameter" : ["source","S_PKG"]},
          // Registration Forms - IBMid
@@ -35,15 +34,19 @@ var datalayer = {
          {"pathNameSubstring": "/events/wwe/grp",               "qsParameter" : ["openform:cmd","OpenForm:cmd","OpenPage:cmd","seminar","locale"]},
          // Case Studies
          {"pathNameSubstring": "/software/businesscasestudies", "qsParameter" : ["synkey"]}, ],
-
-      testDomains : ["dev.nwtw.ibm.com","testdata.coremetrics.com","localhost","wwwbeta-sso.toronto.ca.ibm.com"],
+         
+      DOWNLOADTYPES : "bqy,doc,dot,exe,flv,jpg,png,mov,mp3,pdf,pps,ppt,rss,sh,swf,tar,txt,wmv,xls,xml,zip,avi,eps,gif,lwp,mas,mp4,pot,prz,rtf,wav,wma,123,odt,ott,sxw,stw,docx,odp,otp,sxi,sti,pptx,ods,ots,sxc,stc,xlsx",
+      
+      DOMAINLIST    : "ibm.co,ibm.com,ibmcloud.com,bluemix.net,mybluemix.net,softlayer.com,ibm.biz,jazz.net,lotuslive.com,cognos.com,webdialogs.com,servicemanagementcenter.com,xtify.com,ibmdw.net,smartercitiescloud.com",
+      
+      TESTDOMAINS   : "dev.nwtw.ibm.com,testdata.coremetrics.com,localhost,wwwbeta-sso.toronto.ca.ibm.com",
 
       util : {
-         /*---------------------------------------------------Add SHA256 Hash Functions---------------------------------------------------------*/
+         /*--------------------Add SHA256 Hash Functions--------------------*/
          // 2016-08-04 - jleon: RTC Story# 978510 - https://github.com/jbt/js-crypto
          sha256 : function() {function e(a,b){return a>>>b|a<<32-b}for(var b=1,a,m=[],n=[];18>++b;)for(a=b*b;312>a;a+=b)m[a]=1;b=1;for(a=0;313>b;)m[++b]||(n[a]=Math.pow(b,.5)%1*4294967296|0,m[a++]=Math.pow(b,1/3)%1*4294967296|0);return function(g){for(var l=n.slice(b=0),c=unescape(encodeURI(g)),h=[],d=c.length,k=[],f,p;b<d;)k[b>>2]|=(c.charCodeAt(b)&255)<<8*(3-b++%4);d*=8;k[d>>5]|=128<<24-d%32;k[p=d+64>>5|15]=d;for(b=0;b<p;b+=16){for(c=l.slice(a=0,8);64>a;c[4]+=f)h[a]=16>a?k[a+b]:(e(f=h[a-2],17)^e(f,19)^f>>>10)+(h[a-7]|0)+(e(f=h[a-15],7)^e(f,18)^f>>>3)+(h[a-16]|0),c.unshift((f=(c.pop()+(e(g=c[4],6)^e(g,11)^e(g,25))+((g&c[5]^~g&c[6])+m[a])|0)+(h[a++]|0))+(e(d=c[0],2)^e(d,13)^e(d,22))+(d&c[1]^c[1]&c[2]^c[2]&d));for(a=8;a--;)l[a]=c[a]+l[a]}for(c="";63>a;)c+=(l[++a>>3]>>4*(7-a%8)&15).toString(16);return c}}(),
 
-         /*---------------------------------------------------Add Page Load Epoch Function---------------------------------------------------------*/
+         /*--------------------Add Page Load Epoch Function--------------------*/
          setPageLoadEpoch : function (reset) {
             try {
                if (reset !== 1) {
@@ -60,7 +63,7 @@ var datalayer = {
             }
          },
 
-         /*---------------------------------------------------Add parseQueryString function---------------------------------------------------------*/
+         /*--------------------Add parseQueryString function--------------------*/
          // 2016-07-28 - jleon: RTC Story# 978510
          parseQueryString : function (fullURL) {
             try {
@@ -70,7 +73,7 @@ var datalayer = {
                queries = queryString.split("&");
                for (i = 0, l = queries.length; i < l; i++) {
                   temp = queries[i].split('=');
-                  paramsObject[temp[0]] = temp[1];
+                  paramsObject[temp[0]] = window.decodeURIComponent(temp[1]);
                }
                return(paramsObject);
             }
@@ -79,7 +82,7 @@ var datalayer = {
             }
          },
 
-         /*---------------------------------------------------Add calculateURLID function---------------------------------------------------------*/
+         /*--------------------Add calculateURLID function--------------------*/
          // 2016-07-28 - jleon: RTC Story# 978510 (previous RTC Story# 902576)
          calculateURLID : function (fullURL) {
             try {
@@ -100,8 +103,8 @@ var datalayer = {
                   //--- START: Patch to define pageidQueryStrings for IWM and Search pages.
                   // 2016-09-16 - shruti: Code optimization. Used JSON instead of if-else
                   // process each entry to look for matches based on the default value previously defined
-                  for (var i = 0; i < datalayer.pageidQueryStringsDefault.length; i++) {
-                     var t = datalayer.pageidQueryStringsDefault[i];               
+                  for (var i = 0; i < datalayer.PAGEIDQUERYSTRINGSDEFAULT.length; i++) {
+                     var t = datalayer.PAGEIDQUERYSTRINGSDEFAULT[i];               
                      if (pathName.indexOf(t.pathNameSubstring) === 0 && typeof(window.digitalData.page.attribute.pageidQueryStrings) == "undefined") {               
                         // Set PageID Query Strings 
                         window.digitalData.page.attribute.pageidQueryStrings = t.qsParameter;
@@ -150,7 +153,7 @@ var datalayer = {
             }
          },
 
-         /*---------------------------------------------------Read Cookies function---------------------------------------------------------*/
+         /*--------------------Read Cookies function--------------------*/
          readCookies : function () {
             try {
                // Ensure the parent objects is present, and initialize the cp object
@@ -185,7 +188,7 @@ var datalayer = {
             }
          },
 
-         /*---------------------------------------------------Read Metadata Elements Functions---------------------------------------------------------*/
+         /*--------------------Read Metadata Elements Functions--------------------*/
          readMetaData : function () {
             try {
                // Ensure the parent objects is present, and initialize the meta object
@@ -205,7 +208,7 @@ var datalayer = {
             }
          },
 
-         /*---------------------------------------------------Set Query String Elements---------------------------------------------------------*/
+         /*--------------------Set Query String Elements--------------------*/
          readQueryStrings : function () {
             try {
                // Ensure the parent objects is present, and initialize the qp object
@@ -227,7 +230,7 @@ var datalayer = {
             }
          },
 
-         /*---------------------------------------------------Get referring URL---------------------------------------------------------*/
+         /*--------------------Get referring URL--------------------*/
          getReferringURL : function () {
             try {
                // Ensure the parent objects is present, and initialize the referrer object
@@ -269,7 +272,7 @@ var datalayer = {
             }
          },
 
-         /*---------------------------------------------------Set setUserInfo from DemandBase---------------------------------------------------------------*/
+         /*--------------------Set setUserInfo from DemandBase--------------------*/
          setUserInfo : function () {
             try {
                // Ensure the parent objects is present, and initialize the referrer object
@@ -281,7 +284,7 @@ var datalayer = {
             }
          },        
 
-         /*---------------------------------------------------Set setUserInfo from DemandBase for v17---------------------------------------------------------------*/
+         /*--------------------Set setUserInfo from DemandBase for v17--------------------*/
          setUserInfoV17 : function () {
             try {
                // Ensure the parent objects is present, and initialize the referrer object
@@ -297,7 +300,7 @@ var datalayer = {
             }
          },        
 
-         /*---------------------------------------------------Set Whether Coremetrics should run---------------------------------------------------------------*/
+         /*--------------------Set Whether Coremetrics should run--------------------*/
          setCoremetricsEnabled : function () {
             try {
                if (typeof(window.digitalData.page.pageInfo.coremetrics.enabled) === "boolean") {
@@ -318,7 +321,7 @@ var datalayer = {
             }
          },
 
-         /*---------------------------------------------------Set PAGEID/URLID in DDO---------------------------------------------------------------*/
+         /*--------------------Set PAGEID/URLID in DDO--------------------*/
          setPageID : function () {
             try {
                if (typeof(window.digitalData.page.pageInfo.urlID) !== "undefined" && typeof(window.digitalData.page.pageInfo.pageID) !== "undefined" 
@@ -341,7 +344,7 @@ var datalayer = {
             }
          },
 
-         /*---------------------------------------------------Set referral URLID and referral domain in DDO---------------------------------------------------------------*/
+         /*--------------------Set referral URLID and referral domain in DDO--------------------*/
          setReferringURL : function () {
             try {
                window.digitalData.page.pageInfo.referrer   = window.digitalData.util.referrer.href;
@@ -366,7 +369,7 @@ var datalayer = {
             }
          },
 
-         /*-------------------------------------------------setting IBMER value--------------------------------------------------------*/
+         /*--------------------setting IBMER value--------------------*/
          setIBMer : function () {
             try {
                if (window.document.domain.indexOf("ibm.com") !== -1) {
@@ -394,7 +397,7 @@ var datalayer = {
             }
          },
 
-         /*-------------------------------------------------setting IBM ID Profile ID--------------------------------------------------------*/
+         /*--------------------setting IBM ID Profile ID--------------------*/
          setProfileID : function () {
             try {
                // 2016-07-18 - jleon: RTC Story# 967611
@@ -414,7 +417,7 @@ var datalayer = {
             }
          },
 
-         /*---------------------------------------------------Set Session ID value---------------------------------------------------------*/
+         /*--------------------Set Session ID value--------------------*/
          setSessionID : function () {
             try {
                // Session ID is based on the Tealium cookie ID and the Tealium session ID
@@ -427,7 +430,7 @@ var datalayer = {
             }
          },
 
-         /*---------------------------------------------------Set Site ID---------------------------------------------------------*/
+         /*--------------------Set Site ID--------------------*/
          setSiteID : function () {
             try {
                if (typeof(window.digitalData.util.qp.siteID) !== "undefined") {
@@ -499,11 +502,11 @@ var datalayer = {
             }
          },
 
-         /*---------------------------------------------------setting Client ID---------------------------------------------------------*/
+         /*--------------------setting Client ID--------------------*/
          setClientID : function () {
             try {
-               // If the siteID prefix or suffix is "test" or if the full domain of the hostname is in the testDomains array then set Client ID to 80200000 (test instance)
-               if (window.digitalData.page.pageInfo.ibm.siteID.toLowerCase().match(/^test|test$/) || (datalayer.testDomains.indexOf(document.location.hostname.replace(/^[^\.]+./,"")) !== -1)) {
+               // If the siteID prefix or suffix is "test" or if the full domain of the hostname is in the TESTDOMAINS array then set Client ID to 80200000 (test instance)
+               if (window.digitalData.page.pageInfo.ibm.siteID.toLowerCase().match(/^test|test$/) || (datalayer.TESTDOMAINS.split(",").indexOf(document.location.hostname.replace(/^[^\.]+./,"")) !== -1)) {
                   window.digitalData.page.pageInfo.coremetrics.clientID = "80200000|" + window.digitalData.page.pageInfo.ibm.siteID;
                }
                else {
@@ -515,7 +518,7 @@ var datalayer = {
             }
          },
 
-         /*---------------------------------------------------setting Category ID---------------------------------------------------------*/
+         /*--------------------setting Category ID--------------------*/
          setCategoryID : function () {
             try {
                window.IBMPageCategory = new String();
@@ -571,20 +574,77 @@ var datalayer = {
             }
          },
 
-         /*---------------------------------------------------Finalize Data Layer Call Back Function ---------------------------------------------------------*/
+         /*--------------------Parse the event name  --------------------*/
+         parseEventName : function (eventName, count) {
+            /*
+             * eventName contains two parameters separated by a colon: <product_name>:<tactic_code> This function will
+             * ensure that the string is not greater than 50 characters, and ensuring that the second parameter is
+             * complete
+             */ 
+            try {
+               var size = count || 256;
+               // make sure eventName is a String
+               if (typeof(eventName) === "string") {
+                  // replace all consecutive spaces for a dash '-'
+                  eventName = eventName.replace(/\s+/g, '-').toUpperCase();
+                  if (eventName.length > size) {
+                     var eventNameParts = eventName.split(':');
+                     if (eventNameParts.length === 1)
+                        // eventName only has one element
+                        eventName = eventName.substring(0,size);
+                     else
+                        eventName = eventName.substring(0,size - (eventNameParts[eventNameParts.length - 1].length - 1)) + ':' + eventNameParts[eventNameParts.length - 1];
+                  }
+               }
+               return(eventName);
+            }
+            catch (error) {
+               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > parseEventName: ' + error);
+            }
+         },
+         
+         /*--------------------Parse the event name  --------------------*/
+         parseEventNameGen : function (eventName, count) {
+            /*
+             * Set eventName to 50 characters and return it uppercased
+             */ 
+            try {
+               var size = count || 256;
+               // make sure eventName is a String
+               if (typeof(eventName) === "string") {
+                  // replace all consecutive spaces to one space
+                  eventName = eventName.replace(/\s+/g, ' ').toUpperCase();
+                  // if eventName is bigger than 50 characters then compress it
+                  if (eventName.length > size) {
+                     var ovf = Math.round((eventName.length-size)/2);
+                     eventName = eventName.substring(0,(Math.round(eventName.length/2)-ovf)-1) + ".." 
+                     + eventName.substring(eventName.length - ((size-(Math.round(eventName.length/2)-ovf)-1)), eventName.length);
+                  }
+               }
+               return(eventName);
+            }
+            catch (error) {
+               console.error('+++TME-ERROR > digitalanalytics-datalayer.js > parseEventNameGen: ' + error);
+            }
+         },
+
+         /*--------------------Finalize Data Layer Call Back Function --------------------*/
          finalizeDataLayer : function () {
             try {
+               console.log('+++DBDM-LOG > datalayer.js > finalizeDataLayer > CATCHED!');
                // Update Cookies
                this.readCookies();
 
-               // Set Data Layer Ready and trigger Event
-               window.digitalData.page.isDataLayerReady = true;        	
-               try {
-                  // Trigger Event for Data Layer Ready
-                  jQuery(document).trigger('datalayer_ready');
-               }
-               catch (error) {
-                  console.log('+++DBDM-LOG > datalayer.js > finalizeDataLayer > jQuery not initialized: ' + error);
+               if (!window.digitalData.page.isDataLayerReady) {
+                  // Set Data Layer Ready and trigger Event
+                  window.digitalData.page.isDataLayerReady = true;
+                  try {
+                     // Trigger Event for Data Layer Ready
+                     jQuery(document).trigger('datalayer_ready');
+                  }
+                  catch (error) {
+                     console.log('+++DBDM-LOG > datalayer.js > finalizeDataLayer > jQuery not present: ' + error);
+                  }
                }
             }
             catch (error) {
@@ -593,7 +653,7 @@ var datalayer = {
          },
       },
 
-      /*---------------------------------------------------Init Function for DataLayer---------------------------------------------------------*/
+      /*--------------------Init Function for DataLayer--------------------*/
       update : function () {
          try {
             // Initialize digitalData Object
@@ -618,65 +678,65 @@ var datalayer = {
             window.digitalData.page.pageInfo.tealium     = window.digitalData.page.pageInfo.tealium || {};
             window.digitalData.page.pageInfo.metrics     = window.digitalData.page.pageInfo.metrics || {};
 
-            /*---------------------------------------------------setting page loading time---------------------------------------------------------*/
+            /*--------------------setting page loading time--------------------*/
             this.util.setPageLoadEpoch(0); 
 
-            /*---------------------------------------------------Set Cookies---------------------------------------------------------*/
+            /*--------------------Set Cookies--------------------*/
             this.util.readCookies();
 
-            /*---------------------------------------------------Set Metadata Elements---------------------------------------------------------*/
+            /*--------------------Set Metadata Elements--------------------*/
             this.util.readMetaData();
 
-            /*---------------------------------------------------Set Query String Elements---------------------------------------------------------*/
+            /*--------------------Set Query String Elements--------------------*/
             this.util.readQueryStrings();
 
-            /*---------------------------------------------------Get referring URL---------------------------------------------------------*/
+            /*--------------------Get referring URL--------------------*/
             this.util.getReferringURL();
 
-            /*---------------------------------------------------Set PAGEID/URLID in DDO---------------------------------------------------------------*/
+            /*--------------------Set PAGEID/URLID in DDO--------------------*/
             this.util.setPageID();
 
-            /*---------------------------------------------------Set referral URLID and referral domain in DDO---------------------------------------------------------------*/
+            /*--------------------Set referral URLID and referral domain in DDO--------------------*/
             this.util.setReferringURL();
 
-            /*---------------------------------------------------Set IBMER value--------------------------------------------------------*/
+            /*--------------------Set IBMER value--------------------*/
             this.util.setIBMer();
 
-            /*---------------------------------------------------Set IBM ID Profile ID--------------------------------------------------------*/
+            /*--------------------Set IBM ID Profile ID--------------------*/
             this.util.setProfileID();
 
-            /*---------------------------------------------------Set Session ID value---------------------------------------------------------*/
+            /*--------------------Set Session ID value--------------------*/
             this.util.setSessionID();
 
-            /*---------------------------------------------------Set Site ID---------------------------------------------------------*/
+            /*--------------------Set Site ID--------------------*/
             this.util.setSiteID();
             if (window.digitalData.user.segment.isIBMer) {
                window.digitalData.page.pageInfo.ibm.iniSiteID = window.digitalData.page.pageInfo.ibm.iniSiteID + "_I"
             }
 
-            /*---------------------------------------------------setting Client ID---------------------------------------------------------*/
+            /*--------------------setting Client ID--------------------*/
             this.util.setClientID();
 
-            /*---------------------------------------------------setting Category ID---------------------------------------------------------*/
+            /*--------------------setting Category ID--------------------*/
             this.util.setCategoryID();
 
-            /*---------------------------------------------------Set Destination URL---------------------------------------------------------*/
+            /*--------------------Set Destination URL--------------------*/
             window.digitalData.page.pageInfo.destinationURL = window.location.href || "";
 
-            /*---------------------------------------------------Set Destination URL Domain---------------------------------------------------------*/
+            /*--------------------Set Destination URL Domain--------------------*/
             window.digitalData.page.pageInfo.destinationDomain = document.domain.split('.').splice(-2, 2).join('.') || "";
 
-            /*---------------------------------------------------Set Page Name---------------------------------------------------------*/
+            /*--------------------Set Page Name--------------------*/
             window.digitalData.page.pageInfo.pageName = document.title || "";
 
-            /*---------------------------------------------------Set DLE ID for Page---------------------------------------------------------*/
+            /*--------------------Set DLE ID for Page--------------------*/
             window.digitalData.page.pageInfo.dleID = this.util.sha256(window.digitalData.page.pageInfo.urlID);
 
-            /*---------------------------------------------------Load Coremetrics Tags by Default---------------------------------------------------------*/
+            /*--------------------Load Coremetrics Tags by Default--------------------*/
             this.util.setCoremetricsEnabled();
             window.digitalData.page.pageInfo.coremetrics.isEluminateLoaded = window.digitalData.page.pageInfo.coremetrics.isEluminateLoaded || false;
 
-            /*---------------------------------------------------Set userInfo from DemandBase---------------------------------------------------------*/
+            /*--------------------Set userInfo from DemandBase--------------------*/
             try {
                // Subscribe to the user IP data ready event and call the callback when it happens, or if it already happened ".asap" one.
                IBMCore.common.util.user.subscribe("userIpDataReady", "customjs", datalayer.util.setUserInfo).runAsap(datalayer.util.setUserInfo);
@@ -685,10 +745,10 @@ var datalayer = {
                console.log('+++DBDM-LOG > datalayer.js > update > IBMCore not ready: ' + error);
             }
 
-            /*---------------------------------------------------Set Data Layer Ready---------------------------------------------------------*/
+            /*--------------------Set Data Layer Ready--------------------*/
             window.digitalData.page.isDataLayerReady = true;
 
-            /*---------------------------------------------------Set UDO Variables---------------------------------------------------------*/
+            /*--------------------Set UDO Variables--------------------*/
             if (typeof(window.utag) !== "undefined" && typeof(window.utag.data) !== "undefined") {
                utag.data.category_id      = window.digitalData.page.category.primaryCategory;
                utag.data.concat_clientid  = window.digitalData.page.pageInfo.coremetrics.clientID;
@@ -714,7 +774,7 @@ var datalayer = {
          }
       },
 
-      /*---------------------------------------------------Init Function for DataLayer---------------------------------------------------------*/
+      /*--------------------Init Function for DataLayer--------------------*/
       init : function () {
          try {
             // Tealium UDO
@@ -811,65 +871,65 @@ var datalayer = {
             window.digitalData.page.pageInfo.tealium     = window.digitalData.page.pageInfo.tealium || {};
             window.digitalData.page.pageInfo.metrics     = window.digitalData.page.pageInfo.metrics || {};
 
-            /*---------------------------------------------------setting page loading time---------------------------------------------------------*/
+            /*--------------------setting page loading time--------------------*/
             this.util.setPageLoadEpoch(0); 
 
-            /*---------------------------------------------------Set Cookies---------------------------------------------------------*/
+            /*--------------------Set Cookies--------------------*/
             this.util.readCookies();
 
-            /*---------------------------------------------------Set Metadata Elements---------------------------------------------------------*/
+            /*--------------------Set Metadata Elements--------------------*/
             this.util.readMetaData();
 
-            /*---------------------------------------------------Set Query String Elements---------------------------------------------------------*/
+            /*--------------------Set Query String Elements--------------------*/
             this.util.readQueryStrings();
 
-            /*---------------------------------------------------Get referring URL---------------------------------------------------------*/
+            /*--------------------Get referring URL--------------------*/
             this.util.getReferringURL();
 
-            /*---------------------------------------------------Set PAGEID/URLID in DDO---------------------------------------------------------------*/
+            /*--------------------Set PAGEID/URLID in DDO--------------------*/
             this.util.setPageID();
 
-            /*---------------------------------------------------Set referral URLID and referral domain in DDO---------------------------------------------------------------*/
+            /*--------------------Set referral URLID and referral domain in DDO--------------------*/
             this.util.setReferringURL();
 
-            /*---------------------------------------------------Set IBMER value--------------------------------------------------------*/
+            /*--------------------Set IBMER value--------------------*/
             this.util.setIBMer();
 
-            /*---------------------------------------------------Set IBM ID Profile ID--------------------------------------------------------*/
+            /*--------------------Set IBM ID Profile ID--------------------*/
             this.util.setProfileID();
 
-            /*---------------------------------------------------Set Session ID value---------------------------------------------------------*/
+            /*--------------------Set Session ID value--------------------*/
             this.util.setSessionID();
 
-            /*---------------------------------------------------Set Site ID---------------------------------------------------------*/
+            /*--------------------Set Site ID--------------------*/
             this.util.setSiteID();
             if (window.digitalData.user.segment.isIBMer) {
                window.digitalData.page.pageInfo.ibm.iniSiteID = window.digitalData.page.pageInfo.ibm.iniSiteID + "_I"
             }
 
-            /*---------------------------------------------------setting Client ID---------------------------------------------------------*/
+            /*--------------------setting Client ID--------------------*/
             this.util.setClientID();
 
-            /*---------------------------------------------------setting Category ID---------------------------------------------------------*/
+            /*--------------------setting Category ID--------------------*/
             this.util.setCategoryID();
 
-            /*---------------------------------------------------Set Destination URL---------------------------------------------------------*/
+            /*--------------------Set Destination URL--------------------*/
             window.digitalData.page.pageInfo.destinationURL = window.location.href || "";
 
-            /*---------------------------------------------------Set Destination URL Domain---------------------------------------------------------*/
+            /*--------------------Set Destination URL Domain--------------------*/
             window.digitalData.page.pageInfo.destinationDomain = document.domain.split('.').splice(-2, 2).join('.') || "";
 
-            /*---------------------------------------------------Set Page Name---------------------------------------------------------*/
+            /*--------------------Set Page Name--------------------*/
             window.digitalData.page.pageInfo.pageName = document.title || "";
 
-            /*---------------------------------------------------Set DLE ID for Page---------------------------------------------------------*/
+            /*--------------------Set DLE ID for Page--------------------*/
             window.digitalData.page.pageInfo.dleID = this.util.sha256(window.digitalData.page.pageInfo.urlID);
 
-            /*---------------------------------------------------Load Coremetrics Tags by Default---------------------------------------------------------*/
+            /*--------------------Load Coremetrics Tags by Default--------------------*/
             this.util.setCoremetricsEnabled();
             window.digitalData.page.pageInfo.coremetrics.isEluminateLoaded = false;
 
-            /*---------------------------------------------------Set UDO Variables---------------------------------------------------------*/
+            /*--------------------Set UDO Variables--------------------*/
             utag_data.category_id      = window.digitalData.page.category.primaryCategory;
             utag_data.concat_clientid  = window.digitalData.page.pageInfo.coremetrics.clientID;
             utag_data.cookie_domain    = window.digitalData.page.pageInfo.destinationDomain;
