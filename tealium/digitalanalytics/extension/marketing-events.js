@@ -3,7 +3,7 @@
  * Extension Name: marketing-events.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2016.11.22.1038
+ * Version       : 2016.11.22.1903
  *
  * This script is executed when an page click event is trapped in jQuery
  * 
@@ -52,9 +52,9 @@ function createUtagLinkObject(obj) {
 
       obj.evTriggerTime = new Date().getTime();
 
-      // RTC: Story# 958230, Defect# 967620, and Defect# 967890. Adding code snippet in Support of Conversion Events.
+      /* RTC: Story# 958230, Defect# 967620, and Defect# 967890. Adding code snippet in Support of Conversion Events. */
       if (obj.type) {
-         // set type of conversion for old code
+         /* set type of conversion for old code */
          if (obj.type == "conversion" ) {
             obj.ibmConversion = "true";
          }
@@ -64,7 +64,7 @@ function createUtagLinkObject(obj) {
          else if (obj.type == "product" ) {
             obj.ibmProductTag = "true";
          }
-         // set value to old elements of object
+         /* set value to old elements of object */
          obj.convtype       = obj.eventAction        || "";
          obj.ibmEV          = obj.primaryCategory    || "";
          obj.ibmEvAction    = obj.eventName          || "";
@@ -81,7 +81,7 @@ function createUtagLinkObject(obj) {
          }
       }
       else {
-         // OLD event object definition - set values to new object definition
+         /* OLD event object definition - set values to new object definition */
          obj.eventAction        = obj.convtype       || "";
          obj.primaryCategory    = obj.ibmEV          || "";
          obj.eventName          = obj.ibmEvAction    || "";
@@ -92,7 +92,7 @@ function createUtagLinkObject(obj) {
          obj.targetURL          = obj.ibmEvTarget    || "";
          obj.targetTitle        = obj.ibmEvLinkTitle || "";
          obj.targetSize         = obj.ibmEvFileSize  || "";
-         // set default for type
+         /* set default for type */
          obj.type = "element"
       }
 
@@ -107,7 +107,7 @@ function createUtagLinkObject(obj) {
          obj.type = "product"
       }
 
-      // Make sure that the eventName is truncated if needed to 50 characters
+      /* Make sure that the eventName is truncated if needed to 50 characters */
       if(obj.type === "element") {
          obj.ibmEvActionAttribute = obj.ibmEvAction;
          obj.eventName = obj.ibmEvAction = window.datalayer.util.parseEventNameGen(obj.ibmEvAction,50)
@@ -148,9 +148,9 @@ function createUtagLinkObject(obj) {
          utag.link(data);
       }
       else {
-         //for generating product view tag
+         /* for generating product view tag */
          if (typeof(window.pageViewAttributes) !== "undefined") {
-            //For checking the Product Id from previous ECOM pages
+            /* For checking the Product Id from previous ECOM pages */
             if (data.iniSiteID.toLowerCase().indexOf("ecom") !== -1 || data.concat_clientid.toLowerCase().indexOf("ecom") !== -1) {
                var prevProdID = getCookie("prevProdID");
                if (prevProdID !== null && typeof(window.digitalData.product[0].productInfo.productID) !== "undefined") {
@@ -171,7 +171,7 @@ function createUtagLinkObject(obj) {
    catch (error) {
       console.log('+++DBDM-WARNING > marketing-events.js > createUtagLinkObject: ' + error);
    }
-   //--------------------Call Event IBMDependencyRegistry--------------------//
+   /*--------------------Call Event IBMDependencyRegistry--------------------*/
    /**
     * Id      : IBMDependencyRegistry
     * Author  : devarajk@us.ibm.com
@@ -179,7 +179,7 @@ function createUtagLinkObject(obj) {
     * Date    : 2016-08-23
     * Description: 
     */
-   //>>>>> Start of Call IBMDependencyRegistry
+   /* >>>>> Start of Call IBMDependencyRegistry */
    try {
       if (window.IBMDependencyRegistry) {
          window.IBMDependencyRegistry.on('tealium.IBMSimpleEventRouter.loaded',
@@ -191,7 +191,7 @@ function createUtagLinkObject(obj) {
    catch (error) {
       console.log('+++DBDM-WARNING > marketing-events.js > IBMDependencyRegistry: ' + error);
    }
-   //>>>>> End of Call IBMDependencyRegistry
+   /* >>>>> End of Call IBMDependencyRegistry */
 }
 
 /*--------------------MAIN FUNCTION--------------------*/
@@ -200,9 +200,9 @@ try {
    window.arrObjList = new Array();
    window.ibmStats = ibmStats || {};
 
-   //-------------------- ibmStats.event handler--------------------//
+   /*-------------------- ibmStats.event handler--------------------*/
    window.ibmStats.event = function (obj) {
-      // Ensure that the digitalData Object has not been reset by the page
+      /* Ensure that the digitalData Object has not been reset by the page */
       if (typeof(window.digitalData.page.isDataLayerReady) === "undefined") {
          window.datalayer.update();
          console.log('+++DBDM-WARNING > marketing-events.js: digitalData was reset, recreating datalayer');
@@ -210,7 +210,7 @@ try {
       createUtagLinkObject(obj);
    };
 
-   //-------------------- Ajax function to bind page view tag -----------------------------//
+   /*-------------------- Ajax function to bind page view tag -----------------------------*/
    window.bindPageViewWithAnalytics = function() {
       if(typeof window.utag !== "undefined") utag.view(utag.data);
    }

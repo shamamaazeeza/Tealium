@@ -3,7 +3,7 @@
  * Extension Name: datalayer-initiator.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2016.11.22.1038
+ * Version       : 2016.11.22.1903
  *
  * This script creates a calls the init function of the datalayer to initiate it
  * 
@@ -15,14 +15,15 @@ var tmeid="datalayer-initiator.js";
 
 /*---------------------------------------------------MAIN FUNCTION---------------------------------------------------------*/
 try {
-   // Initialize Data Layer
+   /* Initialize Data Layer */
    window.datalayer.init();
 
-   // Set userInfo from DemandBase
+   /* Set userInfo from DemandBase */
    if (typeof(IBMCore) !== "undefined") {
-      // v18+
+      /* v18+ */
       try {
-         // Subscribe to the user IP data ready event and call the callback when it happens, or if it already happened ".asap" one.
+         /* Subscribe to the user IP data ready event and call the callback when it happens, 
+		  * or if it already happened ".asap" one. */
          IBMCore.common.util.user.subscribe("userIpDataReady", "customjs", datalayer.util.setUserInfo).runAsap(datalayer.util.setUserInfo);
       }
       catch (error) {
@@ -30,40 +31,44 @@ try {
       }
    }
    else if (typeof(ibmweb) !== "undefined") {
-      // v17 and older
+      /* v17 and older */
 
-      // Set a timeout to kill the listener if it takes too long.
-      // Set this first in case the user info is already ready when you set the listener.
+      /* Set a timeout to kill the listener if it takes too long.
+       * Set this first in case the user info is already ready when you set the listener. */
       userInfoTimeout = setTimeout(function() {
          ibmweb.queue.remove(userInfoQueue);
          console.log('+++DBDM-LOG > datalayer-initiator.js > User Info took too long');
       }, 3000);
 
-      // Set a listener to wait till the user IP data has been loaded, then call your function when it's available.
+      /* Set a listener to wait till the user IP data has been loaded, then call your function when it's available. */
       var userInfoQueue = ibmweb.queue.push(function () {
          return ibmweb.comusr.isLoaded();
       }, function () {
          // Clear timeout since it returned in time.
          clearTimeout(userInfoTimeout);
-         // Get user info now that it's ready.
+         /* Get user info now that it's ready. */
          datalayer.util.setUserInfoV17(); });
    }
    else {
       console.log('+++DBDM-LOG > datalayer-initiator.js > User Info not available');
    }
 
-   // Set Data Layer Ready
+   /* Set Data Layer Ready */
    window.digitalData.page.isDataLayerReady = true;
 
-   // Trigger Event for digitalData Object Ready
-   try {
+   if (typeof(jQuery) !== "undefined") {
+	  /* Trigger Event for digitalData Object Ready */
       jQuery(document).trigger('ddo_ready');
       jQuery(document).trigger('datalayer_ready');
+	  
+	  /* Create variables for jQuery version and support for .on() function */
       window.jQueryVersion = utag_data.jQueryVersion = jQuery.fn.jquery;
-      // Set Listener for DLE Readiness
+	  window.isJQueryOnSupported = utag_data.isJQueryOnSupported = jQuery.fn.on?true:false;
+	  
+      /* Set Listener for DLE Readiness */
       if (jQuery.fn.jquery >= "1.7") jQuery(document).on('dle_ready', datalayer.util.finalizeDataLayer);
    }
-   catch (error) {
+   else {
       console.log('+++DBDM-LOG > datalayer-initiator.js > jQuery not present: ' + error);
    }
 }

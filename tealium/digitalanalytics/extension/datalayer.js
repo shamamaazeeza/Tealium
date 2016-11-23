@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2016.11.22.1038
+ * Version       : 2016.11.22.1903
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -17,22 +17,22 @@ var tmeid="datalayer.js";
 /*--------------------Initialize all Digital Data Objects--------------------*/
 var datalayer = {
       PAGEIDQUERYSTRINGSDEFAULT : [
-         // Registration Forms - IWM
+         /* Registration Forms - IWM */
          {"pathNameSubstring": "/marketing/iwm/",               "qsParameter" : ["source","S_PKG"]},
-         // Registration Forms - IBMid
+         /* Registration Forms - IBMid */
          {"pathNameSubstring": "/account/us-en/signup",         "qsParameter" : ["a", "trail", "CatalogName", "quantity", "partNumber", "source", "pkg"]},
-         // Enterprise Search
+         /* Enterprise Search */
          {"pathNameSubstring": "/search/",                      "qsParameter" : ["q","cc","lang","hpp","o"]},
-         // MAM
+         /* MAM */
          {"pathNameSubstring": "/common/ssi/",                  "qsParameter" : ["infotype","subtype","htmlfid","letternum","supplier","docURL","MPPEFSCH"]},
-         // eSupport
+         /* eSupport */
          {"pathNameSubstring": "/support/docview.wss",          "qsParameter" : ["uid"]},
          {"pathNameSubstring": "/support/fixcentral/",          "qsParameter" : ["product"]},
-         // IBM ID - SSO
+         /* IBM ID - SSO */
          {"pathNameSubstring": "/account/profile",              "qsParameter" : ["page", "okURL"]},
-         // Event Registration
+         /* Event Registration */
          {"pathNameSubstring": "/events/wwe/grp",               "qsParameter" : ["openform:cmd","OpenForm:cmd","OpenPage:cmd","seminar","locale"]},
-         // Case Studies
+         /* Case Studies */
          {"pathNameSubstring": "/software/businesscasestudies", "qsParameter" : ["synkey"]}, ],
          
       DOWNLOADTYPES : "bqy,doc,dot,exe,flv,jpg,png,mov,mp3,pdf,pps,ppt,rss,sh,swf,tar,txt,wmv,xls,xml,zip,avi,eps,gif,lwp,mas,mp4,pot,prz,rtf,wav,wma,123,odt,ott,sxw,stw,docx,odp,otp,sxi,sti,pptx,ods,ots,sxc,stc,xlsx",
@@ -43,7 +43,7 @@ var datalayer = {
 
       util : {
          /*--------------------Add SHA256 Hash Functions--------------------*/
-         // 2016-08-04 - jleon: RTC Story# 978510 - https://github.com/jbt/js-crypto
+         /* 2016-08-04 - jleon: RTC Story# 978510 - https://github.com/jbt/js-crypto */
          sha256 : function() {function e(a,b){return a>>>b|a<<32-b}for(var b=1,a,m=[],n=[];18>++b;)for(a=b*b;312>a;a+=b)m[a]=1;b=1;for(a=0;313>b;)m[++b]||(n[a]=Math.pow(b,.5)%1*4294967296|0,m[a++]=Math.pow(b,1/3)%1*4294967296|0);return function(g){for(var l=n.slice(b=0),c=unescape(encodeURI(g)),h=[],d=c.length,k=[],f,p;b<d;)k[b>>2]|=(c.charCodeAt(b)&255)<<8*(3-b++%4);d*=8;k[d>>5]|=128<<24-d%32;k[p=d+64>>5|15]=d;for(b=0;b<p;b+=16){for(c=l.slice(a=0,8);64>a;c[4]+=f)h[a]=16>a?k[a+b]:(e(f=h[a-2],17)^e(f,19)^f>>>10)+(h[a-7]|0)+(e(f=h[a-15],7)^e(f,18)^f>>>3)+(h[a-16]|0),c.unshift((f=(c.pop()+(e(g=c[4],6)^e(g,11)^e(g,25))+((g&c[5]^~g&c[6])+m[a])|0)+(h[a++]|0))+(e(d=c[0],2)^e(d,13)^e(d,22))+(d&c[1]^c[1]&c[2]^c[2]&d));for(a=8;a--;)l[a]=c[a]+l[a]}for(c="";63>a;)c+=(l[++a>>3]>>4*(7-a%8)&15).toString(16);return c}}(),
 
          /*--------------------Add Page Load Epoch Function--------------------*/
@@ -64,7 +64,7 @@ var datalayer = {
          },
 
          /*--------------------Add parseQueryString function--------------------*/
-         // 2016-07-28 - jleon: RTC Story# 978510
+         /* 2016-07-28 - jleon: RTC Story# 978510 */
          parseQueryString : function (fullURL) {
             try {
                var paramsObject = {},
@@ -83,39 +83,41 @@ var datalayer = {
          },
 
          /*--------------------Add calculateURLID function--------------------*/
-         // 2016-07-28 - jleon: RTC Story# 978510 (previous RTC Story# 902576)
+         /* 2016-07-28 - jleon: RTC Story# 978510 (previous RTC Story# 902576) */
          calculateURLID : function (fullURL) {
             try {
                var returnValue = "";
                if (fullURL !== "") {
                   var parserURL = document.createElement('a');
-                  // Get rid of 'm.ibm.com/http/' pattern for mobile, if exists
+                  /* Get rid of 'm.ibm.com/http/' pattern for mobile, if exists */
                   parserURL.href = fullURL.replace(/m\.ibm\.com\/https?\//,'');
-                  // IE 8 and 9 don't load the attributes "protocol" and "host" in case the source URL
-                  // is just a pathname, that is, "/example" and not "http://domain.com/example".
+                  /* IE 8 and 9 don't load the attributes "protocol" and "host" in case the source URL
+				   * is just a pathname, that is, "/example" and not "http://domain.com/example".
+				   */
                   parserURL.href = parserURL.href;
                   var pathName = parserURL.pathname.toLowerCase();
                   if (pathName[0] !== "/") {
-                     // 2016-08-31 - jleon: TIE-163. Missing leading slash in address pathname method for IE
+                     /* 2016-08-31 - jleon: TIE-163. Missing leading slash in address pathname method for IE */
                      pathName = "/" + pathName;
                   }
 
-                  //--- START: Patch to define pageidQueryStrings for IWM and Search pages.
-                  // 2016-09-16 - shruti: Code optimization. Used JSON instead of if-else
-                  // process each entry to look for matches based on the default value previously defined
+                  /* --- START: Patch to define pageidQueryStrings for IWM and Search pages. */
+                  /* 2016-09-16 - shruti: Code optimization. Used JSON instead of if-else
+                   * process each entry to look for matches based on the default value previously defined
+			       */
                   for (var i = 0; i < datalayer.PAGEIDQUERYSTRINGSDEFAULT.length; i++) {
                      var t = datalayer.PAGEIDQUERYSTRINGSDEFAULT[i];               
                      if (pathName.indexOf(t.pathNameSubstring) === 0 && typeof(window.digitalData.page.attribute.pageidQueryStrings) == "undefined") {               
-                        // Set PageID Query Strings 
+                        /* Set PageID Query Strings */ 
                         window.digitalData.page.attribute.pageidQueryStrings = t.qsParameter;
                         break;
                      }
                   }
-                  //--- END: Patch to define pageidQueryStrings for IWM and Search pages. ##TODELETE## when standard is adopted
+                  /* --- END: Patch to define pageidQueryStrings for IWM and Search pages. */
 
-                  // Remove some specified index pages from path name
+                  /* Remove some specified index pages from path name */
                   var lastpart = pathName.substring(pathName.lastIndexOf('/') + 1, pathName.length);
-                  // 2016-07-29 - jleon: RTC Story# XXXXXX - Updating list of omitted default pages
+                  /* 2016-07-29 - jleon: RTC Story# XXXXXX - Updating list of omitted default pages */
                   var omittedHTMLVersions = ["index.php","index.phtml", "index.shtml", "index.wss", "index.jsp", "index.jspa", "index.jsa", "index.htm", "index.html"];
                   for (var i = 0; i < omittedHTMLVersions.length; i++) {
                      if (omittedHTMLVersions[i] == lastpart.toLowerCase()) {
@@ -123,14 +125,16 @@ var datalayer = {
                      }
                   }
 
-                  // Add different Query string parameters
+                  /* Add different Query string parameters */
                   var qs = this.parseQueryString(parserURL.href);
                   if (window.digitalData.page.attribute.pageidQueryStrings) {
                      var addQSValue = "";
                      for (var k=0; k < window.digitalData.page.attribute.pageidQueryStrings.length; k++) {
                         var q = window.digitalData.page.attribute.pageidQueryStrings[k];
-                        // 2016-11-13 - jleon: Adding logic to identify query string that are commands to the web app. This is to support the GRP events URLs
-                        // 2016-11-14 - jleon: Adding statement to lowercase query strings and values
+                        /* 2016-11-13 - jleon: Adding logic to identify query string that are commands to the web app. 
+						 * This is to support the GRP events URLs
+						 */
+                        /* 2016-11-14 - jleon: Adding statement to lowercase query strings and values */
                         if (q.indexOf(":cmd") !== -1 && qs.hasOwnProperty(q.split(":")[0])) {
                            addQSValue += q.split(":")[0].toLowerCase() + "&";
                         }
@@ -142,7 +146,7 @@ var datalayer = {
                      pathName = (addQSValue !== "") ? (pathName + "?" + addQSValue) : pathName;
                   }
 
-                  //remove trailing slash, question mark, or hash(if any)
+                  /* remove trailing slash, question mark, or hash(if any) */
                   pathName = pathName.replace(/[(\/)(?)(#)(&)]+$/, "");
                   returnValue = parserURL.hostname + pathName;
                }
@@ -156,7 +160,7 @@ var datalayer = {
          /*--------------------Read Cookies function--------------------*/
          readCookies : function () {
             try {
-               // Ensure the parent objects is present, and initialize the cp object
+               /* Ensure the parent objects is present, and initialize the cp object */
                window.digitalData.util    = window.digitalData.util || {};
                window.digitalData.util.cp = {};
 
@@ -168,7 +172,7 @@ var datalayer = {
                      value = cookies[i].substring(cookies[i].indexOf('=')+1);
                      window.digitalData.util.cp[name] = window.decodeURIComponent(value)
                   }
-                  // Now, itemize each element for the utag_main
+                  /* Now, itemize each element for the utag_main */
                   if (typeof(digitalData.util.cp.utag_main) !== "undefined") {
                      var temp;
                      cookies = digitalData.util.cp.utag_main.split("$");
@@ -177,7 +181,7 @@ var datalayer = {
                         window.digitalData.util.cp["utag_main_" + temp[0]] = temp[1].split(";")[0];
                      }
                   }
-                  // Set value for Coremetrics Cookie ID to Digital Object
+                  /* Set value for Coremetrics Cookie ID to Digital Object */
                   if (typeof(digitalData.util.cp.CoreID6) !== "undefined") { 
                      window.digitalData.page.pageInfo.coremetrics.visitorID = window.digitalData.util.cp.CoreID6.split("&")[0];
                   }
@@ -191,14 +195,14 @@ var datalayer = {
          /*--------------------Read Metadata Elements Functions--------------------*/
          readMetaData : function () {
             try {
-               // Ensure the parent objects is present, and initialize the meta object
+               /* Ensure the parent objects is present, and initialize the meta object */
                window.digitalData.util    = window.digitalData.util || {};
                window.digitalData.util.meta = {};
 
                var metatags = window.document.getElementsByTagName('meta');
                for (var i = 0, len = metatags.length; i < len; i++) {
                   if (metatags[i].getAttribute("name") !== null) {
-                     // Set metadata element names in lower case
+                     /* Set metadata element names in lower case */
                      window.digitalData.util.meta[metatags[i].getAttribute("name").toLowerCase()] = metatags[i].getAttribute("content");
                   }
                }
@@ -211,7 +215,7 @@ var datalayer = {
          /*--------------------Set Query String Elements--------------------*/
          readQueryStrings : function () {
             try {
-               // Ensure the parent objects is present, and initialize the qp object
+               /* Ensure the parent objects is present, and initialize the qp object */
                window.digitalData.util    = window.digitalData.util || {};
                window.digitalData.util.qp = {};
 
@@ -233,17 +237,20 @@ var datalayer = {
          /*--------------------Get referring URL--------------------*/
          getReferringURL : function () {
             try {
-               // Ensure the parent objects is present, and initialize the referrer object
+               /* Ensure the parent objects is present, and initialize the referrer object */
                window.digitalData.util    = window.digitalData.util || {};
                window.digitalData.util.referrer = {};
 
                if (window.document.referrer !== "" ) {
-                  // 2016-09-16 - jleon: BMP-1480 - making sure that the referrer is set, otherwise createElement will take by default the current URL
+                  /* 2016-09-16 - jleon: BMP-1480 - making sure that the referrer is set, otherwise createElement 
+				   * will take by default the current URL
+				   */
                   var referrerURL = document.createElement('a');
-                  // Get rid of 'm.ibm.com/http/' pattern for mobile, if exists
+                  /* Get rid of 'm.ibm.com/http/' pattern for mobile, if exists */
                   referrerURL.href = window.document.referrer.replace(/m\.ibm\.com\/https?\//,'');
-                  // IE 8 and 9 dont load the attributes "protocol" and "host" in case the source URL
-                  // is just a pathname, that is, "/example" and not "http://domain.com/example".
+                  /* IE 8 and 9 dont load the attributes "protocol" and "host" in case the source URL
+                   * is just a pathname, that is, "/example" and not "http://domain.com/example".
+				   */
                   referrerURL.href = referrerURL.href;
                   window.digitalData.util.referrer.hash     = referrerURL.hash;
                   window.digitalData.util.referrer.host     = referrerURL.host;
@@ -275,7 +282,7 @@ var datalayer = {
          /*--------------------Set setUserInfo from DemandBase--------------------*/
          setUserInfo : function () {
             try {
-               // Ensure the parent objects is present, and initialize the referrer object
+               /* Ensure the parent objects is present, and initialize the referrer object */
                window.digitalData.user = window.digitalData.user || {};
                window.digitalData.user.userInfo = IBMCore.common.util.user.getInfo();
             }
@@ -287,11 +294,11 @@ var datalayer = {
          /*--------------------Set setUserInfo from DemandBase for v17--------------------*/
          setUserInfoV17 : function () {
             try {
-               // Ensure the parent objects is present, and initialize the referrer object
+               /* Ensure the parent objects is present, and initialize the referrer object */
                window.digitalData.user = window.digitalData.user || {};
                window.digitalData.user.userInfo = ibmweb.comusr.getInfo();
 
-               // Make sure that we set the registry country to the regular country if it is not set
+               /* Make sure that we set the registry country to the regular country if it is not set */
                window.digitalData.user.userInfo.registry_country_code = window.digitalData.user.userInfo.registry_country_code || window.digitalData.user.userInfo.country;
 
             }
@@ -304,15 +311,15 @@ var datalayer = {
          setCoremetricsEnabled : function () {
             try {
                if (typeof(window.digitalData.page.pageInfo.coremetrics.enabled) === "boolean") {
-                  // boolean value, convert to String
+                  /* boolean value, convert to String */
                   window.digitalData.page.pageInfo.coremetrics.enabled = window.digitalData.page.pageInfo.coremetrics.enabled.toString();
                }
                else if (typeof(window.digitalData.page.pageInfo.coremetrics.enabled) === "string") {
-                  // ensure value is lower case
+                  /* ensure value is lower case */
                   window.digitalData.page.pageInfo.coremetrics.enabled = window.digitalData.page.pageInfo.coremetrics.enabled.toLowerCase();
                }
                else {
-                  // Default value - Load Coremetrics
+                  /* Default value - Load Coremetrics */
                   window.digitalData.page.pageInfo.coremetrics.enabled = "true";
                }
             }
@@ -326,16 +333,18 @@ var datalayer = {
             try {
                if (typeof(window.digitalData.page.pageInfo.urlID) !== "undefined" && typeof(window.digitalData.page.pageInfo.pageID) !== "undefined" 
                   && window.digitalData.page.pageInfo.pageID === window.digitalData.page.pageInfo.urlID) {
-                  // urlID has been previously defined and assigned to pageID, need to undefine pageID to make sure that it is set properly
+                  /* urlID has been previously defined and assigned to pageID, need to undefine pageID to make
+				   * sure that it is set properly
+				   */
                   window.digitalData.page.pageInfo.pageID = undefined;
                }
                window.digitalData.page.pageInfo.urlID = this.calculateURLID(window.location.href);
                if (typeof(window.digitalData.page.pageID) == "undefined" && typeof(window.digitalData.page.pageInfo.pageID) == "undefined") {
-                  // If the pageID is not provided by the page, then set it to the calculated value in urlID
+                  /* If the pageID is not provided by the page, then set it to the calculated value in urlID */
                   window.digitalData.page.pageInfo.pageID = window.digitalData.page.pageInfo.urlID;
                } 
                else if (typeof(window.digitalData.page.pageID) !== "undefined") {
-                  // Support for old DDO definition of the pageID
+                  /* Support for old DDO definition of the pageID */
                   window.digitalData.page.pageInfo.pageID = window.digitalData.page.pageID;
                }
             }
@@ -349,18 +358,18 @@ var datalayer = {
             try {
                window.digitalData.page.pageInfo.referrer   = window.digitalData.util.referrer.href;
                window.digitalData.page.pageInfo.referrerID = this.calculateURLID(window.digitalData.page.pageInfo.referrer);
-               // Get the sub domain or root domain from the referrer hostname
+               /* Get the sub domain or root domain from the referrer hostname */
                var referrerParts = window.digitalData.util.referrer.hostname.split('.');
                if (referrerParts.length < 2) {
-                  // if the hostname has less than 2 parts, then it is valid (localhost)
+                  /* if the hostname has less than 2 parts, then it is valid (localhost) */
                   window.digitalData.page.pageInfo.referrerDomain = "";
                }
                else if (referrerParts.length > 2) {
-                  // if the hostname has three or more parts, then substract one to get the subdomain or root domain
+                  /* if the hostname has three or more parts, then substract one to get the subdomain or root domain */
                   window.digitalData.page.pageInfo.referrerDomain = referrerParts.splice(-1 * (referrerParts.length - 1),referrerParts.length - 1).join('.');
                }
                else {
-                  // if the hostname has only two parts, assume it is the root domain of the site
+                  /* if the hostname has only two parts, assume it is the root domain of the site */
                   window.digitalData.page.pageInfo.referrerDomain = window.digitalData.util.referrer.hostname;
                }
             }
@@ -373,7 +382,7 @@ var datalayer = {
          setIBMer : function () {
             try {
                if (window.document.domain.indexOf("ibm.com") !== -1) {
-                  //for ibm.com sites
+                  /* for ibm.com sites */
                   if (String(document.cookie).match(/(^| )(w3ibmProfile|w3_sauid|PD-W3-SSO-[^\=]*|OSCw3Session|IBM_W3SSO_ACCESS)=/)) {
                      if (typeof(window.digitalData.user.segment.isIBMer) == "undefined" || window.digitalData.user.segment.isIBMer == null) {
                         window.digitalData.user.segment.isIBMer = 1
@@ -386,9 +395,9 @@ var datalayer = {
                   }
                }
                else {
-                  // for non ibm.com sites, based on API service executed in ida_stats.js
+                  /* for non ibm.com sites, based on API service executed in ida_stats.js */
                   window.digitalData.user.segment.isIBMer = (window.NTPT_IBMer == "true") ? 1 : 0;
-                  // Get IBMISP cookie value for non ibm.com
+                  /* Get IBMISP cookie value for non ibm.com */
                   if (window.IBMIXS) window.digitalData.util.cp.IBMIXS = window.IBMIXS; 
                }
             }
@@ -400,9 +409,9 @@ var datalayer = {
          /*--------------------setting IBM ID Profile ID--------------------*/
          setProfileID : function () {
             try {
-               // 2016-07-18 - jleon: RTC Story# 967611
+               /* 2016-07-18 - jleon: RTC Story# 967611 */
                if (typeof(window.digitalData.util.cp.IBMISP) !== "undefined") {
-                  // Second value of the IBMISP is the Profile ID
+                  /* Second value of the IBMISP is the Profile ID */
                   window.digitalData.user.profile.uuid = window.digitalData.util.cp.IBMISP.split('-')[1] || "";
                }
                else if (typeof(window.digitalData.util.cp.IBMIXS) !== "undefined") {
@@ -420,9 +429,9 @@ var datalayer = {
          /*--------------------Set Session ID value--------------------*/
          setSessionID : function () {
             try {
-               // Session ID is based on the Tealium cookie ID and the Tealium session ID
+               /* Session ID is based on the Tealium cookie ID and the Tealium session ID */
                window.digitalData.page.session.uSessionID = window.digitalData.util.cp["utag_main_v_id"] + "-" + window.digitalData.util.cp["utag_main_ses_id"];
-               // Unique Pageview ID is based on the unique session ID and the pageload epoch, the value is hashed
+               /* Unique Pageview ID is based on the unique session ID and the pageload epoch, the value is hashed */
                window.digitalData.page.session.uPageViewID = this.sha256(window.digitalData.page.session.uSessionID + '-' + window.digitalData.page.session.pageloadEpoch);
             }
             catch (error) {
@@ -434,66 +443,66 @@ var datalayer = {
          setSiteID : function () {
             try {
                if (typeof(window.digitalData.util.qp.siteID) !== "undefined") {
-                  // Set siteID from query string passed on URL
+                  /* Set siteID from query string passed on URL */
                   window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.util.qp.siteID;
                }
                else if (typeof(window.digitalData.page.pageInfo.ibm.siteID) !== "undefined") {
-                  // set siteID from DDO value
+                  /* set siteID from DDO value */
                   window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.page.pageInfo.ibm.siteID;
                }
                else if (typeof(window.digitalData.util.meta["ibm.wtmsite"]) !== "undefined") {
-                  // set siteID based on metadata element IBM.WTMSite
+                  /* set siteID based on metadata element IBM.WTMSite */
                   window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.util.meta["ibm.wtmsite"];
                }
                else if (typeof(window.digitalData.util.meta["wtmsite"]) !== "undefined") {
-                  // set siteID based on metadata element WTMSite
+                  /* set siteID based on metadata element WTMSite */
                   window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.util.meta["wtmsite"];
                }
                else if (typeof(window.digitalData.page.site) !== "undefined" && typeof(window.digitalData.page.site.siteID) !== "undefined") {
-                  // set siteID from OLD DDO format value
+                  /* set siteID from OLD DDO format value */
                   window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.page.site.siteID;
                }
                else if (window.location.href.toLowerCase().indexOf("www-935.ibm.com/services/") !== -1 && window.location.pathname.toLowerCase().match(/\/gbs\/|\/business-consulting\//)) {
-                  // GBS siteID based on URL patterns
+                  /* GBS siteID based on URL patterns */
                   window.digitalData.page.pageInfo.ibm.siteID = "GBS";
                }
                else if (document.domain.toLowerCase().split('.').splice(-2, 2).join('.') === "softlayer.com") {
-                  // SOFTLAYER siteID based on current URL's domain
+                  /* SOFTLAYER siteID based on current URL's domain */
                   window.digitalData.page.pageInfo.ibm.siteID = 'SOFTLAYER'; 
                }
                else if (window.location.href.toLowerCase().match(/www-935.ibm.com\/industries\/|www-06.ibm.com\/industries\/jp\//)) {
-                  // INDUSTRIES siteID based on URL patterns
+                  /* INDUSTRIES siteID based on URL patterns */
                   window.digitalData.page.pageInfo.ibm.siteID = "INDUSTRIES";
                }
                else if (typeof(window.digitalData.page.category.primaryCategory) !== "undefined" && window.digitalData.page.category.primaryCategory.toLowerCase() == "cuf04") {
-                  // Set siteID based on Category id for OSOL pages
+                  /* Set siteID based on Category id for OSOL pages */
                   window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.page.category.primaryCategory
                }
                else if (typeof(window.digitalData.page.category.categoryID) !== "undefined" && window.digitalData.page.category.categoryID.toLowerCase() == "cuf04") {
-                  // Set siteID based on OLD DDO format Category ID for OSOL pages
+                  /* Set siteID based on OLD DDO format Category ID for OSOL pages */
                   window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.page.category.primaryCategory;
                }
                else if (typeof(window.digitalData.util.meta["ibm.wtmcategory"]) !== "undefined" && window.digitalData.util.meta["ibm.wtmcategory"].toLowerCase() == "cuf04") {
-                  // Set siteID based on metadata Category ID for OSOL pages
+                  /* Set siteID based on metadata Category ID for OSOL pages */
                   window.digitalData.page.pageInfo.ibm.siteID = window.digitalData.util.meta["ibm.wtmcategory"];
                }
                else if (typeof(window.digitalData.page.category.primaryCategory) !== "undefined" && window.digitalData.page.category.primaryCategory.substring(0, 5) == "SOFDC") {
-                  // Set siteID based on Category id for developerWorks
+                  /* Set siteID based on Category id for developerWorks */
                   window.digitalData.page.pageInfo.ibm.siteID = "DEVWRKS"
                }
                else if (typeof(window.digitalData.page.category.categoryID) !== "undefined" && window.digitalData.page.category.categoryID.substring(0, 5) == "SOFDC") {
-                  // Set siteID based on OLD DDO format Category ID
+                  /* Set siteID based on OLD DDO format Category ID */
                   window.digitalData.page.pageInfo.ibm.siteID = "DEVWRKS";
                }
                else if (typeof(window.digitalData.util.meta["ibm.wtmcategory"]) !== "undefined" && window.digitalData.util.meta["ibm.wtmcategory"].substring(0, 5) == "SOFDC") {
-                  // 2016-09-21 - matej: Set siteID based on Category metatag for developerWorks
+                  /* 2016-09-21 - matej: Set siteID based on Category metatag for developerWorks */
                   window.digitalData.page.pageInfo.ibm.siteID = "DEVWRKS";
                }
                else {
-                  // Default: set siteID to IBMTESTWWW as last resort
+                  /* Default: set siteID to IBMTESTWWW as last resort */
                   window.digitalData.page.pageInfo.ibm.siteID = "IBMTESTWWW";
                }
-               // Saving initial siteID
+               /* Saving initial siteID */
                window.digitalData.page.pageInfo.ibm.iniSiteID = window.digitalData.page.pageInfo.ibm.siteID;
 
             }
@@ -505,7 +514,9 @@ var datalayer = {
          /*--------------------setting Client ID--------------------*/
          setClientID : function () {
             try {
-               // If the siteID prefix or suffix is "test" or if the full domain of the hostname is in the TESTDOMAINS array then set Client ID to 80200000 (test instance)
+               /* If the siteID prefix or suffix is "test" or if the full domain of the hostname is in 
+			    * the TESTDOMAINS array then set Client ID to 80200000 (test instance)
+				*/
                if (window.digitalData.page.pageInfo.ibm.siteID.toLowerCase().match(/^test|test$/) || (datalayer.TESTDOMAINS.split(",").indexOf(document.location.hostname.replace(/^[^\.]+./,"")) !== -1)) {
                   window.digitalData.page.pageInfo.coremetrics.clientID = "80200000|" + window.digitalData.page.pageInfo.ibm.siteID;
                }
@@ -526,13 +537,13 @@ var datalayer = {
                   window.IBMPageCategory = window.digitalData.page.category.primaryCategory;
                }
                else if (typeof(window.digitalData.page.category.categoryID) !== "undefined") {
-                  // for old DDO structure
+                  /* for old DDO structure */
                   window.IBMPageCategory = window.digitalData.page.category.categoryID;
                }
                else {
                   window.IBMPageCategory = window.digitalData.util.meta["ibm.wtmcategory"] || "null";
                }
-               // set category ID value from page URL(requested for Watson pages)
+               /* set category ID value from page URL(requested for Watson pages) */
                if (typeof (window.digitalData.util.qp.Category) !== "undefined") {
                   window.IBMPageCategory = decodeURIComponent(window.digitalData.util.qp.Category);
                }
@@ -547,7 +558,7 @@ var datalayer = {
                   }
                }
                else if (document.domain.indexOf("ibm.com") == -1 && window.digitalData.user.segment.isIBMer) {
-                  // for non ibm.com
+                  /* for non ibm.com */
                   window.IBMPageCategory += "IBMER";
                }
                if (typeof(window.digitalData.page.pageInfo.ibm.siteID) !== "undefined" && window.digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "error") {
@@ -556,7 +567,7 @@ var datalayer = {
                if (window.digitalData.page.pageInfo.ibm.siteID.substring(0,4).toLowerCase() == "ecom") {
                   window.IBMPageCategory = window.digitalData.page.pageInfo.ibm.siteID + window.IBMPageCategory;
                }
-               // adding DC.Language value category id for Support Content delivery pages
+               /* adding DC.Language value category id for Support Content delivery pages */
                if ((typeof window.digitalData.page.pageInfo.ibm.siteID !== "undefined") && (window.digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estdbl" 
                   || window.digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estkcs" || window.digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estqst")) {
                   if (window.digitalData.util.meta["dc.language"] !== null) {
@@ -566,7 +577,7 @@ var datalayer = {
                      window.IBMPageCategory += "-" + window.digitalData.page.pageInfo.language;
                   }
                }
-               // 2016-07-14 - shazeeza: RTC Story# 958212
+               /* 2016-07-14 - shazeeza: RTC Story# 958212 */
                window.digitalData.page.category.primaryCategory = window.IBMPageCategory;
             }
             catch (error) {
@@ -583,14 +594,14 @@ var datalayer = {
              */ 
             try {
                var size = count || 256;
-               // make sure eventName is a String
+               /* make sure eventName is a String */
                if (typeof(eventName) === "string") {
-                  // replace all consecutive spaces for a dash '-'
+                  /* replace all consecutive spaces for a dash '-' */
                   eventName = eventName.replace(/\s+/g, '-').toUpperCase();
                   if (eventName.length > size) {
                      var eventNameParts = eventName.split(':');
                      if (eventNameParts.length === 1)
-                        // eventName only has one element
+                        /* eventName only has one element */
                         eventName = eventName.substring(0,size);
                      else
                         eventName = eventName.substring(0,size - (eventNameParts[eventNameParts.length - 1].length - 1)) + ':' + eventNameParts[eventNameParts.length - 1];
@@ -610,11 +621,11 @@ var datalayer = {
              */ 
             try {
                var size = count || 256;
-               // make sure eventName is a String
+               /* make sure eventName is a String */
                if (typeof(eventName) === "string") {
-                  // replace all consecutive spaces to one space
+                  /* replace all consecutive spaces to one space */
                   eventName = eventName.replace(/\s+/g, ' ').toUpperCase();
-                  // if eventName is bigger than 50 characters then compress it
+                  /* if eventName is bigger than 50 characters then compress it */
                   if (eventName.length > size) {
                      var ovf = Math.round((eventName.length-size)/2);
                      eventName = eventName.substring(0,(Math.round(eventName.length/2)-ovf)-1) + ".." 
@@ -632,14 +643,14 @@ var datalayer = {
          finalizeDataLayer : function () {
             try {
                console.log('+++DBDM-LOG > datalayer.js > finalizeDataLayer > CATCHED!');
-               // Update Cookies
+               /* Update Cookies */
                this.readCookies();
 
                if (!window.digitalData.page.isDataLayerReady) {
-                  // Set Data Layer Ready and trigger Event
+                  /* Set Data Layer Ready and trigger Event */
                   window.digitalData.page.isDataLayerReady = true;
                   try {
-                     // Trigger Event for Data Layer Ready
+                     /* Trigger Event for Data Layer Ready */
                      jQuery(document).trigger('datalayer_ready');
                   }
                   catch (error) {
@@ -656,7 +667,7 @@ var datalayer = {
       /*--------------------Init Function for DataLayer--------------------*/
       update : function () {
          try {
-            // Initialize digitalData Object
+            /* Initialize digitalData Object */
             window.digitalData                 = window.digitalData || {};
             window.digitalData.page            = window.digitalData.page || {};
             window.digitalData.user            = window.digitalData.user || {};
@@ -738,7 +749,9 @@ var datalayer = {
 
             /*--------------------Set userInfo from DemandBase--------------------*/
             try {
-               // Subscribe to the user IP data ready event and call the callback when it happens, or if it already happened ".asap" one.
+               /* Subscribe to the user IP data ready event and call the callback when it happens, or if 
+			    * it already happened ".asap" one.
+				*/
                IBMCore.common.util.user.subscribe("userIpDataReady", "customjs", datalayer.util.setUserInfo).runAsap(datalayer.util.setUserInfo);
             }
             catch (error) {
@@ -777,19 +790,19 @@ var datalayer = {
       /*--------------------Init Function for DataLayer--------------------*/
       init : function () {
          try {
-            // Tealium UDO
+            /* Tealium UDO */
             if (typeof(window.utag_data) == "undefined") {
                window.utag_data = new Object();
             }
 
             window.utag_data = window.utag_data || {};
-            // Main digitalData object
+            /* Main digitalData object */
             if (typeof(window.digitalData) == "undefined") {
                window.digitalData = new Object();
             }
             window.digitalData = window.digitalData || {};
 
-            // digitalData level 1
+            /* digitalData level 1 */
             if (typeof(window.digitalData.page) == "undefined") {
                window.digitalData.page = new Object();
             }
@@ -803,7 +816,7 @@ var datalayer = {
             window.digitalData.user = window.digitalData.user || {};
             window.digitalData.util = window.digitalData.util || {};
 
-            // digitalData level 2
+            /* digitalData level 2 */
             if (typeof(window.digitalData.page.attribute) == "undefined") {
                window.digitalData.page.attribute = new Object();
             }
@@ -849,7 +862,7 @@ var datalayer = {
             window.digitalData.util.qp         = window.digitalData.util.qp || {};
             window.digitalData.util.referrer   = window.digitalData.util.referrer || {};
 
-            // digitalData level 3
+            /* digitalData level 3 */
             if (typeof(window.digitalData.page.category.ibm) == "undefined") {
                window.digitalData.page.category.ibm = new Object();
             }
