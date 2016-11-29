@@ -3,7 +3,7 @@
  * Extension Name: datalayer-initiator.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2016.11.22.1903
+ * Version       : 2016.11.28.2236
  *
  * This script creates a calls the init function of the datalayer to initiate it
  * 
@@ -23,7 +23,7 @@ try {
       /* v18+ */
       try {
          /* Subscribe to the user IP data ready event and call the callback when it happens, 
-		  * or if it already happened ".asap" one. */
+          * or if it already happened ".asap" one. */
          IBMCore.common.util.user.subscribe("userIpDataReady", "customjs", datalayer.util.setUserInfo).runAsap(datalayer.util.setUserInfo);
       }
       catch (error) {
@@ -44,7 +44,7 @@ try {
       var userInfoQueue = ibmweb.queue.push(function () {
          return ibmweb.comusr.isLoaded();
       }, function () {
-         // Clear timeout since it returned in time.
+         /* Clear timeout since it returned in time. */
          clearTimeout(userInfoTimeout);
          /* Get user info now that it's ready. */
          datalayer.util.setUserInfoV17(); });
@@ -57,16 +57,16 @@ try {
    window.digitalData.page.isDataLayerReady = true;
 
    if (typeof(jQuery) !== "undefined") {
-	  /* Trigger Event for digitalData Object Ready */
+      /* Trigger Event for digitalData Object Ready */
       jQuery(document).trigger('ddo_ready');
       jQuery(document).trigger('datalayer_ready');
-	  
-	  /* Create variables for jQuery version and support for .on() function */
+
+      /* Create variables for jQuery version and support for .on() function */
       window.jQueryVersion = utag_data.jQueryVersion = jQuery.fn.jquery;
-	  window.isJQueryOnSupported = utag_data.isJQueryOnSupported = jQuery.fn.on?true:false;
-	  
+      window.isJQueryOnSupported = utag_data.isJQueryOnSupported = jQuery.fn.on?true:false;
+
       /* Set Listener for DLE Readiness */
-      if (jQuery.fn.jquery >= "1.7") jQuery(document).on('dle_ready', datalayer.util.finalizeDataLayer);
+      if (window.isJQueryOnSupported) jQuery(document).on('dle_ready', datalayer.util.finalizeDataLayer);
    }
    else {
       console.log('+++DBDM-LOG > datalayer-initiator.js > jQuery not present: ' + error);

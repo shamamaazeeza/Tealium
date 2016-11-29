@@ -3,7 +3,7 @@
  * Extension Name: marketing-events.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2016.11.22.1903
+ * Version       : 2016.11.28.2236
  *
  * This script is executed when an page click event is trapped in jQuery
  * 
@@ -108,9 +108,9 @@ function createUtagLinkObject(obj) {
       }
 
       /* Make sure that the eventName is truncated if needed to 50 characters */
-      if(obj.type === "element") {
-         obj.ibmEvActionAttribute = obj.ibmEvAction;
-         obj.eventName = obj.ibmEvAction = window.datalayer.util.parseEventNameGen(obj.ibmEvAction,50)
+      obj.eventNameAttr = obj.ibmEvActionAttribute = obj.eventName;
+      if(obj.type === "element" || obj.type == "pageclick") {
+         obj.eventName = obj.ibmEvAction = window.datalayer.util.parseEventNameGen(obj.eventName,50);
       }
 
       var statsObjListString = JSON.stringify(obj).replace(/-_-/g,"---");
