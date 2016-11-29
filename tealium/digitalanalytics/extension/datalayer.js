@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2016.11.22.1903
+ * Version       : 2016.11.28.2318
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -92,8 +92,8 @@ var datalayer = {
                   /* Get rid of 'm.ibm.com/http/' pattern for mobile, if exists */
                   parserURL.href = fullURL.replace(/m\.ibm\.com\/https?\//,'');
                   /* IE 8 and 9 don't load the attributes "protocol" and "host" in case the source URL
-				   * is just a pathname, that is, "/example" and not "http://domain.com/example".
-				   */
+                   * is just a pathname, that is, "/example" and not "http://domain.com/example".
+                   */
                   parserURL.href = parserURL.href;
                   var pathName = parserURL.pathname.toLowerCase();
                   if (pathName[0] !== "/") {
@@ -104,7 +104,7 @@ var datalayer = {
                   /* --- START: Patch to define pageidQueryStrings for IWM and Search pages. */
                   /* 2016-09-16 - shruti: Code optimization. Used JSON instead of if-else
                    * process each entry to look for matches based on the default value previously defined
-			       */
+                   */
                   for (var i = 0; i < datalayer.PAGEIDQUERYSTRINGSDEFAULT.length; i++) {
                      var t = datalayer.PAGEIDQUERYSTRINGSDEFAULT[i];               
                      if (pathName.indexOf(t.pathNameSubstring) === 0 && typeof(window.digitalData.page.attribute.pageidQueryStrings) == "undefined") {               
@@ -132,8 +132,8 @@ var datalayer = {
                      for (var k=0; k < window.digitalData.page.attribute.pageidQueryStrings.length; k++) {
                         var q = window.digitalData.page.attribute.pageidQueryStrings[k];
                         /* 2016-11-13 - jleon: Adding logic to identify query string that are commands to the web app. 
-						 * This is to support the GRP events URLs
-						 */
+                         * This is to support the GRP events URLs
+                         */
                         /* 2016-11-14 - jleon: Adding statement to lowercase query strings and values */
                         if (q.indexOf(":cmd") !== -1 && qs.hasOwnProperty(q.split(":")[0])) {
                            addQSValue += q.split(":")[0].toLowerCase() + "&";
@@ -147,7 +147,7 @@ var datalayer = {
                   }
 
                   /* remove trailing slash, question mark, or hash(if any) */
-                  pathName = pathName.replace(/[(\/)(?)(#)(&)]+$/, "");
+                  pathName = pathName.replace(/[\/?#&]+$/, "");
                   returnValue = parserURL.hostname + pathName;
                }
                return(returnValue);
@@ -243,14 +243,14 @@ var datalayer = {
 
                if (window.document.referrer !== "" ) {
                   /* 2016-09-16 - jleon: BMP-1480 - making sure that the referrer is set, otherwise createElement 
-				   * will take by default the current URL
-				   */
+                   * will take by default the current URL
+                   */
                   var referrerURL = document.createElement('a');
                   /* Get rid of 'm.ibm.com/http/' pattern for mobile, if exists */
                   referrerURL.href = window.document.referrer.replace(/m\.ibm\.com\/https?\//,'');
                   /* IE 8 and 9 dont load the attributes "protocol" and "host" in case the source URL
                    * is just a pathname, that is, "/example" and not "http://domain.com/example".
-				   */
+                   */
                   referrerURL.href = referrerURL.href;
                   window.digitalData.util.referrer.hash     = referrerURL.hash;
                   window.digitalData.util.referrer.host     = referrerURL.host;
@@ -334,8 +334,8 @@ var datalayer = {
                if (typeof(window.digitalData.page.pageInfo.urlID) !== "undefined" && typeof(window.digitalData.page.pageInfo.pageID) !== "undefined" 
                   && window.digitalData.page.pageInfo.pageID === window.digitalData.page.pageInfo.urlID) {
                   /* urlID has been previously defined and assigned to pageID, need to undefine pageID to make
-				   * sure that it is set properly
-				   */
+                   * sure that it is set properly
+                   */
                   window.digitalData.page.pageInfo.pageID = undefined;
                }
                window.digitalData.page.pageInfo.urlID = this.calculateURLID(window.location.href);
@@ -515,8 +515,8 @@ var datalayer = {
          setClientID : function () {
             try {
                /* If the siteID prefix or suffix is "test" or if the full domain of the hostname is in 
-			    * the TESTDOMAINS array then set Client ID to 80200000 (test instance)
-				*/
+                * the TESTDOMAINS array then set Client ID to 80200000 (test instance)
+                */
                if (window.digitalData.page.pageInfo.ibm.siteID.toLowerCase().match(/^test|test$/) || (datalayer.TESTDOMAINS.split(",").indexOf(document.location.hostname.replace(/^[^\.]+./,"")) !== -1)) {
                   window.digitalData.page.pageInfo.coremetrics.clientID = "80200000|" + window.digitalData.page.pageInfo.ibm.siteID;
                }
@@ -613,7 +613,7 @@ var datalayer = {
                console.error('+++TME-ERROR > digitalanalytics-datalayer.js > parseEventName: ' + error);
             }
          },
-         
+
          /*--------------------Parse the event name  --------------------*/
          parseEventNameGen : function (eventName, count) {
             /*
@@ -750,8 +750,8 @@ var datalayer = {
             /*--------------------Set userInfo from DemandBase--------------------*/
             try {
                /* Subscribe to the user IP data ready event and call the callback when it happens, or if 
-			    * it already happened ".asap" one.
-				*/
+                * it already happened ".asap" one.
+                */
                IBMCore.common.util.user.subscribe("userIpDataReady", "customjs", datalayer.util.setUserInfo).runAsap(datalayer.util.setUserInfo);
             }
             catch (error) {
