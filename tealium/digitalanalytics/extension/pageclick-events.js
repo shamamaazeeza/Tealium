@@ -3,7 +3,7 @@
  * Extension Name: pageclick-events.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2016.11.22.1903
+ * Version       : 2016.11.29.2306
  *
  * This script is executed when an page click event is trapped in jQuery
  * 
@@ -85,7 +85,7 @@ try {
                hrefObj.href = hrefObj.href; /* Get around issues with IE */
                link_hrefdomain = hrefObj.hostname.split('.').splice(-2, 2).join('.');
                /* Get rid of the protocol for the link_href value */
-               link_href = location.hostname + (hrefObj.pathname[0]==='/' ? hrefObj.pathname : '/'+hrefObj.pathname) + hrefObj.hash + hrefObj.search
+               link_href = hrefObj.hostname + (hrefObj.pathname[0]==='/' ? hrefObj.pathname : '/'+hrefObj.pathname) + hrefObj.hash + hrefObj.search
             }
 			else if (/^javascript:.+$|^IPT:.+$|^ipt:.+$/.test(link_obj.href)) {
                link_href = link_obj.href;
