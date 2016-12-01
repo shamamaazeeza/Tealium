@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2016.11.30.2002
+ * Version       : 2016.12.01.1536
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -90,7 +90,7 @@ var datalayer = {
                b = {};
                if (typeof(a) === "object") {
                   for (c in a) {
-                     if (a.hasOwnProperty(c) && typeof a[c] !== "function") {
+                     if (typeof(a[c]) !== "function") {
                         /* Exclude functions */
                         if (a[c]instanceof Array) {
                            b[c] = a[c].slice(0)
