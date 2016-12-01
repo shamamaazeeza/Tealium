@@ -27,7 +27,7 @@ try {
          IBMCore.common.util.user.subscribe("userIpDataReady", "customjs", datalayer.util.setUserInfo).runAsap(datalayer.util.setUserInfo);
       }
       catch (error) {
-         console.log('+++DBDM-LOG > datalayer-init.js > update > IBMCore not ready: ' + error);
+         datalayer.log('+++DBDM-LOG > datalayer-init.js > update > IBMCore not ready: ' + error);
       }
    }
    else if (typeof(ibmweb) !== "undefined") {
@@ -37,7 +37,7 @@ try {
        * Set this first in case the user info is already ready when you set the listener. */
       userInfoTimeout = setTimeout(function() {
          ibmweb.queue.remove(userInfoQueue);
-         console.log('+++DBDM-LOG > datalayer-init.js > User Info took too long');
+         datalayer.log('+++DBDM-LOG > datalayer-init.js > User Info took too long');
       }, 3000);
 
       /* Set a listener to wait till the user IP data has been loaded, then call your function when it's available. */
@@ -50,7 +50,7 @@ try {
          datalayer.util.setUserInfoV17(); });
    }
    else {
-      console.log('+++DBDM-LOG > datalayer-init.js > User Info not available');
+      datalayer.log('+++DBDM-LOG > datalayer-init.js > User Info not available');
    }
 
    if (typeof(jQuery) !== "undefined") {
@@ -59,30 +59,40 @@ try {
       window.isJQueryOnSupported = utag_data.isJQueryOnSupported = jQuery.fn.on?true:false;
 
       /* Trigger Event for digitalData Object Ready */
-      console.log('+++DBDM-LOG > datalayer-init.js > Triggering ddo_ready event!');
+      datalayer.log('+++DBDM-LOG > datalayer-init.js > Triggering ddo_ready event!');
       jQuery(document).trigger('ddo_ready');
 
-      /* Set a 3s timeout to wait for the dle_ready event */
-      dleTimeout = setTimeout(function() {
-         /* Stop listening for the dle_ready event */
-         jQuery(document).off('dle_ready');
+      if (typeof(utag2) !== "undefined" && utag2.dleReady) {
          /* Continue finishing setting up data layer */
-         console.log('+++DBDM-LOG > datalayer-init.js > Timed out waiting for dle_ready event!');
+         datalayer.log('+++DBDM-LOG > datalayer-init.js > dle_ready event was already triggered!');
          datalayer.util.finalizeDataLayer();
-      }, 3000);
+      }
+      else {     
+         /* Set a 3s timeout to wait for the dle_ready event */
+         dleTimeout = setTimeout(function() {
+            /* Stop listening for the dle_ready event */
+            jQuery(document).off('dle_ready');
+            /* Continue finishing setting up data layer */
+            datalayer.log('+++DBDM-LOG > datalayer-init.js > Timed out waiting for dle_ready event!');
+            datalayer.util.finalizeDataLayer();
+         }, 3000);
 
-      /* Set Listener for DLE Readiness */
-      if (window.isJQueryOnSupported) jQuery(document).on('dle_ready', function () {
-         /* Clear timeout since it returned in time. */
-         clearTimeout(dleTimeout);
-         /* Continue finishing setting up data layer */
-         datalayer.util.finalizeDataLayer();
-      });
+         /* Set Listener for DLE Readiness */
+         if (window.isJQueryOnSupported) jQuery(document).on('dle_ready', function () {
+            /* Clear timeout since it returned in time. */
+            clearTimeout(dleTimeout);
+            /* Continue finishing setting up data layer */
+            datalayer.log('+++DBDM-LOG > datalayer-init.js > DLE Object is ready!');
+            datalayer.util.finalizeDataLayer();
+         });
+      }
    }
    else {
-      console.log('+++DBDM-LOG > datalayer-init.js > jQuery not present: ' + error);
+      datalayer.log('+++DBDM-LOG > datalayer-init.js > jQuery not present!... Continue');
+      /* Continue to finalize Data Layer*/
+      datalayer.util.finalizeDataLayer();
    }
 }
 catch (error) {
-   console.error('+++DBDM-ERROR > datalayer-init.js: ' + error);
+   datalayer.log('+++DBDM-ERROR > datalayer-init.js: ' + error);
 }
