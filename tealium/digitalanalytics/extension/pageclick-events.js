@@ -149,7 +149,8 @@ try {
                   'targetID'           : link_id
             };
             ibmStats.event(eventInfo);
-            utag.DB('+++DBDM-LOG > pageclick-events.js: Event captured - eventInfo: \n' + JSON.stringify(eventInfo, null, 2));
+            datalayer.log('+++DBDM-LOG > pageclick-events.js: Event captured - eventInfo: \n' + JSON.stringify(eventInfo, null, 2));
+            datalayer.log(event);
 
             /* Trigger the conversion event for EXTERNAL LINK and DOWNLOAD */
             if (link_type === "DOWNLOAD LINK" || link_type === "EXTERNAL LINK") {
@@ -165,8 +166,8 @@ try {
                   'targetID'           : link_id
                };
                ibmStats.event(eventInfoConv);
-               utag.DB('+++DBDM-LOG > pageclick-events.js: Triger Conversion event - eventInfoConv: \n' + JSON.stringify(eventInfoConv, null, 2));
-               utag.DB(event);
+               datalayer.log('+++DBDM-LOG > pageclick-events.js: Triger Conversion event - eventInfoConv: \n' + JSON.stringify(eventInfoConv, null, 2));
+               datalayer.log(event);
             }
          }
       }
