@@ -3,7 +3,7 @@
  * Extension Name: datalayer-init.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2016.11.28.2236
+ * Version       : 2016.12.07.0015
  *
  * This script creates a calls the init function of the datalayer to initiate it
  * 
@@ -82,7 +82,7 @@ try {
             /* Clear timeout since it returned in time. */
             clearTimeout(dleTimeout);
             /* Continue finishing setting up data layer */
-            datalayer.log('+++DBDM-LOG > datalayer-init.js > DLE Object is ready!');
+            datalayer.log('+++DBDM-LOG > datalayer-init.js > dle_ready event captured!');
             datalayer.util.finalizeDataLayer();
          });
       }
