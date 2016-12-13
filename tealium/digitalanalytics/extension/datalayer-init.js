@@ -16,6 +16,7 @@ var tmeid="datalayer-init.js";
 /*---------------------------------------------------MAIN FUNCTION---------------------------------------------------------*/
 try {
    /* Initialize Data Layer */
+   datalayer.log('+++DBDM-LOG > datalayer-init.js > Initializing Data Layer.');
    datalayer.init();
 
    /* Set userInfo from DemandBase */
