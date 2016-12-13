@@ -1,137 +1,154 @@
-/*
+/**
  * Id         : /tm-v1.0/common/js/coremetrics/eluminate.js
- * Scope      : All IBM pages
- * Description: Script used to load Tag Management (Tealium) on IBM web pages
- * 
+ * Scope      : All v17 IBM pages
+ * Version    : 2016.12.12.2349
+ *
+ * Script used to load Tag Management (Tealium) on IBM web pages 
+ *
+ *  NOTE: FIND LATEST VERSION IN GITHUB:
+ *        https://github.ibm.com/tag-management/tm-v1.0.git
+ *
  */
-(function() {
-	/* 
-	 * List of ghost functions that may not be defined at point of execution
-	 * Create a shell function that will push into a queue each call made before the real function is created.
-	 * Once the functions are defined, then execute each the functions from the queue.
-	 */
-	var ghostFunctions = [
-		'cmCreatePageviewTag',
-		'cmCreateProductviewTag',
-		'cmCreateShopAction5Tag',
-		'cmDisplayShops',
-		'cmCreateShopAction9Tag',
-		'cmCreateOrderTag',
-		'cmCreateRegistrationTag',
-		'cmCreateElementTag',
-		'cmCreateConversionEventTag',
-		'cmCreateManualPageviewTag',
-		'cmCreateManualLinkClickTag',
-		'cmCreateManualImpressionTag',
-		'cmCreateCustomTag',
-		'cmSetupOther',
-		'cmSetCurrencyCode',
-		'cmDisplayShop9s',
-		'cmDisplayShop5s',
-		'ibmStats.event',
-		'bindPageViewWithAnalytics'];
-	window.ghostQueue = [];
 
-	/* This gets executed right on code load. Sets the ghost functions and wait for the real ones */
-	(function init() {
-		if (!isOriginSetLoaded()) {
-			for (var i = 0; i < ghostFunctions.length; i++) {
-				createGhostFunction(ghostFunctions[i]);
-			}
-			listenForOriginSet();
-		}
-	})();
+/*----------------------Ensure that old browsers don't break when referencing the console-----------------------*/
+if (!window.console) { window.console = {log: function(){}, error:function(){}, warn:function(){} }; }
 
-	/* Checks that ALL functions are properly defined, and no longer ghost functions */
-	function isOriginSetLoaded() {
-		for (var i = 0; i < ghostFunctions.length; i++) {
-			if (ghostFunctions[i].indexOf('.') === -1) {
-				// window level function
-				if (typeof(window[ghostFunctions[i]]) !== 'function' || window[ghostFunctions[i]].isGhost) {
-					return false;
-				}
-			}
-			else {
-				// Second level function or object method. ONLY FIRST LEVEL METHOD IS SUPPORTED
-				if (typeof(window[ghostFunctions[i].split('.')[0]]) !== "undefined") {
-					if (typeof(window[ghostFunctions[i].split('.')[0]][ghostFunctions[i].split('.')[1]]) !== 'function' 
-						|| window[ghostFunctions[i].split('.')[0]][ghostFunctions[i].split('.')[1]].isGhost) {
-						return false;
-					}
-				}
-				else {
-					return false;
-				}
-			}
-		}
-		return true;
-	}
+if (window.isIdaStatsLoaded) {
+   /* ida_stats.js has been loaded already, stop loading */
+   console.log('+++DBDM-LOG > ida_stats.js > ida_stats.js has already been loaded, exiting.');
+}
+else {
+   /* Set flag that code has been loaded */
+   window.isIdaStatsLoaded = true;
 
-	/* 
-	 * Creates each of the ghost functions. Every time the function is called, 
-	 * it will push the call into the queue for later execution
-	 */
-	function createGhostFunction(ghostFunctionName) {
-		if (ghostFunctionName.indexOf('.') === -1) {
-			// window level function
-			window[ghostFunctionName] = function() {
-				window.ghostQueue.push({
-					functionName: ghostFunctionName,
-					args: arguments
-				});
-			}
-			window[ghostFunctionName].isGhost = true;
-		}
-		else {
-			// Second level function or object method. ONLY FIRST LEVEL METHOD IS SUPPORTED
-			// Make sure that the window level object is defined
-			window[ghostFunctionName.split('.')[0]] = window[ghostFunctionName.split('.')[0]] || {};
-			// Assign the ghost function
-			window[ghostFunctionName.split('.')[0]][ghostFunctionName.split('.')[1]] = function() {
-				window.ghostQueue.push({
-					functionName: ghostFunctionName,
-					args: arguments
-				});
-			}
-			window[ghostFunctionName.split('.')[0]][ghostFunctionName.split('.')[1]].isGhost = true;
-		}
-	}
+   (function() {
+      /*
+       * List of ghost functions that may not be defined at point of execution
+       * Create a shell function that will push into a queue each call made before the real function is created.
+       * Once the functions are defined, then execute each the functions from the queue.
+       */
+      var ghostFunctions = [
+         'cmCreatePageviewTag',
+         'cmCreateProductviewTag',
+         'cmCreateShopAction5Tag',
+         'cmDisplayShops',
+         'cmCreateShopAction9Tag',
+         'cmCreateOrderTag',
+         'cmCreateRegistrationTag',
+         'cmCreateElementTag',
+         'cmCreateConversionEventTag',
+         'cmCreateManualPageviewTag',
+         'cmCreateManualLinkClickTag',
+         'cmCreateManualImpressionTag',
+         'cmCreateCustomTag',
+         'cmSetupOther',
+         'cmSetCurrencyCode',
+         'cmDisplayShop9s',
+         'cmDisplayShop5s',
+         'ibmStats.event',
+         'bindPageViewWithAnalytics'];
+      window.ghostQueue = [];
 
-	/* 
-	 * This is the timeout loop, it will wait for 50ms before asking whether ALL the functions remain ghost
-	 * Otherwise, it will execute each of the calls in the ghostQueue
-	 */
-	function listenForOriginSet() {
-		setTimeout(function() {
-			if (isOriginSetLoaded()) {
-				delegateQueue();
-			}
-			else {
-				listenForOriginSet();
-			}
-		}, 50);
-	}
+      /* This gets executed right on code load. Sets the ghost functions and wait for the real ones */
+      (function init() {
+         if (!isOriginSetLoaded()) {
+            for (var i = 0; i < ghostFunctions.length; i++) {
+               createGhostFunction(ghostFunctions[i]);
+            }
+            listenForOriginSet();
+         }
+      })();
 
-	/* Function that executes each called ghost function in the ghostQueue */
-	function delegateQueue() {
-		for (var i = 0; i < window.ghostQueue.length; i++) {
-			if (window.ghostQueue[i].functionName.indexOf('.') === -1) {
-				// window level function
-				window[window.ghostQueue[i].functionName].apply(this, window.ghostQueue[i].args);
-			}
-			else {
-				// Second level function or object method. ONLY FIRST LEVEL METHOD IS SUPPORTED
-				window[window.ghostQueue[i].functionName.split('.')[0]][window.ghostQueue[i].functionName.split('.')[1]].apply(this, window.ghostQueue[i].args);
-			}
-		}
-	}
-})();
+      /* Checks that ALL functions are properly defined, and no longer ghost functions */
+      function isOriginSetLoaded() {
+         for (var i = 0; i < ghostFunctions.length; i++) {
+            if (ghostFunctions[i].indexOf('.') === -1) {
+               /* window level function */
+               if (typeof(window[ghostFunctions[i]]) !== 'function' || window[ghostFunctions[i]].isGhost) {
+                  return false;
+               }
+            }
+            else {
+               /* Second level function or object method. ONLY FIRST LEVEL METHOD IS SUPPORTED */
+               if (typeof(window[ghostFunctions[i].split('.')[0]]) !== "undefined") {
+                  if (typeof(window[ghostFunctions[i].split('.')[0]][ghostFunctions[i].split('.')[1]]) !== 'function' 
+                     || window[ghostFunctions[i].split('.')[0]][ghostFunctions[i].split('.')[1]].isGhost) {
+                     return false;
+                  }
+               }
+               else {
+                  return false;
+               }
+            }
+         }
+         return true;
+      }
 
-(function ibmCoreAuto(){
+      /* 
+       * Creates each of the ghost functions. Every time the function is called, 
+       * it will push the call into the queue for later execution
+       */
+      function createGhostFunction(ghostFunctionName) {
+         if (ghostFunctionName.indexOf('.') === -1) {
+            /* window level function */
+            window[ghostFunctionName] = function() {
+               window.ghostQueue.push({
+                  functionName: ghostFunctionName,
+                  args: arguments
+               });
+            }
+            window[ghostFunctionName].isGhost = true;
+         }
+         else {
+            /* Second level function or object method. ONLY FIRST LEVEL METHOD IS SUPPORTED */
+            /* Make sure that the window level object is defined */
+            window[ghostFunctionName.split('.')[0]] = window[ghostFunctionName.split('.')[0]] || {};
+            /* Assign the ghost function */
+            window[ghostFunctionName.split('.')[0]][ghostFunctionName.split('.')[1]] = function() {
+               window.ghostQueue.push({
+                  functionName: ghostFunctionName,
+                  args: arguments
+               });
+            }
+            window[ghostFunctionName.split('.')[0]][ghostFunctionName.split('.')[1]].isGhost = true;
+         }
+      }
 
-var ibmCMURLPathname = window.location.pathname;
+      /* 
+       * This is the timeout loop, it will wait for 50ms before asking whether ALL the functions remain ghost
+       * Otherwise, it will execute each of the calls in the ghostQueue
+       */
+      function listenForOriginSet() {
+         setTimeout(function() {
+            if (isOriginSetLoaded()) {
+               delegateQueue();
+            }
+            else {
+               listenForOriginSet();
+            }
+         }, 50);
+      }
 
-var ibmCMURLMatch = {
+      /* Function that executes each called ghost function in the ghostQueue */
+      function delegateQueue() {
+         for (var i = 0; i < window.ghostQueue.length; i++) {
+            if (window.ghostQueue[i].functionName.indexOf('.') === -1) {
+               /* window level function */
+               window[window.ghostQueue[i].functionName].apply(this, window.ghostQueue[i].args);
+            }
+            else {
+               /* Second level function or object method. ONLY FIRST LEVEL METHOD IS SUPPORTED */
+               window[window.ghostQueue[i].functionName.split('.')[0]][window.ghostQueue[i].functionName.split('.')[1]].apply(this, window.ghostQueue[i].args);
+            }
+         }
+      }
+   })();
+
+   (function ibmCoreAuto(){
+
+      var ibmCMURLPathname = window.location.pathname;
+
+      var ibmCMURLMatch = {
 '/manage/trial/apim.html':'IBM_Commerce_TopLevel',
 '/manage/trial/webpush.html':'IBM_Commerce_MarketingCategory',
 '/commerce/us-en':'IBM_Commerce_eCommerce',
@@ -2200,510 +2217,479 @@ var ibmCMURLMatch = {
 '/software/shopzseries/shopzseries.wss':'IBM_Systems_Hardware_zSystems',
 '/software/shopzseries/shopzserieshelp.wss':'IBM_Systems_Hardware_zSystems',
 '/software/shopzseries/shopzserieshelp_public.wss':'IBM_Systems_Hardware_zSystems'
-};
+      };
 
-for(var ibmCMSiteURL in ibmCMURLMatch) {
- var ibmCMCoreTag = ibmCMURLMatch[ibmCMSiteURL];
-  if((ibmCMSiteURL === ibmCMURLPathname) || (ibmCMSiteURL + '/' === ibmCMURLPathname)) {
+      for(var ibmCMSiteURL in ibmCMURLMatch) {
+         var ibmCMCoreTag = ibmCMURLMatch[ibmCMSiteURL];
+         if((ibmCMSiteURL === ibmCMURLPathname) || (ibmCMSiteURL + '/' === ibmCMURLPathname)) {
 
-   var ibmCMSMeta = document.getElementsByTagName("meta");
-   for (var i = 0; i < ibmCMSMeta.length; i++) {
-    if ((ibmCMSMeta[i].name.toLowerCase() == "ibm.wtmsite") || (ibmCMSMeta[i].name.toLowerCase() == "ibm.wtmcategory")){
-     ibmCMSMeta[i].content = '';
-    }
-   }
-
-if (String(document.cookie).match(/(^| )(w3ibmProfile|w3_sauid|PD-W3-SSO-|OSCw3Session|IBM_W3SSO_ACCESS)=/)) {
- var ibmCMCoreTagSplitSecond = 'New_IBMER';
-}
-else {
- var ibmCMCoreTagSplitSecond = 'New_IBM_' + ibmCMCoreTag.split("_")[1];
-}
-
-   digitalData = {
-    page: {
-     pageInfo: {
-      ibm: {
-       siteID: ibmCMCoreTagSplitSecond
-      }
-     },
-     category: {
-      primaryCategory: ibmCMCoreTag
-     }
-    }
-   };
-  }
-}
-}());
-
-//----------------------Ensure that old browsers don't break when referencing the console-----------------------//
-if (!window.console) { window.console = {log: function(){}, error:function(){} }; }
-
-/*---------------------------------------------------Add parseEventName function---------------------------------------------------------*/   
-window.parseEventName = function(eventName) {
-   /*
-    * eventName contains two parameters separated by a colon: <product_name>:<tactic_code>
-    * This function will ensure that the string is not greater than 256 characters, and ensuring that the second parameter is complete
-    */ 
-   try {
-      if (eventName.length <= 256) {
-         eventName = eventName.replace(/\s+/g, '-').toUpperCase();
-      }
-      else {
-         var eventNameParts = eventName.split(':');
-         if (eventNameParts.length === 1) {
-            eventName = eventNameParts[0].substring(0,256).replace(/\s+/g, '-').toUpperCase();
-         }
-         else {
-            eventName = eventNameParts[0].substring(0,256-eventNameParts[1].length-1).replace(/\s+/g, '-').toUpperCase() + ':' + eventNameParts[1].replace(/\s+/g, '-').toUpperCase();
-         }
-      }
-      return(eventName);
-   }
-   catch (error) {
-      console.error('+++TME-ERROR > eluminate.js > parseEventName: ' + error);
-   }
-}
-
-function create_cmElement(obj){
-	if(obj.ibmProductTag && obj.ibmProductTag == "true"){
-		window.onload = function(){
-			if (typeof (window.pageViewAttributes) == "undefined")	ibmweb.eluminate.storeTealiumPageviewData();
-			if (typeof (window.pageViewAttributes) != "undefined") var productAttr = window.pageViewAttributes.split("-_-", 21).join("-_-");
-			if (typeof(window.ibmweb.config.eluminate.siteID) !== "undefined" && window.ibmweb.config.eluminate.siteID.toLowerCase()== "ecom" && typeof obj.serviceType != "undefined") productAttr += "-_--_--_--_--_--_--_--_--_--_-" + obj.serviceType;
-			if (typeof cmCreateProductviewTag !== 'undefined') cmCreateProductviewTag(obj.proID,obj.proName,obj.proCategory,productAttr,obj.cm_vc);
-		}
-	}
-}
-
-ibmweb.eluminate = {
-
-	downloadTypes: ['bqy','doc','dot','exe','flv','jpg','png','mov','mp3','pdf','pps','ppt','rss','sh','swf','tar','txt','wmv','xls','xml','zip','avi','eps','gif','lwp','mas','mp4','pot','prz','rtf','wav','wma','123','odt','ott','sxw','stw','docx','odp','otp','sxi','sti','pptx','ods','ots','sxc','stc','xlsx'],
-	domainList: ['.ibm.com', '.lotus.com', '.lotuslive.com', '.cognos.com', '.webdialogs.com', '.jazz.net', '.servicemanagementcenter.com','.xtify.com','.ibmcloud.com','.ibmdw.net','.bluemix.net','.smartercitiescloud.com'],
-	domainBlacklist: ".ibm.com,.mitre.org,.learnquest.com",
-	
-	// creating QueryString variable
-	create_QueryString: function() {
-		var query = window.location.search.substring(1);
-		
-		try {
-			window.QueryString = dojo.queryToObject(query);
-		} catch (e) {
-			window.QueryString = {};
-		}
-	},
-
-	domainTest: function(host) {
-		if (host.length > 0) {
-			host = host.toLowerCase();
-
-			if (host == window.location.hostname.toLowerCase() || dojo.indexOf(this.domainList, host) !== -1) return true;
-
-			for (var i = 0; i < this.domainList.length; i++) {
-				if (host.search(this.domainList[i]) != -1) return true;
-			}
-		}
-		return false;
-	},
-
-	match: function(pth) {
-		var result = false,
-			type = pth.substring(pth.lastIndexOf(".") + 1, pth.length);
-
-		if (dojo.indexOf(this.downloadTypes, type) !== -1) result = true;
-
-		return result;
-	},
-
-	pause: function(ms) {
-		var date = new Date(),
-			curDate = null;
-
-		do curDate = new Date(); while(curDate - date < ms);
-	},
-
-	findElm: function(e, tag) {
-		var elm = dojo.query(e.target || e.srcElement);
-
-		if (typeof elm[0] === 'undefined') return null;
-
-		elmNode = elm[0];
-
-		var result = elmNode;
-		
-		while (typeof elmNode.parentNode !== 'undefined') {
-			elmNode = elmNode.parentNode;
-			if (elmNode == null) break;
-			if (typeof elmNode.tagName !== 'undefined' && elmNode.tagName.toLowerCase() === tag) {result = elmNode; break}
-		}
-
-		return result;
-	},
-    
-	download_and_offset_tracking: function(e) {
-
-		if (typeof e == "undefined") return;
-
-		var elm = this.findElm(e, 'a');
-
-		if (typeof elm === 'undefined' || elm == null) return;
-
-		if ((typeof elm.tagName !== 'undefined' && elm.tagName.toLowerCase() == 'a') && !!elm.href) this.tracking_core(e, elm, 'normalClick');
-	},
-	
-	left_click_tracking: function(e){
-		var ev = (e.target)? e.target : ((e.srcElement)? e.srcElement : e.delegateTarget); //added to prevent duplicate element tag while ibmStats.event presents
-		if (typeof ev !== 'undefined' || ev != null) {
-			if(navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
-			{ 
-				var switcher = false;
-				for (var att in ev.attributes)
-				{	
-					if (ev.attributes[att].name == 'onclick' && ev.attributes[att].value.indexOf('ibmStats.event') > -1 )
-					{
-						switcher = true;
-						break;
-					}
-				}
-				if (switcher != true) 
-				{
-					this.download_and_offset_tracking(e);
-				}
-			}
-			else
-			{
-				var statsEvent = (ev.getAttribute("onclick") !== null) ? (ev.getAttribute("onclick").indexOf("ibmStats.event")) : -1;
-				if(statsEvent === -1) 
-				{
-					this.download_and_offset_tracking(e);
-				}
-
-			}
-		}
-	}, 
-	
-	right_click_tracking: function(e) {
-
-		if (typeof e == "undefined") return;
-		
-		var btn = e.which || e.button;
-
-		if ((btn !== 1 ) || (navigator.userAgent.indexOf("Safari") !== -1)) {
-
-			var elm = this.findElm(e, 'a');
-
-			if (typeof elm === 'undefined' || elm == null) return;
-
-			if ((typeof elm.tagName !== 'undefined' && elm.tagName.toLowerCase() == 'a') && !!elm.href) this.tracking_core(e, elm, 'rightClick');
-		}
-	},
-	
-	//function to check if the link calls www megamenu or social toolbar
-    check_megamenu_element : function(el){
-		if (typeof (el) !== 'undefined'){
-	    	do {
-	    		if (el.id == "ibm-menu-links" || el.id == "ibm-common-menu" || el.id == "ibm-social-tools") {
-	    	      	//(el.className == "ibm-media")
-	    	      	return true;
-	    	    }
-	    		el = el.parentElement || el.parentNode;
-	    	  } while ((el !== null) && (el.parentElement || el.parentNode))
-		}
-    	return false;
-    },
-	
-	tracking_core: function(e, elm, type) { // for both click type
-    	var hostName = elm.hostname? (elm.hostname.split(":")[0]) : "",
-			fullURL = escape(elm.href),
-			qry = elm.search? elm.search.substring(elm.search.indexOf("?") + 1, elm.search.length) : "",
-			p = dojo.queryToObject(qry),
-			vparam = 'none',
-			prtcl = elm.protocol || "",
-			evAction = (elm.protocol == "ftp:")?  fullURL.substr(8) : ((elm.protocol == "https:") ? fullURL.substr(10) : fullURL.substr(9)),
-			evid = (elm.protocol == "ftp:")?  elm.href.substr(6) : ((elm.protocol == "https:") ? elm.href.substr(8) : elm.href.substr(7)),
-			evLinkTitle = (navigator.appVersion.indexOf("MSIE") != -1) ? elm.innerText.trim() : elm.textContent.trim(),
-			pageid = "";
-			
-			if(evLinkTitle.length > 256) evLinkTitle = evLinkTitle.substring(0,125) + "..." + evLinkTitle.substring(evLinkTitle.length - 128, evLinkTitle.length);
-			
-			//replace -_- from evAction if exists 
-            if(evAction.indexOf('-_-') != -1){
-            	evAction = evAction.replace(/-_-/g,"---");
+            var ibmCMSMeta = document.getElementsByTagName("meta");
+            for (var i = 0; i < ibmCMSMeta.length; i++) {
+               if ((ibmCMSMeta[i].name.toLowerCase() == "ibm.wtmsite") || (ibmCMSMeta[i].name.toLowerCase() == "ibm.wtmcategory")){
+                  ibmCMSMeta[i].content = '';
+               }
             }
 
-        if (typeof (window.digitalData) != "undefined" && typeof (window.digitalData.page) != "undefined") {
-        	if(typeof (window.digitalData.page.pageInfo) != "undefined" && typeof (window.digitalData.page.pageInfo.pageID) != "undefined"){//for new DDO structure
-        		pageid = window.digitalData.page.pageInfo.pageID;
-        	}else if(typeof (window.digitalData.page.pageID) != "undefined"){
-        		pageid = window.digitalData.page.pageID;
-        	}
-        	var currentdate = new Date(),
-        		pageLocation = window.location.href.replace(/-_-/g,"---");
-        	if (typeof (window.utag) != "undefined" && typeof (window.utag.data) != "undefined") {
-        		pageid = pageid + "-_--_--_--_--_--_-" + window.utag.data.page_loadingTime + "-_-" + pageLocation + "-_-" +  currentdate.getTime() + "-_-" + window.utag.data.IBMER_value;
-    		}else{
-    			window.NTPT_IBMer = (String(document.cookie).match(/(^| )(w3ibmProfile|w3_sauid|PD-W3-SSO-|OSCw3Session|IBM_W3SSO_ACCESS)=/)) ? 1 : 0;
-    			pageid = pageid + "-_--_--_--_--_--_-" + window.loadingTime + "-_-" + pageLocation + "-_-" +  window.loadingTime + "-_-" + window.NTPT_IBMer;
-    		}
-        }
-		        
-		if (typeof p.attachment !== 'undefined') vparam = p.attachment;
-		if (typeof p.FILE !== 'undefined') vparam = p.FILE;
-		if (typeof p.attachmentName !== 'undefined') vparam = p.attachmentName;
+            if (String(document.cookie).match(/(^| )(w3ibmProfile|w3_sauid|PD-W3-SSO-|OSCw3Session|IBM_W3SSO_ACCESS)=/)) {
+               var ibmCMCoreTagSplitSecond = 'New_IBMER';
+            }
+            else {
+               var ibmCMCoreTagSplitSecond = 'New_IBM_' + ibmCMCoreTag.split("_")[1];
+            }
 
-		var download_param = vparam.toLowerCase(),
-			download_uri = elm.pathname.toLowerCase(),
-			megamenuElement = this.check_megamenu_element(elm);
+            digitalData = {
+                  page: {
+                     pageInfo: {
+                        ibm: {
+                           siteID: ibmCMCoreTagSplitSecond
+                        }
+                     },
+                     category: {
+                        primaryCategory: ibmCMCoreTag
+                     }
+                  }
+            };
+         }
+      }
+   }());
 
-		if (evid.length > 50) evid = evid.substring(0,22) + "..." + evid.substring(evid.length - 25, evid.length);
-		var optionalAttribute = evLinkTitle+'-_-null-_-null-_-null-_-'+evAction.toLowerCase()+'-_-'+evLinkTitle+'-_-null-_--_--_-'+pageid;
-		//element attribute for Inside Sales
-		if(typeof(window.ibmweb.config.eluminate.siteID) !== "undefined" && (window.ibmweb.config.eluminate.siteID.substring(0,3)).toLowerCase() == "ins"){
-			if(String(dojo.query("meta[name='PopID']").attr("content"))) optionalAttribute = optionalAttribute + "-_-" + String(dojo.query("meta[name='PopID']").attr("content"));
-		}
-		
-		// download_tracking and page_click
-		if (megamenuElement == false && this.domainTest(hostName)) {
+   function create_cmElement(obj){
+      if(obj.ibmProductTag && obj.ibmProductTag == "true"){
+         window.onload = function(){
+            if (typeof (window.pageViewAttributes) == "undefined")	ibmweb.eluminate.storeTealiumPageviewData();
+            if (typeof (window.pageViewAttributes) != "undefined") var productAttr = window.pageViewAttributes.split("-_-", 21).join("-_-");
+            if (typeof(window.ibmweb.config.eluminate.siteID) !== "undefined" && window.ibmweb.config.eluminate.siteID.toLowerCase()== "ecom" && typeof obj.serviceType != "undefined") productAttr += "-_--_--_--_--_--_--_--_--_--_-" + obj.serviceType;
+            if (typeof cmCreateProductviewTag !== 'undefined') cmCreateProductviewTag(obj.proID,obj.proName,obj.proCategory,productAttr,obj.cm_vc);
+         }
+      }
+   }
 
-			if (this.match(download_uri) || this.match(download_param)) {
-				var ttl = "",
-					text = document.all? elm.innerText : elm.text,
-					img = this.findElm(e, 'img'),
-					coremetricsParam = '';
+   ibmweb.eluminate = {
 
-				if (img.alt) ttl = img.alt;
-				else if (text) ttl = text;
-				else if (elm.innerHTML) ttl = elm.innerHTML;
+         downloadTypes: ['bqy','doc','dot','exe','flv','jpg','png','mov','mp3','pdf','pps','ppt','rss','sh','swf','tar','txt','wmv','xls','xml','zip','avi','eps','gif','lwp','mas','mp4','pot','prz','rtf','wav','wma','123','odt','ott','sxw','stw','docx','odp','otp','sxi','sti','pptx','ods','ots','sxc','stc','xlsx'],
+         domainList: ['.ibm.com', '.lotus.com', '.lotuslive.com', '.cognos.com', '.webdialogs.com', '.jazz.net', '.servicemanagementcenter.com','.xtify.com','.ibmcloud.com','.ibmdw.net','.bluemix.net','.smartercitiescloud.com'],
+         domainBlacklist: ".ibm.com,.mitre.org,.learnquest.com",
 
-				if (vparam == "none") {
-					
-					coremetricsParam = evAction.toLowerCase() + '-_-' + optionalAttribute;
-					
-					if (typeof cmCreateElementTag !== 'undefined') cmCreateElementTag(evid.toLowerCase(), 'download', 'download'+ '-_-' + coremetricsParam);
+         // creating QueryString variable
+         create_QueryString: function() {
+            var query = window.location.search.substring(1);
 
-				} else {
+            try {
+               window.QueryString = dojo.queryToObject(query);
+            } catch (e) {
+               window.QueryString = {};
+            }
+         },
 
-					coremetricsParam = download_param + '-_-' + optionalAttribute;
-					
-					if (typeof cmCreateElementTag !== 'undefined') cmCreateElementTag(download_param, 'download', 'download'+ '-_-' + coremetricsParam);
+         domainTest: function(host) {
+            if (host.length > 0) {
+               host = host.toLowerCase();
 
-				}
+               if (host == window.location.hostname.toLowerCase() || dojo.indexOf(this.domainList, host) !== -1) return true;
 
-			} else {
+               for (var i = 0; i < this.domainList.length; i++) {
+                  if (host.search(this.domainList[i]) != -1) return true;
+               }
+            }
+            return false;
+         },
 
-				var pageClickParams = 'page click' + '-_-' + evAction + '-_-' + optionalAttribute;
+         match: function(pth) {
+            var result = false,
+            type = pth.substring(pth.lastIndexOf(".") + 1, pth.length);
 
-				if (typeof cmCreateElementTag !== 'undefined') cmCreateElementTag(evid.toLowerCase(), 'page click', pageClickParams);
-			}
-		}
+            if (dojo.indexOf(this.downloadTypes, type) !== -1) result = true;
 
-		// offsite_tracking
-		if (megamenuElement == false && ((hostName.length > 0) && (prtcl.indexOf("http") == 0 || prtcl.indexOf("mailto") == 0) && (!this.domainTest(hostName)))) {
+            return result;
+         },
 
-			if (typeof cmCreateElementTag !== 'undefined') cmCreateElementTag(evid.toLowerCase(), 'external link', 'external link' + '-_-' + evAction + '-_-' + optionalAttribute);
+         pause: function(ms) {
+            var date = new Date(),
+            curDate = null;
 
-		}
-	},
-	
-	//Limit assignment of WTMSite from WTMCategory(specially for too many category Id in IWM page)
-	checkRestrictCategory : function(wtmCategoryId){
-		var selectedIWMCategory = ['GBS','GTS','STG','SWG','CSUITE','DW','ESD','IND','MID','MM','PPW','RATLE'],
-		    noCategory = "";
-		if(wtmCategoryId.indexOf('-') !== -1){
-			var selectedPart = wtmCategoryId.split('-')[0];
-    		for (var i = 0; i < selectedIWMCategory.length; i++) {
-    			if (selectedPart.toUpperCase() === selectedIWMCategory[i]) {
-    				return selectedPart;
-    			}
-    		}
-		}
-		if(wtmCategoryId.toLowerCase() == "cuf04") noCategory = wtmCategoryId;
-		return noCategory;
-	},
+            do curDate = new Date(); while(curDate - date < ms);
+         },
 
-	utilstatsHelper: function(e) {
-		// check if builder has specified page title already
-		if(!e.ibmEvLinkTitle && !e.ibmEvLinktitle){
-			// no, so let's get it and add
-			// get title of this page
-			var h1Element = dojo.query('h1:first');
-			if(h1Element.length > 0 && h1Element[0].innerHTML){
-				// mixin with object provided by builder
-				dojo.mixin(e, { 'ibmEvLinkTitle': h1Element[0].innerHTML });
-			}
-		}
-		
-		if (!e.ibmEvGroup) e.ibmEvGroup = 'null';
-		if (!e.ibmEvName) e.ibmEvName = 'null';
-		if (!e.ibmEvModule) e.ibmEvModule = 'null';
-		if (!e.ibmEvSection) e.ibmEvSection = 'null';
-		if (!e.ibmEvTarget) e.ibmEvTarget = 'null';
-		if (!e.ibmEvFileSize) e.ibmEvFileSize = 'null';
-		if (!e.ibmEvLinkTitle) e.ibmEvLinkTitle = 'null';
+         findElm: function(e, tag) {
+            var elm = dojo.query(e.target || e.srcElement);
 
-		// and now just call ibmStats.event()
-		ibmStats.event(e);
-	},
-     
-	storeTealiumPageviewData : function(){
-		if (typeof (window.utag) != "undefined") {
-			var arr = new Array();
-			window.pageViewAttributes = "";
-			var x = JSON.stringify(window.utag.sender).split(/[}]/);
-			for (var i=0;i<x.length;i++){
-				var firstPart = x[i].split('{')[0],
-					lastPart = x[i].split('{')[1];
-				if (firstPart.indexOf("map") !== -1 && typeof lastPart !== "undefined") {
-					var arr1 = lastPart.split(',');
-					for (var j=0;j<arr1.length;j++){
-						if (typeof arr1[j].split(':')[1] !== "undefined" && arr1[j].split(':')[1].indexOf('PageviewTag_pv_a') !== -1){
-							var a = arr1[j].split(':')[0].replace(/[""]/g,''),
-								k = arr1[j].split(':')[1].substring(17,arr1[j].split(':')[1].length-1);
-							if (typeof utag.data[a] !== "undefined" && (arr[k] == "" || arr[k] == undefined)) arr[k] = utag.data[a];
-							else if (typeof utag.data[a] !== "undefined" && a.indexOf('meta.') !== -1) arr[k] = utag.data[a];//to prioritize the meta tag values over DDO
-						}
-					}
-				}
-			}
-			for(var i=1;i<=arr.length;i++){
-				window.pageViewAttributes += arr[i] + "-_-";
-			}
-		}
-	},
-	
-	init: function() {
+            if (typeof elm[0] === 'undefined') return null;
 
-		var _this = this,
-			_conf = ibmweb.config.eluminate;
+            elmNode = elm[0];
 
-		_conf.enabled = true;
+            var result = elmNode;
 
-		//----------------------------- IBMDependencyRegistry --------------------------------//
-		/**
-		 * Id      : IBMDependencyRegistry
-		 * Author  : devarajk@us.ibm.com
-		 * MemberOf: Tag Management Registry 
-		 * Date    : 2016-08-23
-		 * Description: 
-		 */
-		//>>>>> Start of IBMDependencyRegistry
-		try {
-		   (function() {
-		      window.IBMDependencyRegistry = window.IBMDependencyRegistry || {
-		         isLoaded : {},
-		         listeners : [],
-		         check : function(dependencies) {
-		            for (var i = 0, l = dependencies.length; i < l; i++) {
-		               if (!this.isLoaded[dependencies[i]])
-		                  return false;
-		            }
-		            return true;
-		         },
-		         on : function(dependencies, callback) {
-		            if (typeof callback !== 'function')
-		               return false;
-		            if (typeof dependencies === 'string')
-		               dependencies = [dependencies];
-		            if (this.check(dependencies)) {
-		               callback();
-		            } else {
-		               this.listeners.push({
-		                  dependencies : dependencies,
-		                  callback : callback
-		               });
-		            }
-		         },
-		         emit : function(name) {
-		            this.isLoaded[name] = 1;
-		            var toCall = [];
-		            for (var i = this.listeners.length - 1; i > -1; i--) {
-		               var listener = this.listeners[i];
-		               if (this.check(listener.dependencies)) {
-		                  toCall.push(this.listeners.splice(i, 1)[0]);
-		               }
-		            }
-		            for (i = 0; i < toCall.length; i++) {
-		               toCall[i].callback();
-		            }
-		         }
-		      };
-		   })();
-		}
-		catch (error) {
-            console.log('+++TME-ERROR > eluminate.js > IBMDependencyRegistry: ' + error);
-		}
-		//>>>>> End of IBMDependencyRegistry
+            while (typeof elmNode.parentNode !== 'undefined') {
+               elmNode = elmNode.parentNode;
+               if (elmNode == null) break;
+               if (typeof elmNode.tagName !== 'undefined' && elmNode.tagName.toLowerCase() === tag) {result = elmNode; break}
+            }
 
-		/* TEALIUM IMPLEMENTATION - START */
+            return result;
+         },
 
-		(function(a,b,c,d) {
-			a = '//tags.tiqcdn.com/utag/ibm/main/prod/utag.js';
-			b = document;
-			c = 'script';
-			d = b.createElement(c);
-			d.src = a;
-			d.type = 'text/java' + c;
-			d.async = true;
-			a = b.getElementsByTagName(c)[0];
-			a.parentNode.insertBefore(d,a);
-			d.onload = function(){
-				if(typeof window.utag !== "undefined"){
-					_conf.siteID = window.utag.data["siteID_value"];
-					if(_conf.siteID == "ECOM"){
-						window.cmTagQueue.push(['cmSetupNormalization', 'krypto-_-krypto']);	
-					}
-				}
-			}
-		})();
+         download_and_offset_tracking: function(e) {
 
-		/* TEALIUM IMPLEMENTATION - END */
+            if (typeof e == "undefined") return;
 
+            var elm = this.findElm(e, 'a');
 
-		// set QueryString
-		this.create_QueryString();
+            if (typeof elm === 'undefined' || elm == null) return;
 
-		// set cmTagQueue
-		if (typeof(window.cmTagQueue) == 'undefined')  window.cmTagQueue = [];
+            if ((typeof elm.tagName !== 'undefined' && elm.tagName.toLowerCase() == 'a') && !!elm.href) this.tracking_core(e, elm, 'normalClick');
+         },
 
-		window.cmTagQueue.push(['cmSetupOther', {"cm_JSFEAMasterIDSessionCookie": true}]);
+         left_click_tracking: function(e){
+            var ev = (e.target)? e.target : ((e.srcElement)? e.srcElement : e.delegateTarget); //added to prevent duplicate element tag while ibmStats.event presents
+            if (typeof ev !== 'undefined' || ev != null) {
+               if(navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
+               { 
+                  var switcher = false;
+                  for (var att in ev.attributes)
+                  {	
+                     if (ev.attributes[att].name == 'onclick' && ev.attributes[att].value.indexOf('ibmStats.event') > -1 )
+                     {
+                        switcher = true;
+                        break;
+                     }
+                  }
+                  if (switcher != true) 
+                  {
+                     this.download_and_offset_tracking(e);
+                  }
+               }
+               else
+               {
+                  var statsEvent = (ev.getAttribute("onclick") !== null) ? (ev.getAttribute("onclick").indexOf("ibmStats.event")) : -1;
+                  if(statsEvent === -1) 
+                  {
+                     this.download_and_offset_tracking(e);
+                  }
 
-		//cookie migration from IBM to non IBM pages
-		if(typeof (document.domain) !== 'undefined' && document.domain.indexOf('ibm.com') !== -1){
-			window.cmTagQueue.push(['cmSetupCookieMigration', true, true, null, this.domainBlacklist]);
-		}
+               }
+            }
+         }, 
 
-		// loading eluminate
-		(function() {
-			window.loadingTime = new Date().getTime();
-			window.eluminateLoaded = true;
-		})();
+         right_click_tracking: function(e) {
 
-		// coremetrics event functions
-		dojo.addOnLoad(function(){
-			//function call to store all page view attributes
-			 if (window.addEventListener) {
-		      	  window.addEventListener('load', _this.storeTealiumPageviewData, false);
-		      }
-		      else if (window.attachEvent) {
-		      	  window.attachEvent('onload', _this.storeTealiumPageviewData);
-		      }
-		});
-	}
-};
+            if (typeof e == "undefined") return;
 
-//if (ibmweb.config.config == 'www' && navigator.userAgent.toLowerCase().indexOf('msie') == -1) {
-if (ibmweb.config.config == 'www') {
+            var btn = e.which || e.button;
 
-	if (navigator.platform.search('AIX') < 0) { // we disabling coremetrics for AIX server
+            if ((btn !== 1 ) || (navigator.userAgent.indexOf("Safari") !== -1)) {
 
-		cmSetClientID = function(){};
-		if (typeof(window.eluminate_enabled) !=='undefined' || typeof(window.tealium_enabled) !=='undefined') {
-			// we search if this variable is set on false
-			if (!window.eluminate_enabled || !window.tealium_enabled) {/*do nothing*/}
-			else ibmweb.eluminate.init();
-		} else {
-			// we are enabled for all pages
-			ibmweb.eluminate.init();
-		}
-	}
+               var elm = this.findElm(e, 'a');
+
+               if (typeof elm === 'undefined' || elm == null) return;
+
+               if ((typeof elm.tagName !== 'undefined' && elm.tagName.toLowerCase() == 'a') && !!elm.href) this.tracking_core(e, elm, 'rightClick');
+            }
+         },
+
+         //function to check if the link calls www megamenu or social toolbar
+         check_megamenu_element : function(el){
+            if (typeof (el) !== 'undefined'){
+               do {
+                  if (el.id == "ibm-menu-links" || el.id == "ibm-common-menu" || el.id == "ibm-social-tools") {
+                     //(el.className == "ibm-media")
+                     return true;
+                  }
+                  el = el.parentElement || el.parentNode;
+               } while ((el !== null) && (el.parentElement || el.parentNode))
+            }
+            return false;
+         },
+
+         tracking_core: function(e, elm, type) { // for both click type
+            var hostName = elm.hostname? (elm.hostname.split(":")[0]) : "",
+                  fullURL = escape(elm.href),
+                  qry = elm.search? elm.search.substring(elm.search.indexOf("?") + 1, elm.search.length) : "",
+                        p = dojo.queryToObject(qry),
+                        vparam = 'none',
+                        prtcl = elm.protocol || "",
+                        evAction = (elm.protocol == "ftp:")?  fullURL.substr(8) : ((elm.protocol == "https:") ? fullURL.substr(10) : fullURL.substr(9)),
+                              evid = (elm.protocol == "ftp:")?  elm.href.substr(6) : ((elm.protocol == "https:") ? elm.href.substr(8) : elm.href.substr(7)),
+                                    evLinkTitle = (navigator.appVersion.indexOf("MSIE") != -1) ? elm.innerText.trim() : elm.textContent.trim(),
+                                          pageid = "";
+
+                                    if(evLinkTitle.length > 256) evLinkTitle = evLinkTitle.substring(0,125) + "..." + evLinkTitle.substring(evLinkTitle.length - 128, evLinkTitle.length);
+
+                                    //replace -_- from evAction if exists 
+                                    if(evAction.indexOf('-_-') != -1){
+                                       evAction = evAction.replace(/-_-/g,"---");
+                                    }
+
+                                    if (typeof (window.digitalData) != "undefined" && typeof (window.digitalData.page) != "undefined") {
+                                       if(typeof (window.digitalData.page.pageInfo) != "undefined" && typeof (window.digitalData.page.pageInfo.pageID) != "undefined"){//for new DDO structure
+                                          pageid = window.digitalData.page.pageInfo.pageID;
+                                       }else if(typeof (window.digitalData.page.pageID) != "undefined"){
+                                          pageid = window.digitalData.page.pageID;
+                                       }
+                                       var currentdate = new Date(),
+                                       pageLocation = window.location.href.replace(/-_-/g,"---");
+                                       if (typeof (window.utag) != "undefined" && typeof (window.utag.data) != "undefined") {
+                                          pageid = pageid + "-_--_--_--_--_--_-" + window.utag.data.page_loadingTime + "-_-" + pageLocation + "-_-" +  currentdate.getTime() + "-_-" + window.utag.data.IBMER_value;
+                                       }else{
+                                          window.NTPT_IBMer = (String(document.cookie).match(/(^| )(w3ibmProfile|w3_sauid|PD-W3-SSO-|OSCw3Session|IBM_W3SSO_ACCESS)=/)) ? 1 : 0;
+                                          pageid = pageid + "-_--_--_--_--_--_-" + window.loadingTime + "-_-" + pageLocation + "-_-" +  window.loadingTime + "-_-" + window.NTPT_IBMer;
+                                       }
+                                    }
+
+                                    if (typeof p.attachment !== 'undefined') vparam = p.attachment;
+                                    if (typeof p.FILE !== 'undefined') vparam = p.FILE;
+                                    if (typeof p.attachmentName !== 'undefined') vparam = p.attachmentName;
+
+                                    var download_param = vparam.toLowerCase(),
+                                    download_uri = elm.pathname.toLowerCase(),
+                                    megamenuElement = this.check_megamenu_element(elm);
+
+                                    if (evid.length > 50) evid = evid.substring(0,22) + "..." + evid.substring(evid.length - 25, evid.length);
+                                    var optionalAttribute = evLinkTitle+'-_-null-_-null-_-null-_-'+evAction.toLowerCase()+'-_-'+evLinkTitle+'-_-null-_--_--_-'+pageid;
+                                    //element attribute for Inside Sales
+                                    if(typeof(window.ibmweb.config.eluminate.siteID) !== "undefined" && (window.ibmweb.config.eluminate.siteID.substring(0,3)).toLowerCase() == "ins"){
+                                       if(String(dojo.query("meta[name='PopID']").attr("content"))) optionalAttribute = optionalAttribute + "-_-" + String(dojo.query("meta[name='PopID']").attr("content"));
+                                    }
+
+                                    // download_tracking and page_click
+                                    if (megamenuElement == false && this.domainTest(hostName)) {
+
+                                       if (this.match(download_uri) || this.match(download_param)) {
+                                          var ttl = "",
+                                          text = document.all? elm.innerText : elm.text,
+                                                img = this.findElm(e, 'img'),
+                                                coremetricsParam = '';
+
+                                          if (img.alt) ttl = img.alt;
+                                          else if (text) ttl = text;
+                                          else if (elm.innerHTML) ttl = elm.innerHTML;
+
+                                          if (vparam == "none") {
+
+                                             coremetricsParam = evAction.toLowerCase() + '-_-' + optionalAttribute;
+
+                                             if (typeof cmCreateElementTag !== 'undefined') cmCreateElementTag(evid.toLowerCase(), 'download', 'download'+ '-_-' + coremetricsParam);
+
+                                          } else {
+
+                                             coremetricsParam = download_param + '-_-' + optionalAttribute;
+
+                                             if (typeof cmCreateElementTag !== 'undefined') cmCreateElementTag(download_param, 'download', 'download'+ '-_-' + coremetricsParam);
+
+                                          }
+
+                                       } else {
+
+                                          var pageClickParams = 'page click' + '-_-' + evAction + '-_-' + optionalAttribute;
+
+                                          if (typeof cmCreateElementTag !== 'undefined') cmCreateElementTag(evid.toLowerCase(), 'page click', pageClickParams);
+                                       }
+                                    }
+
+                                    // offsite_tracking
+                                    if (megamenuElement == false && ((hostName.length > 0) && (prtcl.indexOf("http") == 0 || prtcl.indexOf("mailto") == 0) && (!this.domainTest(hostName)))) {
+
+                                       if (typeof cmCreateElementTag !== 'undefined') cmCreateElementTag(evid.toLowerCase(), 'external link', 'external link' + '-_-' + evAction + '-_-' + optionalAttribute);
+
+                                    }
+         },
+
+         //Limit assignment of WTMSite from WTMCategory(specially for too many category Id in IWM page)
+         checkRestrictCategory : function(wtmCategoryId){
+            var selectedIWMCategory = ['GBS','GTS','STG','SWG','CSUITE','DW','ESD','IND','MID','MM','PPW','RATLE'],
+            noCategory = "";
+            if(wtmCategoryId.indexOf('-') !== -1){
+               var selectedPart = wtmCategoryId.split('-')[0];
+               for (var i = 0; i < selectedIWMCategory.length; i++) {
+                  if (selectedPart.toUpperCase() === selectedIWMCategory[i]) {
+                     return selectedPart;
+                  }
+               }
+            }
+            if(wtmCategoryId.toLowerCase() == "cuf04") noCategory = wtmCategoryId;
+            return noCategory;
+         },
+
+         utilstatsHelper: function(e) {
+            // check if builder has specified page title already
+            if(!e.ibmEvLinkTitle && !e.ibmEvLinktitle){
+               // no, so let's get it and add
+               // get title of this page
+               var h1Element = dojo.query('h1:first');
+               if(h1Element.length > 0 && h1Element[0].innerHTML){
+                  // mixin with object provided by builder
+                  dojo.mixin(e, { 'ibmEvLinkTitle': h1Element[0].innerHTML });
+               }
+            }
+
+            if (!e.ibmEvGroup) e.ibmEvGroup = 'null';
+            if (!e.ibmEvName) e.ibmEvName = 'null';
+            if (!e.ibmEvModule) e.ibmEvModule = 'null';
+            if (!e.ibmEvSection) e.ibmEvSection = 'null';
+            if (!e.ibmEvTarget) e.ibmEvTarget = 'null';
+            if (!e.ibmEvFileSize) e.ibmEvFileSize = 'null';
+            if (!e.ibmEvLinkTitle) e.ibmEvLinkTitle = 'null';
+
+            // and now just call ibmStats.event()
+            ibmStats.event(e);
+         },
+
+         storeTealiumPageviewData : function(){
+            if (typeof (window.utag) != "undefined") {
+               var arr = new Array();
+               window.pageViewAttributes = "";
+               var x = JSON.stringify(window.utag.sender).split(/[}]/);
+               for (var i=0;i<x.length;i++){
+                  var firstPart = x[i].split('{')[0],
+                  lastPart = x[i].split('{')[1];
+                  if (firstPart.indexOf("map") !== -1 && typeof lastPart !== "undefined") {
+                     var arr1 = lastPart.split(',');
+                     for (var j=0;j<arr1.length;j++){
+                        if (typeof arr1[j].split(':')[1] !== "undefined" && arr1[j].split(':')[1].indexOf('PageviewTag_pv_a') !== -1){
+                           var a = arr1[j].split(':')[0].replace(/[""]/g,''),
+                           k = arr1[j].split(':')[1].substring(17,arr1[j].split(':')[1].length-1);
+                           if (typeof utag.data[a] !== "undefined" && (arr[k] == "" || arr[k] == undefined)) arr[k] = utag.data[a];
+                           else if (typeof utag.data[a] !== "undefined" && a.indexOf('meta.') !== -1) arr[k] = utag.data[a];//to prioritize the meta tag values over DDO
+                        }
+                     }
+                  }
+               }
+               for(var i=1;i<=arr.length;i++){
+                  window.pageViewAttributes += arr[i] + "-_-";
+               }
+            }
+         },
+
+         init: function() {
+
+            var _this = this,
+            _conf = ibmweb.config.eluminate;
+
+            _conf.enabled = true;
+
+            //----------------------------- IBMDependencyRegistry --------------------------------//
+            /**
+             * Id      : IBMDependencyRegistry
+             * Author  : devarajk@us.ibm.com
+             * MemberOf: Tag Management Registry 
+             * Date    : 2016-08-23
+             * Description: 
+             */
+            /* >>>>> Start of IBMDependencyRegistry */
+            try {
+               (function() {
+                  window.IBMDependencyRegistry = window.IBMDependencyRegistry || {
+                     isLoaded : {},
+                     listeners : [],
+                     check : function(dependencies) {
+                        for (var i = 0, l = dependencies.length; i < l; i++) {
+                           if (!this.isLoaded[dependencies[i]])
+                              return false;
+                        }
+                        return true;
+                     },
+                     on : function(dependencies, callback) {
+                        if (typeof callback !== 'function')
+                           return false;
+                        if (typeof dependencies === 'string')
+                           dependencies = [dependencies];
+                        if (this.check(dependencies)) {
+                           callback();
+                        } else {
+                           this.listeners.push({
+                              dependencies : dependencies,
+                              callback : callback
+                           });
+                        }
+                     },
+                     emit : function(name) {
+                        this.isLoaded[name] = 1;
+                        var toCall = [];
+                        for (var i = this.listeners.length - 1; i > -1; i--) {
+                           var listener = this.listeners[i];
+                           if (this.check(listener.dependencies)) {
+                              toCall.push(this.listeners.splice(i, 1)[0]);
+                           }
+                        }
+                        for (i = 0; i < toCall.length; i++) {
+                           toCall[i].callback();
+                        }
+                     }
+                  };
+               })();
+            }
+            catch (error) {
+               console.log('+++DBDM-ERROR > eluminate.js > IBMDependencyRegistry: ' + error);
+            }
+            /* >>>>> End of IBMDependencyRegistry */
+
+            /* ----------------------------- TEALIUM IMPLEMENTATION - START -------------------------------- */
+            (function(a,b,c,d) {
+               a = '//tags.tiqcdn.com/utag/ibm/main/prod/utag.js';
+               b = document;
+               c = 'script';
+               d = b.createElement(c);
+               d.src = a;
+               d.type = 'text/java' + c;
+               d.async = true;
+               a = b.getElementsByTagName(c)[0];
+               a.parentNode.insertBefore(d,a);
+               d.onload = function(){
+                  if (typeof window.utag !== "undefined" && typeof window.utag.data !== "undefined") {
+                     _conf.siteID = window.utag.data["site_id"] || "";
+
+                     if (_conf.siteID.toLowerCase() == "ecom") {
+                        window.cmTagQueue.push(['cmSetupNormalization', 'krypto-_-krypto']);	
+                     }
+                  }
+               }
+            })();
+            /* ----------------------------- TEALIUM IMPLEMENTATION - END -------------------------------- */
+
+            /* set QueryString */
+            this.create_QueryString();
+
+            /* set cmTagQueue */
+            if (typeof(window.cmTagQueue) == 'undefined')  window.cmTagQueue = [];
+
+            window.cmTagQueue.push(['cmSetupOther', {"cm_JSFEAMasterIDSessionCookie": true}]);
+
+            /* cookie migration from IBM to non IBM pages */
+            if(typeof (document.domain) !== 'undefined' && document.domain.indexOf('ibm.com') !== -1){
+               window.cmTagQueue.push(['cmSetupCookieMigration', true, true, null, this.domainBlacklist]);
+            }
+
+            /* loading eluminate */
+            (function() {
+               window.loadingTime = new Date().getTime();
+               window.eluminateLoaded = true;
+            })();
+
+            /*  coremetrics event functions */
+            dojo.addOnLoad(function(){
+               /* function call to store all page view attributes */
+               if (window.addEventListener) {
+                  window.addEventListener('load', _this.storeTealiumPageviewData, false);
+               }
+               else if (window.attachEvent) {
+                  window.attachEvent('onload', _this.storeTealiumPageviewData);
+               }
+            });
+         }
+   };
+
+   if (ibmweb.config.config == 'www') {
+
+      if (navigator.platform.search('AIX') < 0) { // we disabling coremetrics for AIX server
+
+         cmSetClientID = function(){};
+         if (typeof(window.eluminate_enabled) !=='undefined' || typeof(window.tealium_enabled) !=='undefined') {
+            /* we search if this variable is set on false */
+            if (!window.eluminate_enabled || !window.tealium_enabled) {/*do nothing*/}
+            else ibmweb.eluminate.init();
+         } else {
+            /*  we are enabled for all pages */
+            ibmweb.eluminate.init();
+         }
+      }
+   }
 }
