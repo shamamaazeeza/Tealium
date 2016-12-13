@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2016.12.07.0015
+ * Version       : 2016.12.12.2349
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -1188,6 +1188,27 @@ var datalayer = {
 
             /*--------------------Set Data Layer Ready--------------------*/
             digitalData.page.isDataLayerReady = true;
+
+            /*--------------------Set UDO Variables--------------------*/
+            if (typeof(utag) !== "undefined" && typeof(utag.data) !== "undefined") {
+               utag.data.category_id      = digitalData.page.category.primaryCategory;
+               utag.data.concat_clientid  = digitalData.page.pageInfo.coremetrics.clientID;
+               utag_data.cookie_domain    = digitalData.page.pageInfo.destinationDomain;
+               utag.data.destinationURL   = digitalData.page.pageInfo.destinationURL;
+               utag.data.site_id          = digitalData.page.pageInfo.ibm.siteID;
+               utag.data.iniSiteID        = digitalData.page.pageInfo.ibm.iniSiteID;
+               utag.data.page_id          = digitalData.page.pageInfo.pageID;   
+               utag.data.referrer         = digitalData.page.pageInfo.referrer;
+               utag.data.referrerID       = digitalData.page.pageInfo.referrerID;
+               utag.data.referrerDomain   = digitalData.page.pageInfo.referrerDomain;
+               utag.data.urlID            = digitalData.page.pageInfo.urlID;
+               utag.data.pageProd         = digitalData.page.pageInfo.urlID;
+               utag.data.page_loadingTime = digitalData.page.session.pageloadEpoch;
+               utag.data.cookie_sessionID = digitalData.page.session.uSessionID;
+               utag.data.uPageViewID      = digitalData.page.session.uPageViewID;
+               utag.data.profileID        = digitalData.user.profile.uuid;
+               utag.data.IBMER_value      = digitalData.user.segment.isIBMer;
+            }
          }
          catch (error) {
             datalayer.log('+++DBDM-ERROR > datalayer.js > update: ' + error);
@@ -1280,6 +1301,25 @@ var datalayer = {
             /*--------------------Load Coremetrics Tags by Default--------------------*/
             this.util.setCoremetricsEnabled();
             digitalData.page.pageInfo.coremetrics.isEluminateLoaded = false;
+
+            /*--------------------Set UDO Variables--------------------*/
+            utag_data.category_id      = digitalData.page.category.primaryCategory;
+            utag_data.concat_clientid  = digitalData.page.pageInfo.coremetrics.clientID;
+            utag_data.cookie_domain    = digitalData.page.pageInfo.destinationDomain;
+            utag_data.destinationURL   = digitalData.page.pageInfo.destinationURL;
+            utag_data.site_id          = digitalData.page.pageInfo.ibm.siteID;
+            utag_data.iniSiteID        = digitalData.page.pageInfo.ibm.iniSiteID;
+            utag_data.page_id          = digitalData.page.pageInfo.pageID;   
+            utag_data.referrer         = digitalData.page.pageInfo.referrer;
+            utag_data.referrerID       = digitalData.page.pageInfo.referrerID;
+            utag_data.referrerDomain   = digitalData.page.pageInfo.referrerDomain;
+            utag_data.urlID            = digitalData.page.pageInfo.urlID;
+            utag_data.pageProd         = digitalData.page.pageInfo.urlID;
+            utag_data.page_loadingTime = digitalData.page.session.pageloadEpoch;
+            utag_data.cookie_sessionID = digitalData.page.session.uSessionID;
+            utag_data.uPageViewID      = digitalData.page.session.uPageViewID;
+            utag_data.profileID        = digitalData.user.profile.uuid;
+            utag_data.IBMER_value      = digitalData.user.segment.isIBMer;
          }
          catch (error) {
             datalayer.log('+++DBDM-ERROR > datalayer.js > init: ' + error);

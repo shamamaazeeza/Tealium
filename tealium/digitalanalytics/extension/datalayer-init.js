@@ -3,7 +3,7 @@
  * Extension Name: datalayer-init.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2016.12.07.0015
+ * Version       : 2016.12.12.2349
  *
  * This script creates a calls the init function of the datalayer to initiate it
  * 
