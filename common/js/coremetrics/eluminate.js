@@ -144,6 +144,32 @@ else {
       }
    })();
 
+   /*On v17 pages load jQuery version 1.7 or greater*/
+   if (typeof (jQuery) === 'undefined') {
+	   if (typeof dojo !== 'undefined'){
+		   var dojoVersionMinor = '';
+   		
+		   if (dojo.version.minor < 8){ //1.6
+			   dojoVersionMinor = '1.6';
+	   	   }
+	   	   else if (dojo.version.minor == 8){ //1.8
+	   		   dojoVersionMinor = '1.8';
+	   	   }
+	   	   else if (dojo.version.minor > 8){ //1.9
+	   		   dojoVersionMinor = '1.9';		
+	   	   }
+   		
+   		   if (dojoVersionMinor !== ''){
+   			   var jQueryFilePath = "//1.www.s81c.com/common/js/dojo/"+dojoVersionMinor+"/ibmweb/jquery.js"
+   			   var jQueryFileref = document.createElement("script")
+   			   jQueryFileref.setAttribute("type","text/javascript")
+   			   jQueryFileref.setAttribute("src", jQueryFilePath);					
+   		       var firstScriptNode = document.getElementsByTagName("script")[0];
+   			   firstScriptNode.parentNode.insertBefore(jQueryFileref, firstScriptNode);		    
+   		   }
+	   }
+   }
+
    (function ibmCoreAuto(){
 
       var ibmCMURLPathname = window.location.pathname;
@@ -2256,7 +2282,7 @@ else {
    function create_cmElement(obj){
       if(obj.ibmProductTag && obj.ibmProductTag == "true"){
          window.onload = function(){
-            if (typeof (window.pageViewAttributes) == "undefined")	ibmweb.eluminate.storeTealiumPageviewData();
+            if (typeof (window.pageViewAttributes) == "undefined")   ibmweb.eluminate.storeTealiumPageviewData();
             if (typeof (window.pageViewAttributes) != "undefined") var productAttr = window.pageViewAttributes.split("-_-", 21).join("-_-");
             if (typeof(window.ibmweb.config.eluminate.siteID) !== "undefined" && window.ibmweb.config.eluminate.siteID.toLowerCase()== "ecom" && typeof obj.serviceType != "undefined") productAttr += "-_--_--_--_--_--_--_--_--_--_-" + obj.serviceType;
             if (typeof cmCreateProductviewTag !== 'undefined') cmCreateProductviewTag(obj.proID,obj.proName,obj.proCategory,productAttr,obj.cm_vc);
@@ -2346,7 +2372,7 @@ else {
                { 
                   var switcher = false;
                   for (var att in ev.attributes)
-                  {	
+                  {  
                      if (ev.attributes[att].name == 'onclick' && ev.attributes[att].value.indexOf('ibmStats.event') > -1 )
                      {
                         switcher = true;
@@ -2638,7 +2664,7 @@ else {
                      _conf.siteID = window.utag.data["site_id"] || "";
 
                      if (_conf.siteID.toLowerCase() == "ecom") {
-                        window.cmTagQueue.push(['cmSetupNormalization', 'krypto-_-krypto']);	
+                        window.cmTagQueue.push(['cmSetupNormalization', 'krypto-_-krypto']); 
                      }
                   }
                }
