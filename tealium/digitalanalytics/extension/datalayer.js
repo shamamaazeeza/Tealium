@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2016.12.12.2349
+ * Version       : 2016.12.18.1626
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -13,38 +13,6 @@
  *        
  */
 var tmeid="datalayer.js";
-
-/*--------------------Page Events Handling: ibmStats.event--------------------*/
-function checkMarketingData() {
-   try {
-      var modify_siteId = null;
-      if (typeof(utag) !== "undefined" && typeof(utag.data) !== "undefined" && typeof(utag.data.concat_clientid) !== "undefined") {
-         modify_siteId = utag.data.concat_clientid;
-         var x = utag.data.concat_clientid.substring(0,utag.data.concat_clientid.indexOf('|'));
-         if (typeof window.ibm_global_data !== "undefined" && typeof ibm_global_data["Site ID"] != "undefined") {
-            if (utag.data['IBMER_value'] == "1") {
-               modify_siteId = x + "|" + window.ibm_global_data["Site ID"] + "_I";
-            }
-            else if (window.ibm_global_data["Site ID"] !== undefined) {
-               modify_siteId = x + "|" + window.ibm_global_data["Site ID"];
-            }
-         }
-      }
-      return modify_siteId;
-   } 
-   catch (error) {
-      console.error('+++DBDM-ERROR > marketing-events.js > checkMarketingData: ' + error);
-   }
-}
-
-function setCookie(name, value){
-   document.cookie=name + "=" + escape(value) + "; path=/";
-}
-
-function getCookie(name) {
-   match = document.cookie.match(new RegExp(name + '=([^;]+)'));
-   if (match) return match[1];
-}
 
 /*--------------------Initialize all Digital Data Objects--------------------*/
 var datalayer = {
@@ -83,8 +51,8 @@ var datalayer = {
                return;
             }
             else if (typeof(datalayer.isLogEnabled) === "undefined") {
-               /* See if the utagdb cookie is set to true to enable logging - This is based on Tealium's */
-               datalayer.isLogEnabled = ((document.cookie.indexOf('utagdb=true') >= 0) ? true : false);
+               /* See if either of the dldb or utagdb cookies are set to true, if so enable logging - This is based on Tealium's */
+               datalayer.isLogEnabled = ((document.cookie.indexOf('dldb=true') >= 0) ? true : ((document.cookie.indexOf('utagdb=true') >= 0) ? true : false));
             }
             if (datalayer.isLogEnabled) {
                b = {};
@@ -352,6 +320,27 @@ var datalayer = {
             }
          },
 
+         /*--------------------Add setCookie function--------------------*/
+         setCookie : function (name, value) {
+            try {
+               document.cookie=name + "=" + escape(value) + "; path=/";
+            }
+            catch (error) {
+               datalayer.log('+++DBDM-ERROR > datalayer.js > setCookie: ' + error);
+            }
+         },        
+
+         /*--------------------Add getCookie function--------------------*/
+         getCookie : function (name) {
+            try {
+               match = document.cookie.match(new RegExp(name + '=([^;]+)'));
+               if (match) return match[1];
+            }
+            catch (error) {
+               datalayer.log('+++DBDM-ERROR > datalayer.js > getCookie: ' + error);
+            }
+         },        
+         
          /*--------------------Set setUserInfo from DemandBase--------------------*/
          setUserInfo : function () {
             try {
@@ -894,134 +883,112 @@ var datalayer = {
             try {
                var data = new Object();
                var modifySiteID = "";
-               obj.event_name = "ibmStatsEvent_element";
 
-               obj.evTriggerTime = new Date().getTime();
+               obj.eventTriggerTime = new Date().getTime();
 
                /* RTC: Story# 958230, Defect# 967620, and Defect# 967890. Adding code snippet in Support of Conversion Events. */
-               if (obj.type) {
-                  /* set type of conversion for old code */
-                  if (obj.type == "conversion" ) {
-                     obj.ibmConversion = "true";
-                  }
-                  else if (obj.type == "element" ) {
-                     obj.ibmElementTag = "true";
-                  }
-                  else if (obj.type == "product" ) {
-                     obj.ibmProductTag = "true";
-                  }
-                  /* set value to old elements of object */
-                  obj.convtype       = obj.eventAction        || "";
-                  obj.ibmEV          = obj.primaryCategory    || "";
-                  obj.ibmEvAction    = obj.eventName          || "";
-                  obj.ibmEvName      = obj.eventCategoryGroup || "";
-                  obj.ibmEvGroup     = obj.executionPath      || "";
-                  obj.ibmEvModule    = obj.eventCallBackCode  || "";
-                  obj.ibmEvSection   = obj.execPathReturnCode || "";
-                  obj.ibmEvTarget    = obj.targetURL          || "";
-                  obj.ibmEvLinkTitle = obj.targetTitle        || "";
-                  obj.ibmEvFileSize  = obj.targetSize         || "";
-
-                  if (typeof(obj.eventPoints) !== "undefined") {
-                     obj.point = obj.eventPoints;
-                  }
-               }
-               else {
+               if (!obj.type) {
                   /* OLD event object definition - set values to new object definition */
-                  obj.eventAction        = obj.convtype       || "";
-                  obj.primaryCategory    = obj.ibmEV          || "";
-                  obj.eventName          = obj.ibmEvAction    || "";
-                  obj.eventCategoryGroup = obj.ibmEvName      || "";
-                  obj.executionPath      = obj.ibmEvGroup     || "";
-                  obj.eventCallBackCode  = obj.ibmEvModule    || "";
-                  obj.execPathReturnCode = obj.ibmEvSection   || "";
-                  obj.targetURL          = obj.ibmEvTarget    || "";
-                  obj.targetTitle        = obj.ibmEvLinkTitle || "";
-                  obj.targetSize         = obj.ibmEvFileSize  || "";
-                  /* set default for type */
-                  obj.type = "element"
-               }
+                  if (obj.convtype)          {obj.eventAction        = obj.convtype          || ""; delete obj.convtype;}
+                  if (obj.ibmEV)             {obj.primaryCategory    = obj.ibmEV             || ""; delete obj.ibmEV;}
+                  if (obj.ibmEvAction)       {obj.eventName          = obj.ibmEvAction       || ""; delete obj.ibmEvAction;}
+                  if (obj.ibmEvName)         {obj.eventCategoryGroup = obj.ibmEvName         || ""; delete obj.ibmEvName;}
+                  if (obj.point)             {obj.eventPoints        = obj.point             || ""; delete obj.point;}
+                  if (obj.ibmEvGroup)        {obj.executionPath      = obj.ibmEvGroup        || ""; delete obj.ibmEvGroup;}
+                  if (obj.ibmEvModule)       {obj.eventCallBackCode  = obj.ibmEvModule       || ""; delete obj.ibmEvModule;}
+                  if (obj.ibmEvSection)      {obj.execPathReturnCode = obj.ibmEvSection      || ""; delete obj.ibmEvSection;}
+                  if (obj.ibmEvTarget)       {obj.targetURL          = obj.ibmEvTarget       || ""; delete obj.ibmEvTarget;}
+                  if (obj.ibmEvLinkTitle)    {obj.targetTitle        = obj.ibmEvLinkTitle    || ""; delete obj.ibmEvLinkTitle;}
+                  if (obj.ibmEvFileSize)     {obj.targetSize         = obj.ibmEvFileSize     || ""; delete obj.ibmEvFileSize;}
+                  if (obj.ibmEvVidStatus)    {obj.eventVidStatus     = obj.ibmEvVidStatus    || ""; delete obj.ibmEvVidStatus;}
+                  if (obj.ibmEvVidTimeStamp) {obj.eventVidTimeStamp  = obj.ibmEvVidTimeStamp || ""; delete obj.ibmEvVidTimeStamp;}
+                  if (obj.ibmEvVidLength)    {obj.eventVidLength     = obj.ibmEvVidLength    || ""; delete obj.ibmEvVidLength;}
+                  if (obj.proID)             {obj.productID          = obj.proID             || ""; delete obj.proID;}
+                  if (obj.proName)           {obj.productName        = obj.proName           || ""; delete obj.proName;}
+                  if (obj.cm_vc)             {obj.virtualCategory    = obj.cm_vc             || ""; delete obj.cm_vc;}
+                  if (obj.serviceType)       {obj.productServiceType = obj.serviceType       || ""; delete obj.serviceType;}
+                  if (obj.proCategory)       {obj.primaryCategory    = obj.proCategory       || ""; delete obj.proCategory;}
 
-               if(obj.ibmConversion && obj.ibmConversion == "true") {
-                  if (!obj.point && obj.convtype && obj.convtype == "1") obj.point = '10';
-                  if (!obj.point && obj.convtype && obj.convtype == "2") obj.point = '20';
-                  obj.event_name = "ibmStatsEvent_conversion";
-                  obj.type = "conversion"
-               } 
-               else if(obj.ibmProductTag && obj.ibmProductTag == "true") {
-                  obj.event_name = "ibmStatsEvent_product";
-                  obj.type = "product"
-               }
-               else if (obj.primaryCategory.toLowerCase().indexOf("rich_media_service") !== -1 || obj.primaryCategory.toLowerCase().indexOf("video player") !== -1) {
-                  obj.type = "video";
+                  if (obj.ibmConversion && obj.ibmConversion == "true") {
+                     if (!obj.eventPoints && obj.eventAction && obj.eventAction == "1") obj.eventPoints = '10';
+                     if (!obj.eventPoints && obj.eventAction && obj.eventAction == "2") obj.eventPoints = '20';
+                     obj.type = "conversion";
+                  } 
+                  else if (obj.ibmProductTag && obj.ibmProductTag == "true") {
+                     obj.type = "product";
+                  } 
+                  else if (obj.primaryCategory.toLowerCase().indexOf("rich_media_service") !== -1 || obj.primaryCategory.toLowerCase().indexOf("video player") !== -1) {
+                     obj.type = "video";
+                  } 
+                  else {
+                     obj.type = "element";
+                  }
                }
                
+               /* Set name and ID for event */
+               if (obj.type === "conversion") {
+                  obj.event_name = "ibmStatsEvent_conversion";
+                  obj.cm_ConversionEventTag_cid = obj.eventName;
+               }
+               else if (obj.type === "pageclick") {
+                  obj.event_name = "ibmStatsEvent_element";
+                  obj.cm_ElementTag_eid = obj.eventName;
+               }
+               else if (obj.type === "product") {
+                  obj.event_name = "ibmStatsEvent_product";
+               }
+               else if (obj.type === "video" ) {
+                  obj.event_name = "ibmStatsEvent_product";
+               }
+               else {
+                  obj.event_name = "ibmStatsEvent_element";
+                  obj.cm_ElementTag_eid = datalayer.util.parseEventNameGen(obj.eventName,50);                  
+               }
+              
                /* Set EventType for Data Layer */
                obj.eventType = obj.type;
+               obj.destinationURL = digitalData.page.pageInfo.destinationURL;
 
-               /* Make sure that the eventName is truncated if needed to 50 characters */
-               obj.eventNameAttr = obj.ibmEvActionAttribute = obj.eventName;
-               if(obj.type === "element" || obj.type == "pageclick") {
-                  obj.eventName = obj.ibmEvAction = datalayer.util.parseEventNameGen(obj.eventName,50);
-               }
-
+               /* Ensure to replace coremetrics attribute separator '-_-' with '---' to avoid shifting */
                var statsObjListString = JSON.stringify(obj).replace(/-_-/g,"---");
                data = JSON.parse(statsObjListString);
-               data.page_loadingTime  = digitalData.page.session.pageloadEpoch;
-               data.IBMER_value       = digitalData.user.segment.isIBMer;
-               data.destinationURL    = digitalData.page.pageInfo.destinationURL.replace(/-_-/g,"---");
-               data.uPageViewID       = digitalData.page.session.uPageViewID;
-               data.category_id       = digitalData.page.category.primaryCategory;
-               data.concat_clientid   = modifySiteID;
-               data.site_id           = digitalData.page.pageInfo.ibm.siteID;
-               data.iniSiteID         = digitalData.page.pageInfo.ibm.iniSiteID;
-               data.urlID             = digitalData.page.pageInfo.urlID;
-
-               if (data.event_name !== "ibmStatsEvent_product") {
-                  modifySiteID = checkMarketingData();
-                  if (typeof window.ibm_global_data !== "undefined" && typeof ibm_global_data["Site ID"] != "undefined" && 
-                        typeof data.ibmEV !== "undefined" && (data.ibmEV.toLowerCase().indexOf("rich_media_service") !== -1 || data.ibmEV.toLowerCase().indexOf("video player") !== -1)) {
-                     data.primaryCategory = data.ibmEV = "VIDEO - " + modifySiteID.substring(modifySiteID.indexOf('|')+1,modifySiteID.length);
-                     if(data.ibmEvAction.toLowerCase() == "start" || data.ibmEvAction.toLowerCase() == "played") {
+ 
+               if (data.type !== "product") {
+                  if (data.type == "video") {
+                     data.primaryCategory = "VIDEO - " + digitalData.page.pageInfo.ibm.siteID;
+                     if (data.eventName.toLowerCase() == "start" || data.eventName.toLowerCase() == "played") {
                         var dataConversion = data;
                         dataConversion.event_name="ibmStatsEvent_conversion";
-                        dataConversion.eventCategoryGroup = dataConversion.ibmEvName = dataConversion.ibmEvName + " - Play";
-                        dataConversion.eventAction = dataConversion.convtype = 1;
-                        datalayer.log('+++DBDM-LOG > datalayer.js > ibmStatsEventHandler: Event captured - eventInfo: \n' + JSON.stringify(dataConversion, null, 2));
-                        utag.link(dataConversion);
+                        dataConversion.eventCategoryGroup = dataConversion.eventCategoryGroup + " - Play";
+                        dataConversion.eventAction = 1;
+                        datalayer.log('+++DBDM-LOG > datalayer.js > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
+                        utag.link(dataConversion);                        
                      }
-                     else if (obj.ibmEvAction.toLowerCase() == "finish" || obj.ibmEvAction.toLowerCase() == "ended") {
+                     else if (data.eventName.toLowerCase() == "finish" || data.eventName.toLowerCase() == "ended") {
                         var dataConversion = data;
                         dataConversion.event_name="ibmStatsEvent_conversion";
-                        dataConversion.eventCategoryGroup = dataConversion.ibmEvName = dataConversion.ibmEvName + " - End";
-                        dataConversion.eventAction = dataConversion.convtype = 2;
-                        datalayer.log('+++DBDM-LOG > datalayer.js > ibmStatsEventHandler: Event captured - eventInfo: \n' + JSON.stringify(dataConversion, null, 2));
+                        dataConversion.eventCategoryGroup = dataConversion.eventCategoryGroup + " - End";
+                        dataConversion.eventAction = 2;
+                        datalayer.log('+++DBDM-LOG > datalayer.js > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
                         utag.link(dataConversion);
                      }
                   }
-                  datalayer.log('+++DBDM-LOG > datalayer.js > ibmStatsEventHandler: Event captured - eventInfo: \n' + JSON.stringify(data, null, 2));
+                  datalayer.log('+++DBDM-LOG > datalayer.js > ibmStatsEventHandler: Event captured - ' + data.type + ': \n' + JSON.stringify(data, null, 2));
                   utag.link(data);
                }
                else {
-                  /* for generating product view tag */
-                  if (typeof(window.pageViewAttributes) !== "undefined") {
-                     /* For checking the Product Id from previous ECOM pages */
-                     if (data.iniSiteID.toLowerCase().indexOf("ecom") !== -1 || data.concat_clientid.toLowerCase().indexOf("ecom") !== -1) {
-                        var prevProdID = getCookie("prevProdID");
-                        if (prevProdID !== null && typeof(digitalData.product[0].productInfo.productID) !== "undefined") {
-                           if (digitalData.product[0].productInfo.productID == prevProdID) data.event_name = "doNotFire";
-                        }
-                        setCookie("prevProdID", obj.proID);
+                  /* For checking the Product Id from previous ECOM pages */
+                  if (digitalData.page.pageInfo.ibm.iniSiteID.toLowerCase().indexOf("ecom") !== -1 || digitalData.page.pageInfo.ibm.siteID.toLowerCase().indexOf("ecom") !== -1) {
+                     var prevProdID = datalayer.util.getCookie("prevProdID");
+                     if (prevProdID !== null && typeof(digitalData.product) !== "undefined" && typeof(digitalData.product[0].productInfo.productID) !== "undefined") {
+                        if (digitalData.product[0].productInfo.productID == prevProdID) data.event_name = "doNotFire";
                      }
-                     var x = window.pageViewAttributes.split("-_-");
-                     for (var k=0; k<= x.length; k++) {
-                        var pr_y = "productTag_a"+k;
-                        if (x[k] !== "undefined" || x[k] !== "")   data[pr_y] = x[k];
-                     }
-                     if (typeof data.serviceType !== "undefined") data["productTag_serviceType"] = data.serviceType;
+                     datalayer.util.setCookie("prevProdID", obj.productID);
                   }
-                  datalayer.log('+++DBDM-LOG > datalayer.js > ibmStatsEventHandler: Event captured - eventInfo: \n' + JSON.stringify(data, null, 2));
-                  if (data.event_name !== "doNotFire") utag.link(data);
+                  if (data.event_name !== "doNotFire") {
+                     datalayer.log('+++DBDM-LOG > datalayer.js > ibmStatsEventHandler: Event captured - ' + data.type + ': \n' + JSON.stringify(data, null, 2));
+                     utag.link(data);
+                  }
                }
                /* print out the data layer available for the event */
                datalayer.log(data);
@@ -1061,7 +1028,7 @@ var datalayer = {
 
          /*--------------------Finalize Data Layer Call Back Function --------------------*/
          finalizeDataLayer : function () {
-            try {		   
+            try {
                if (!digitalData.page.isDataLayerReady) {
                   /* Set Data Layer Ready and trigger Event */
                   digitalData.page.isDataLayerReady = true;
