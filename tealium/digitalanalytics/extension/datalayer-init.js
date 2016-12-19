@@ -1,9 +1,9 @@
-/*
+/**
  * Id            : tm-v1.0/tealium/digitalanalytics/extension/datalayer-init.js
  * Extension Name: datalayer-init.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2016.12.12.2349
+ * Version       : 2016.12.18.2044
  *
  * This script creates a calls the init function of the datalayer to initiate it
  * 

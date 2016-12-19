@@ -1,9 +1,9 @@
-/*
+/**
  * Id            : tm-v1.0/tealium/digitalanalytics/extension/datalayer.js
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2016.12.18.1626
+ * Version       : 2016.12.18.2044
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -919,6 +919,9 @@ var datalayer = {
                   } 
                   else if (obj.primaryCategory.toLowerCase().indexOf("rich_media_service") !== -1 || obj.primaryCategory.toLowerCase().indexOf("video player") !== -1) {
                      obj.type = "video";
+                     var ibmEvAction = obj.eventName;
+                     obj.eventName = obj.eventCategoryGroup;
+                     obj.eventCategoryGroup = ibmEvAction;
                   } 
                   else {
                      obj.type = "element";
@@ -928,21 +931,22 @@ var datalayer = {
                /* Set name and ID for event */
                if (obj.type === "conversion") {
                   obj.event_name = "ibmStatsEvent_conversion";
-                  obj.cm_ConversionEventTag_cid = obj.eventName;
+                  obj.cm_ConversionEventTag_cid = obj.eventName.toUpperCase();
                }
                else if (obj.type === "pageclick") {
                   obj.event_name = "ibmStatsEvent_element";
-                  obj.cm_ElementTag_eid = obj.eventName;
+                  obj.cm_ElementTag_eid = datalayer.util.parseEventNameGen(obj.eventName,50);
                }
                else if (obj.type === "product") {
                   obj.event_name = "ibmStatsEvent_product";
                }
                else if (obj.type === "video" ) {
-                  obj.event_name = "ibmStatsEvent_product";
+                  obj.event_name = "ibmStatsEvent_element";
+                  obj.cm_ElementTag_eid = datalayer.util.parseEventNameGen(obj.eventName,50);
                }
                else {
                   obj.event_name = "ibmStatsEvent_element";
-                  obj.cm_ElementTag_eid = datalayer.util.parseEventNameGen(obj.eventName,50);                  
+                  obj.cm_ElementTag_eid = datalayer.util.parseEventNameGen(obj.eventName,50);
                }
               
                /* Set EventType for Data Layer */
@@ -955,19 +959,21 @@ var datalayer = {
  
                if (data.type !== "product") {
                   if (data.type == "video") {
-                     data.primaryCategory = "VIDEO - " + digitalData.page.pageInfo.ibm.siteID;
-                     if (data.eventName.toLowerCase() == "start" || data.eventName.toLowerCase() == "played") {
-                        var dataConversion = data;
+                     /* data.primaryCategory = "VIDEO - " + digitalData.page.pageInfo.ibm.siteID; */
+                     if (data.eventVidTimeStamp.toString().toLowerCase() == "start") {
+                        var dataConversion = JSON.parse(JSON.stringify(data));
                         dataConversion.event_name="ibmStatsEvent_conversion";
-                        dataConversion.eventCategoryGroup = dataConversion.eventCategoryGroup + " - Play";
+                        dataConversion.cm_ConversionEventTag_cid = dataConversion.eventName.toUpperCase();
+                        delete dataConversion.cm_ElementTag_eid;
                         dataConversion.eventAction = 1;
                         datalayer.log('+++DBDM-LOG > datalayer.js > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
                         utag.link(dataConversion);                        
                      }
-                     else if (data.eventName.toLowerCase() == "finish" || data.eventName.toLowerCase() == "ended") {
-                        var dataConversion = data;
+                     else if (data.eventVidTimeStamp.toString().toLowerCase() == "end") {
+                        var dataConversion = JSON.parse(JSON.stringify(data));
                         dataConversion.event_name="ibmStatsEvent_conversion";
-                        dataConversion.eventCategoryGroup = dataConversion.eventCategoryGroup + " - End";
+                        dataConversion.cm_ConversionEventTag_cid = dataConversion.eventName.toUpperCase();
+                        delete dataConversion.cm_ElementTag_eid;
                         dataConversion.eventAction = 2;
                         datalayer.log('+++DBDM-LOG > datalayer.js > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
                         utag.link(dataConversion);
