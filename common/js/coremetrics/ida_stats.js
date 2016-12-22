@@ -1,7 +1,7 @@
 /**
  * Id         : /tm-v1.0/common/js/coremetrics/ida_stats.js
  * Scope      : All v18+ IBM pages
- * Version    : 2016.12.12.2349
+ * Version    : 2016.12.22.1641
  *
  * Script used to load Tag Management (Tealium) on IBM web pages 
  *
@@ -13,9 +13,17 @@
 /*----------------------Ensure that old browsers don't break when referencing the console-----------------------*/
 if (!window.console) { window.console = {log: function(){}, error:function(){}, warn:function(){} }; }
 
-if (window.isIdaStatsLoaded) {
-   /* ida_stats.js has been loaded already, stop loading */
-   console.log('+++DBDM-LOG > ida_stats.js > ida_stats.js has already been loaded, exiting.');
+/* Make sure all conditions are set to run */
+if (window.isIdaStatsLoaded
+      || (typeof(window.eluminate_enabled) !== 'undefined' && !window.eluminate_enabled)
+      || (typeof(window.tealium_enabled) !== 'undefined' && !window.tealium_enabled)) {
+   if (window.isIdaStatsLoaded) {
+      /* ida_stats.js has been loaded already, stop loading */
+      console.log('+++DBDM-LOG > ida_stats.js: ida_stats.js has already been loaded, exiting.');
+   }
+   else {
+      console.log('+++DBDM-LOG > ida_stats.js: Conditions not met, exiting.');
+   }
 }
 else {
    /* Set flag that code has been loaded */
@@ -318,15 +326,6 @@ else {
             }
          }
    };
-
-   /*---------------------------------------------------MAIN FUNCTION---------------------------------------------------------*/
-   if (typeof(window.ida_eluminate_enabled) !=='undefined' || typeof(window.tealium_enabled) !=='undefined') {
-      /* we search if this variable is set on false */
-      if (!window.ida_eluminate_enabled || !window.tealium_enabled) {/*do nothing*/}
-      else v16elu.init();
-   } 
-   else {
-      /* we are enebled for all pages */
-      v16elu.init();
-   }
+   
+   v16elu.init();
 }

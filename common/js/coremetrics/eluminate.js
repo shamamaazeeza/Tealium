@@ -1,7 +1,7 @@
 /**
  * Id         : /tm-v1.0/common/js/coremetrics/eluminate.js
  * Scope      : All v17 IBM pages
- * Version    : 2016.12.12.2349
+ * Version    : 2016.12.22.1641
  *
  * Script used to load Tag Management (Tealium) on IBM web pages 
  *
@@ -13,9 +13,19 @@
 /*----------------------Ensure that old browsers don't break when referencing the console-----------------------*/
 if (!window.console) { window.console = {log: function(){}, error:function(){}, warn:function(){} }; }
 
-if (window.isIdaStatsLoaded) {
-   /* ida_stats.js has been loaded already, stop loading */
-   console.log('+++DBDM-LOG > ida_stats.js > ida_stats.js has already been loaded, exiting.');
+/* Make sure all conditions are set to run */
+if (window.isIdaStatsLoaded
+      || (typeof(window.eluminate_enabled) !== 'undefined' && !window.eluminate_enabled)
+      || (typeof(window.tealium_enabled) !== 'undefined' && !window.tealium_enabled)
+      || (typeof(ibmweb) !== 'undefined' && typeof(ibmweb.config) !== 'undefined' && typeof(ibmweb.config.config) !== 'undefined' && ibmweb.config.config !== 'www')
+      || (navigator.platform.toLowerCase().search('aix') >= 0)) {
+   if (window.isIdaStatsLoaded) {
+      /* ida_stats.js has been loaded already, stop loading */
+      console.log('+++DBDM-LOG > eluminate.js: ida_stats.js has already been loaded, exiting.');
+   }
+   else {
+      console.log('+++DBDM-LOG > eluminate.js: Conditions not met, exiting.');
+   }
 }
 else {
    /* Set flag that code has been loaded */
@@ -146,28 +156,28 @@ else {
 
    /*On v17 pages load jQuery version 1.7 or greater*/
    if (typeof (jQuery) === 'undefined') {
-	   if (typeof dojo !== 'undefined'){
-		   var dojoVersionMinor = '';
-   		
-		   if (dojo.version.minor < 8){ //1.6
-			   dojoVersionMinor = '1.6';
-	   	   }
-	   	   else if (dojo.version.minor == 8){ //1.8
-	   		   dojoVersionMinor = '1.8';
-	   	   }
-	   	   else if (dojo.version.minor > 8){ //1.9
-	   		   dojoVersionMinor = '1.9';		
-	   	   }
-   		
-   		   if (dojoVersionMinor !== ''){
-   			   var jQueryFilePath = "//1.www.s81c.com/common/js/dojo/"+dojoVersionMinor+"/ibmweb/jquery.js"
-   			   var jQueryFileref = document.createElement("script")
-   			   jQueryFileref.setAttribute("type","text/javascript")
-   			   jQueryFileref.setAttribute("src", jQueryFilePath);					
-   		       var firstScriptNode = document.getElementsByTagName("script")[0];
-   			   firstScriptNode.parentNode.insertBefore(jQueryFileref, firstScriptNode);		    
-   		   }
-	   }
+      if (typeof dojo !== 'undefined'){
+         var dojoVersionMinor = '';
+
+         if (dojo.version.minor < 8){ //1.6
+            dojoVersionMinor = '1.6';
+         }
+         else if (dojo.version.minor == 8){ //1.8
+            dojoVersionMinor = '1.8';
+         }
+         else if (dojo.version.minor > 8){ //1.9
+            dojoVersionMinor = '1.9';		
+         }
+
+         if (dojoVersionMinor !== ''){
+            var jQueryFilePath = "//1.www.s81c.com/common/js/dojo/"+dojoVersionMinor+"/ibmweb/jquery.js"
+            var jQueryFileref = document.createElement("script")
+            jQueryFileref.setAttribute("type","text/javascript")
+            jQueryFileref.setAttribute("src", jQueryFilePath);					
+            var firstScriptNode = document.getElementsByTagName("script")[0];
+            firstScriptNode.parentNode.insertBefore(jQueryFileref, firstScriptNode);		    
+         }
+      }
    }
 
    (function ibmCoreAuto(){
@@ -2702,20 +2712,6 @@ else {
             });
          }
    };
-
-   if (ibmweb.config.config == 'www') {
-
-      if (navigator.platform.search('AIX') < 0) { // we disabling coremetrics for AIX server
-
-         cmSetClientID = function(){};
-         if (typeof(window.eluminate_enabled) !=='undefined' || typeof(window.tealium_enabled) !=='undefined') {
-            /* we search if this variable is set on false */
-            if (!window.eluminate_enabled || !window.tealium_enabled) {/*do nothing*/}
-            else ibmweb.eluminate.init();
-         } else {
-            /*  we are enabled for all pages */
-            ibmweb.eluminate.init();
-         }
-      }
-   }
+   
+   ibmweb.eluminate.init();
 }
