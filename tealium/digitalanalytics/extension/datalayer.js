@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2016.12.18.2044
+ * Version       : 2017.01.23.0144
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -20,7 +20,7 @@ var datalayer = {
          /* Registration Forms - IWM */
          {"pathNameSubstring": "/marketing/iwm/",               "qsParameter" : ["source","S_PKG"]},
          /* Registration Forms - IBMid */
-         {"pathNameSubstring": "/account/us-en/signup",         "qsParameter" : ["a", "trail", "CatalogName", "quantity", "partNumber", "source", "pkg"]},
+         {"pathNameSubstring": "/account/us-en/signup",         "qsParameter" : ["a", "trial", "catalogName", "quantity", "partNumber", "source", "pkg"]},
          /* Enterprise Search */
          {"pathNameSubstring": "/search/",                      "qsParameter" : ["q","cc","lang","hpp","o"]},
          /* MAM */
@@ -31,15 +31,26 @@ var datalayer = {
          /* IBM ID - SSO */
          {"pathNameSubstring": "/account/profile",              "qsParameter" : ["page", "okURL"]},
          /* Event Registration */
-         {"pathNameSubstring": "/events/wwe/grp",               "qsParameter" : ["openform:cmd","OpenForm:cmd","OpenPage:cmd","seminar","locale"]},
+         {"pathNameSubstring": "/events/wwe/grp",               "qsParameter" : ["OpenForm:cmd","OpenPage:cmd","seminar","locale"]},
          /* Case Studies */
-         {"pathNameSubstring": "/software/businesscasestudies", "qsParameter" : ["synkey"]}, ],
+         {"pathNameSubstring": "/software/businesscasestudies", "qsParameter" : ["synkey"]}, 
+      ],
          
       DOWNLOADTYPES : "bqy,doc,dot,exe,flv,jpg,png,mov,mp3,pdf,pps,ppt,rss,sh,swf,tar,txt,wmv,xls,xml,zip,avi,eps,gif,lwp,mas,mp4,pot,prz,rtf,wav,wma,123,odt,ott,sxw,stw,docx,odp,otp,sxi,sti,pptx,ods,ots,sxc,stc,xlsx",
       
       DOMAINLIST    : "ibm.co,ibm.com,ibmcloud.com,bluemix.net,mybluemix.net,softlayer.com,ibm.biz,jazz.net,lotuslive.com,cognos.com,webdialogs.com,servicemanagementcenter.com,xtify.com,ibmdw.net,smartercitiescloud.com",
       
       TESTDOMAINS   : "dev.nwtw.ibm.com,testdata.coremetrics.com,localhost,wwwbeta-sso.toronto.ca.ibm.com",
+      
+      UDOTODDOREFRESH : {
+         /* List of variables from DLE that need to be updated in DDO */
+         "ddo.p.pi.ibm.siteID"            : "digitalData.page.pageInfo.ibm.siteID",
+         "ddo.p.c.primaryCategory"        : "digitalData.page.category.primaryCategory",
+         "ddo.p.c.ibm.globalBrandTableL10": "digitalData.page.category.ibm.globalBrandTableL10",
+         "ddo.p.c.ibm.globalBrandTableL17": "digitalData.page.category.ibm.globalBrandTableL17",
+         "ddo.p.c.ibm.globalBrandTableL20": "digitalData.page.category.ibm.globalBrandTableL20",
+         "ddo.p.c.ibm.globalBrandTableL30": "digitalData.page.category.ibm.globalBrandTableL30", 
+      },
       
       /* To store all messages being sent by the solution */
       logFile       : [],
@@ -109,7 +120,8 @@ var datalayer = {
          parseQueryString : function (fullURL) {
             try {
                var paramsObject = {},
-               queryString = fullURL.substring(fullURL.indexOf("?") + 1),
+               /* 2017-01-12 - jleon: added condition to detect and exclude anchor (hash) data */
+               queryString = fullURL.substring(fullURL.indexOf("?")+1, (fullURL.lastIndexOf("#") !== -1)?fullURL.lastIndexOf("#"):fullURL.length),
                queries, temp, i, l,
                queries = queryString.split("&");
                for (i = 0, l = queries.length; i < l; i++) {
@@ -167,28 +179,28 @@ var datalayer = {
                   }
 
                   /* Add different Query string parameters */
-                  var qs = this.parseQueryString(parserURL.href);
+                  /* 2016-11-14 - jleon: Adding statement to lowercase query strings and values */
+                  var qs = this.parseQueryString(parserURL.href.toLowerCase());
                   if (digitalData.page.attribute.pageidQueryStrings) {
                      var addQSValue = "";
                      for (var k=0; k < digitalData.page.attribute.pageidQueryStrings.length; k++) {
-                        var q = digitalData.page.attribute.pageidQueryStrings[k];
+                        var q = digitalData.page.attribute.pageidQueryStrings[k].toLowerCase();
                         /* 2016-11-13 - jleon: Adding logic to identify query string that are commands to the web app. 
                          * This is to support the GRP events URLs
                          */
-                        /* 2016-11-14 - jleon: Adding statement to lowercase query strings and values */
                         if (q.indexOf(":cmd") !== -1 && qs.hasOwnProperty(q.split(":")[0])) {
                            addQSValue += q.split(":")[0].toLowerCase() + "&";
                         }
                         else if (typeof(qs[q]) !== "undefined") {
-                           addQSValue += q.toLowerCase() + "=" + qs[q].toLowerCase() + "&";
+                           addQSValue += q + "=" + qs[q] + "&";
                         }
                      }
                      addQSValue = addQSValue.replace(/&$/,"");
                      pathName = (addQSValue !== "") ? (pathName + "?" + addQSValue) : pathName;
                   }
 
-                  /* remove trailing slash, question mark, or hash(if any) */
-                  pathName = pathName.replace(/[\/?#&]+$/, "");
+                  /* remove trailing slash, question mark, hash, or spaces (if any) */
+                  pathName = pathName.replace(/[/?#&]+$/, "").trim();
                   returnValue = parserURL.hostname + pathName;
                }
                return(returnValue);
@@ -576,6 +588,11 @@ var datalayer = {
          /*--------------------setting Client ID--------------------*/
          setClientID : function () {
             try {
+               /* Check if we have the latest value for siteID */
+               if (typeof(utag) !== "undefined" && typeof(utag.data) !== "undefined" && typeof(utag2) !== "undefined") {
+                  digitalData.page.pageInfo.ibm.siteID = utag.data[utag2.getShortName("digitalData.page.pageInfo.ibm.siteID")] || digitalData.page.pageInfo.ibm.siteID || "IBMTESTWWW";
+               }
+               
                /* If the siteID prefix or suffix is "test" or if the full domain of the hostname is in 
                 * the TESTDOMAINS array then set Client ID to 80200000 (test instance)
                 */
@@ -596,57 +613,85 @@ var datalayer = {
             try {
                window.IBMPageCategory = new String();
                if (typeof(digitalData.page.category.primaryCategory) !== "undefined") {
-                  window.IBMPageCategory = digitalData.page.category.primaryCategory;
+                  IBMPageCategory = digitalData.page.category.primaryCategory;
                }
                else if (typeof(digitalData.page.category.categoryID) !== "undefined") {
                   /* for old DDO structure */
-                  window.IBMPageCategory = digitalData.page.category.categoryID;
+                  IBMPageCategory = digitalData.page.category.categoryID;
                }
                else {
-                  window.IBMPageCategory = digitalData.util.meta["ibm.wtmcategory"] || "null";
+                  IBMPageCategory = digitalData.util.meta["ibm.wtmcategory"] || "null";
                }
                /* set category ID value from page URL(requested for Watson pages) */
                if (typeof (digitalData.util.qp.Category) !== "undefined") {
-                  window.IBMPageCategory = decodeURIComponent(digitalData.util.qp.Category);
+                  IBMPageCategory = decodeURIComponent(digitalData.util.qp.Category);
                }
 
                if (document.domain.indexOf("ibm.com") !== -1 && digitalData.user.segment.isIBMer) {
                   if (digitalData.page.pageInfo.ibm.siteID.substring(0,3) == "EST" || digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "serveng" 
                      || digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "extconnections"  || digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "extconnectionstest") {
-                     window.IBMPageCategory += "IBMER";
+                     IBMPageCategory += "IBMER";
                   }
                   else {
-                     window.IBMPageCategory = "IBMER";
+                     IBMPageCategory = "IBMER";
                   }
                }
                else if (document.domain.indexOf("ibm.com") == -1 && digitalData.user.segment.isIBMer) {
                   /* for non ibm.com */
-                  window.IBMPageCategory += "IBMER";
+                  IBMPageCategory += "IBMER";
                }
                if (typeof(digitalData.page.pageInfo.ibm.siteID) !== "undefined" && digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "error") {
-                  window.IBMPageCategory = "error";
+                  IBMPageCategory = "error";
                }
                if (digitalData.page.pageInfo.ibm.siteID.substring(0,4).toLowerCase() == "ecom") {
-                  window.IBMPageCategory = digitalData.page.pageInfo.ibm.siteID + window.IBMPageCategory;
+                  IBMPageCategory = digitalData.page.pageInfo.ibm.siteID + IBMPageCategory;
                }
                /* adding DC.Language value category id for Support Content delivery pages */
                if ((typeof digitalData.page.pageInfo.ibm.siteID !== "undefined") && (digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estdbl" 
                   || digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estkcs" || digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estqst")) {
                   if (digitalData.util.meta["dc.language"] !== null) {
-                     window.IBMPageCategory += "-" + digitalData.util.meta["dc.language"];
+                     IBMPageCategory += "-" + digitalData.util.meta["dc.language"];
                   }
                   else if (digitalData.page.pageInfo.language) {
-                     window.IBMPageCategory += "-" + digitalData.page.pageInfo.language;
+                     IBMPageCategory += "-" + digitalData.page.pageInfo.language;
                   }
                }
                /* 2016-07-14 - shazeeza: RTC Story# 958212 */
-               digitalData.page.category.primaryCategory = window.IBMPageCategory;
+               digitalData.page.category.primaryCategory = IBMPageCategory;
             }
             catch (error) {
                datalayer.log('+++DBDM-ERROR > datalayer.js > setCategoryID: ' + error);
             }
          },
 
+         /*--------------------setting Search Terms from Enterprise Search--------------------*/
+         setSearchTerms: function () {
+            try {
+               if (digitalData.util.meta["IBM.SearchTerm"] !== null) {
+                  digitalData.page.pageInfo.onsiteSearchTerm = String(digitalData.util.meta["IBM.SearchTerm"]) + "";
+               } else if (typeof(window.ibmSrchTerm) !== "undefined") {
+                  digitalData.page.pageInfo.onsiteSearchTerm = window.ibmSrchTerm;
+               } else if (document.getElementById('catalog_search_result_information') !== null) {
+                  var str = (document.getElementById('catalog_search_result_information').innerHTML).replace(/[""''{}\s]+/g, '').split(',');
+                  for (var i = 0; i < str.length; i++) {
+                     if (str[i].split(':')[0] == 'searchTerms')
+                        digitalData.page.pageInfo.onsiteSearchTerm = str[i].split(':')[1];
+                  }
+               }
+
+               if (typeof(window.ibmSrchRslts) !== "undefined") {
+                  digitalData.page.pageInfo.onsiteSearchResult = window.ibmSrchRslts;
+               } else if (document.getElementById('catalog_search_result_information') !== null) {
+                  var str = (document.getElementById('catalog_search_result_information').innerHTML).replace(/[""''{}\s]+/g, '').split(',');
+                  for (var i = 0; i < str.length; i++) {
+                     if (str[i].split(':')[0] == 'totalResultCount')
+                        digitalData.page.pageInfo.onsiteSearchResult = str[i].split(':')[1];
+                  }
+               }
+            } catch (error) {
+               datalayer.log('+++DBDM-ERROR > datalayer.js > setSearchTerms: ' + error);
+            }
+         },
          /*--------------------Parse the event name  --------------------*/
          parseEventName : function (eventName, count) {
             /*
@@ -1033,9 +1078,30 @@ var datalayer = {
          },
 
          /*--------------------Finalize Data Layer Call Back Function --------------------*/
+         refreshFromUDO : function () {
+            try {
+               digitalData.page.pageInfo.ibm.siteID = utag.data[utag2.getShortName("digitalData.page.pageInfo.ibm.siteID")] || digitalData.page.pageInfo.ibm.siteID || "IBMTESTWWW";
+               digitalData.page.category.primaryCategory = utag.data[utag2.getShortName("digitalData.page.category.primaryCategory")] || digitalData.page.category.primaryCategory || "";
+               digitalData.page.category.ibm.globalBrandTableL10 = utag.data[utag2.getShortName("digitalData.page.category.ibm.globalBrandTableL10")] || digitalData.page.category.ibm.globalBrandTableL10 || "";
+               digitalData.page.category.ibm.globalBrandTableL17 = utag.data[utag2.getShortName("digitalData.page.category.ibm.globalBrandTableL17")] || digitalData.page.category.ibm.globalBrandTableL17 || "";
+               digitalData.page.category.ibm.globalBrandTableL20 = utag.data[utag2.getShortName("digitalData.page.category.ibm.globalBrandTableL20")] || digitalData.page.category.ibm.globalBrandTableL20 || "";
+               digitalData.page.category.ibm.globalBrandTableL30 = utag.data[utag2.getShortName("digitalData.page.category.ibm.globalBrandTableL30")] || digitalData.page.category.ibm.globalBrandTableL30 || "";            
+            }
+            catch (error) {
+               datalayer.log('+++DBDM-ERROR > datalayer.js > refreshFromUDO: ' + error);
+            }
+         },
+
+         /*--------------------Finalize Data Layer Call Back Function --------------------*/
          finalizeDataLayer : function () {
             try {
                if (!digitalData.page.isDataLayerReady) {
+                  /* Refresh DDO variabbles from UDO */
+                  datalayer.util.refreshFromUDO();
+
+                  /* setting Client ID */
+                  datalayer.util.setClientID();
+
                   /* Set Data Layer Ready and trigger Event */
                   digitalData.page.isDataLayerReady = true;
 
@@ -1122,9 +1188,6 @@ var datalayer = {
 
             /*--------------------Set Site ID--------------------*/
             this.util.setSiteID();
-            if (digitalData.user.segment.isIBMer) {
-               digitalData.page.pageInfo.ibm.iniSiteID = digitalData.page.pageInfo.ibm.iniSiteID + "_I"
-            }
 
             /*--------------------setting Client ID--------------------*/
             this.util.setClientID();
@@ -1249,15 +1312,15 @@ var datalayer = {
 
             /*--------------------Set Site ID--------------------*/
             this.util.setSiteID();
-            if (digitalData.user.segment.isIBMer) {
-               digitalData.page.pageInfo.ibm.iniSiteID = digitalData.page.pageInfo.ibm.iniSiteID + "_I"
-            }
 
             /*--------------------setting Client ID--------------------*/
             this.util.setClientID();
 
             /*--------------------setting Category ID--------------------*/
             this.util.setCategoryID();
+            
+            /*--------------------setting Search Terms from Enterprise Search--------------------*/
+            this.util.setSearchTerms();
 
             /*--------------------Set Destination URL--------------------*/
             digitalData.page.pageInfo.destinationURL = window.location.href || "";
