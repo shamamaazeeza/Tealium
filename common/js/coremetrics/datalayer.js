@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.01.12.1234
+ * Version       : 2017.01.27.1533
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -12,7 +12,6 @@
  *        https://github.ibm.com/tag-management/tm-v1.0.git
  *        
  */
-var tmeid="datalayer.js";
 
 /*--------------------Initialize all Digital Data Objects--------------------*/
 var datalayer = {
