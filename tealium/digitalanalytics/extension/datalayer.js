@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.01.26.1027
+ * Version       : 2017.01.27.1533
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -18,20 +18,20 @@ var tmeid="datalayer.js";
 var datalayer = {
       PAGEIDQUERYSTRINGSDEFAULT : [
          /* Registration Forms - IWM */
-         {"pathNameSubstring": "/marketing/iwm/",               "qsParameter" : ["source","S_PKG"]},
+         {"pathNameSubstring": "/marketing/iwm/",               "qsParameter" : ["S_PKG","source"]},
          /* Registration Forms - IBMid */
-         {"pathNameSubstring": "/account/us-en/signup",         "qsParameter" : ["a", "trial", "catalogName", "quantity", "partNumber", "source", "pkg"]},
+         {"pathNameSubstring": "/account/us-en/signup",         "qsParameter" : ["a","catalogName","partNumber","pkg","quantity","source","trial"]},
          /* Enterprise Search */
-         {"pathNameSubstring": "/search/",                      "qsParameter" : ["q","cc","lang","hpp","o"]},
+         {"pathNameSubstring": "/search/",                      "qsParameter" : ["cc","hpp","lang","o","q"]},
          /* MAM */
-         {"pathNameSubstring": "/common/ssi/",                  "qsParameter" : ["infotype","subtype","htmlfid","letternum","supplier","docURL","MPPEFSCH"]},
+         {"pathNameSubstring": "/common/ssi/",                  "qsParameter" : ["docURL","htmlfid","infotype","letternum","MPPEFSCH","subtype","supplier"]},
          /* eSupport */
          {"pathNameSubstring": "/support/docview.wss",          "qsParameter" : ["uid"]},
          {"pathNameSubstring": "/support/fixcentral/",          "qsParameter" : ["product"]},
          /* IBM ID - SSO */
-         {"pathNameSubstring": "/account/profile",              "qsParameter" : ["page", "okURL"]},
+         {"pathNameSubstring": "/account/profile",              "qsParameter" : ["okURL","page"]},
          /* Event Registration */
-         {"pathNameSubstring": "/events/wwe/grp",               "qsParameter" : ["OpenForm:cmd","OpenPage:cmd","seminar","locale"]},
+         {"pathNameSubstring": "/events/wwe/grp",               "qsParameter" : ["OpenForm:cmd","OpenPage:cmd","locale","seminar"]},
          /* Case Studies */
          {"pathNameSubstring": "/software/businesscasestudies", "qsParameter" : ["synkey"]}, 
       ],
@@ -143,7 +143,7 @@ var datalayer = {
                if (fullURL !== "") {
                   var parserURL = document.createElement('a');
                   /* Get rid of 'm.ibm.com/http/' pattern for mobile, if exists */
-                  parserURL.href = fullURL.replace(/m\.ibm\.com\/https?\//,'').trim();
+                  parserURL.href = fullURL.replace(/m\.ibm\.com\/https?\//,'').trim().replace(/[/?#&]+$/, "");
                   /* IE 8 and 9 don't load the attributes "protocol" and "host" in case the source URL
                    * is just a pathname, that is, "/example" and not "http://domain.com/example".
                    */
@@ -469,10 +469,15 @@ var datalayer = {
                   }
                }
                else {
+                  /* 
+                   * 2017.01.27 - jleon: ASSUME for non-ibm.com domains that all are non-IBMers 
+                   * as the cross-domain API is no longer working 
+                   */
+                  digitalData.user.segment.isIBMer = 0;
                   /* for non ibm.com sites, based on API service executed in ida_stats.js */
-                  digitalData.user.segment.isIBMer = (window.NTPT_IBMer == "true") ? 1 : 0;
+                  // digitalData.user.segment.isIBMer = (window.NTPT_IBMer == "true") ? 1 : 0;
                   /* Get IBMISP cookie value for non ibm.com */
-                  if (window.IBMIXS) digitalData.util.cp.IBMIXS = window.IBMIXS; 
+                  // if (window.IBMIXS) digitalData.util.cp.IBMIXS = window.IBMIXS; 
                }
             }
             catch (error) {
@@ -705,8 +710,28 @@ var datalayer = {
                datalayer.log('+++DBDM-ERROR > datalayer.js > setPageHeader: ' + error);
             }
          },
-
-            /*--------------------Parse the event name  --------------------*/
+         
+         /*--------------------Set DDO from Metadata Valuesr--------------------*/
+         setDDOFromMetadata: function () {
+            try {
+               digitalData.page.pageInfo.description   = digitalData.page.pageInfo.description   || digitalData.util.meta["description"];
+               digitalData.page.pageInfo.effectiveDate = digitalData.page.pageInfo.effectiveDate || digitalData.util.meta["ibm.effective"];
+               digitalData.page.pageInfo.expiryDate    = digitalData.page.pageInfo.expiryDate    || digitalData.util.meta["ibm.expires"];
+               digitalData.page.pageInfo.keywords      = digitalData.page.pageInfo.keywords      || digitalData.util.meta["keywords"];
+               digitalData.page.pageInfo.language      = digitalData.page.pageInfo.language      || digitalData.util.meta["dc.language"];
+               digitalData.page.pageInfo.publishDate   = digitalData.page.pageInfo.publishDate   || digitalData.util.meta["dc.date"];
+               digitalData.page.pageInfo.publisher     = digitalData.page.pageInfo.publisher     || digitalData.util.meta["dc.publisher"];
+               digitalData.page.pageInfo.rights        = digitalData.page.pageInfo.rights        || digitalData.util.meta["dc.rights"];
+               digitalData.page.pageInfo.ibm.country   = digitalData.page.pageInfo.ibm.country   || digitalData.util.meta["ibm.country"];
+               digitalData.page.pageInfo.ibm.industry  = digitalData.page.pageInfo.ibm.industry  || digitalData.util.meta["ibm.industry"];
+               digitalData.page.pageInfo.ibm.owner     = digitalData.page.pageInfo.ibm.owner     || digitalData.util.meta["owner"];
+               digitalData.page.pageInfo.ibm.subject   = digitalData.page.pageInfo.ibm.subject   || digitalData.util.meta["dc.subject"];
+               digitalData.page.pageInfo.ibm.type      = digitalData.page.pageInfo.ibm.type      || digitalData.util.meta["dc.type"];
+            } catch (error) {
+               datalayer.log('+++DBDM-ERROR > datalayer.js > setDDOFromMetadata: ' + error);
+            }
+         },
+         /*--------------------Parse the event name  --------------------*/
          parseEventName : function (eventName, count) {
             /*
              * eventName contains two parameters separated by a colon: <product_name>:<tactic_code> This function will
@@ -715,10 +740,12 @@ var datalayer = {
              */ 
             try {
                var size = count || 256;
+               size -= encodeURIComponent(eventName) - eventName.length;
                /* make sure eventName is a String */
                if (typeof(eventName) === "string") {
                   /* replace all consecutive spaces for a dash '-' */
                   eventName = eventName.replace(/\s+/g, '-').toUpperCase();
+                  size -= (encodeURIComponent(eventName).length - eventName.length);
                   if (eventName.length > size) {
                      var eventNameParts = eventName.split(':');
                      if (eventNameParts.length === 1)
@@ -745,7 +772,8 @@ var datalayer = {
                /* make sure eventName is a String */
                if (typeof(eventName) === "string") {
                   /* replace all consecutive spaces to one space */
-                  eventName = eventName.replace(/\s+/g, ' ').toUpperCase();
+                  eventName = eventName.replace(/\s+/g, '-').toUpperCase();
+                  size -= (encodeURIComponent(eventName).length - eventName.length);
                   /* if eventName is bigger than 50 characters then compress it */
                   if (eventName.length > size) {
                      var ovf = Math.round((eventName.length-size)/2);
@@ -993,7 +1021,7 @@ var datalayer = {
                /* Set name and ID for event */
                if (obj.type === "conversion") {
                   obj.event_name = "ibmStatsEvent_conversion";
-                  obj.cm_ConversionEventTag_cid = obj.eventName.toUpperCase();
+                  obj.cm_ConversionEventTag_cid = datalayer.util.parseEventNameGen(obj.eventName,256);
                }
                else if (obj.type === "pageclick") {
                   obj.event_name = "ibmStatsEvent_element";
@@ -1026,7 +1054,7 @@ var datalayer = {
                         var dataConversion = JSON.parse(JSON.stringify(data));
                         dataConversion.event_name="ibmStatsEvent_conversion";
                         dataConversion.type = dataConversion.eventType = "conversion"
-                        dataConversion.cm_ConversionEventTag_cid = dataConversion.eventName.toUpperCase();
+                        dataConversion.cm_ConversionEventTag_cid = datalayer.util.parseEventNameGen(obj.eventName,256);
                         delete dataConversion.cm_ElementTag_eid;
                         dataConversion.eventAction = 1;
                         datalayer.log('+++DBDM-LOG > datalayer.js > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
@@ -1036,7 +1064,7 @@ var datalayer = {
                         var dataConversion = JSON.parse(JSON.stringify(data));
                         dataConversion.event_name="ibmStatsEvent_conversion";
                         dataConversion.type = dataConversion.eventType = "conversion"
-                        dataConversion.cm_ConversionEventTag_cid = dataConversion.eventName.toUpperCase();
+                        dataConversion.cm_ConversionEventTag_cid = datalayer.util.parseEventNameGen(obj.eventName,256);
                         delete dataConversion.cm_ElementTag_eid;
                         dataConversion.eventAction = 2;
                         datalayer.log('+++DBDM-LOG > datalayer.js > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
@@ -1220,6 +1248,9 @@ var datalayer = {
             /*--------------------setting Page Header--------------------*/
             this.util.setPageHeader()
 
+            /*--------------------Set DDO from Metadata Valuesr--------------------*/
+            this.util.setDDOFromMetadata();
+
             /*--------------------Set Destination URL--------------------*/
             digitalData.page.pageInfo.destinationURL = window.location.href || "";
 
@@ -1349,6 +1380,9 @@ var datalayer = {
 
             /*--------------------setting Page Header--------------------*/
             this.util.setPageHeader()
+
+            /*--------------------Set DDO from Metadata Valuesr--------------------*/
+            this.util.setDDOFromMetadata();
 
             /*--------------------Set Destination URL--------------------*/
             digitalData.page.pageInfo.destinationURL = window.location.href || "";
