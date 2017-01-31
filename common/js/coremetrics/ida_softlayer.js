@@ -1,7 +1,7 @@
 /**
  * Id         : /tm-v1.0/common/js/coremetrics/ida_softlayer.js
  * Scope      : All non-vxx IBM pages
- * Version    : 2016.12.22.1641
+ * Version    : 2017.01.31.1242
  *
  * Script used to load Tag Management (Tealium) on IBM web pages 
  *
@@ -10,20 +10,25 @@
  *
  */
 
+/*
+ * 20170130 - jleon: Code to identify Chrome 56+ Browsers
+ */
+window.isChrome56 = window.isChrome56 || function() {
+    var raw = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
+    raw = raw ? parseInt(raw[2], 10) : false;
+    if (typeof window.chrome !== 'undefined' && raw >= 56) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 /*----------------------Ensure that old browsers don't break when referencing the console-----------------------*/
 if (!window.console) { window.console = {log: function(){}, error:function(){}, warn:function(){} }; }
 
-/* Make sure all conditions are set to run */
-if (window.isIdaStatsLoaded
-      || (typeof(window.eluminate_enabled) !== 'undefined' && !window.eluminate_enabled)
-      || (typeof(window.tealium_enabled) !== 'undefined' && !window.tealium_enabled)) {
-   if (window.isIdaStatsLoaded) {
-      /* ida_stats.js has been loaded already, stop loading */
-      console.log('+++DBDM-LOG > ida_softlayer.js: ida_stats.js has already been loaded, exiting.');
-   }
-   else {
-      console.log('+++DBDM-LOG > ida_softlayer.js: Conditions not met, exiting.');
-   }
+if (window.isIdaStatsLoaded) {
+   /* ida_stats.js has been loaded already, stop loading */
+   console.log('+++DBDM-LOG > ida_stats.js > ida_stats.js has already been loaded, exiting.');
 }
 else {
    /* Set flag that code has been loaded */
@@ -53,6 +58,7 @@ else {
          'cmSetCurrencyCode',
          'cmDisplayShop9s',
          'cmDisplayShop5s',
+         'cmRetrieveUserID',
          'ibmStats.event',
          'bindPageViewWithAnalytics'];
       window.ghostQueue = [];
@@ -154,8 +160,8 @@ else {
 
    var v16elu = {
 
-         NTPT_DOWNLOADTYPES : "bqy,doc,dot,exe,flv,jpg,png,mov,mp3,pdf,pps,ppt,rss,sh,swf,tar,txt,wmv,xls,xml,zip,avi,eps,gif,lwp,mas,mp4,pot,prz,rtf,wav,wma,123,odt,ott,sxw,stw,docx,odp,otp,sxi,sti,pptx,ods,ots,sxc,stc,xlsx",
-         NTPT_DOMAINLIST : ".ibm.co,.ibm.com,.lotuslive.com,.cognos.com,.webdialogs.com,.servicemanagementcenter.com,.xtify.com,.ibmcloud.com,.ibmdw.net,.bluemix.net,.smartercitiescloud.com",
+         NTPT_DOWNLOADTYPES : "123,avi,bqy,doc,docx,dot,eps,exe,flv,gif,jpg,lwp,mas,mov,mp3,mp4,odp,ods,odt,otp,ots,ott,pdf,png,pot,pps,ppt,pptx,prz,rss,rtf,sh,stc,sti,stw,swf,sxc,sxi,sxw,tar,txt,wav,wma,wmv,xls,xlsx,xml,zip",
+         NTPT_DOMAINLIST : ".bluemix.net,.cognos.com,.ibm.biz,.ibm.co,.ibm.com,.ibmcloud.com,.ibmdw.net,.jazz.net,.lotuslive.com,.mybluemix.net,.securityintelligence.com,.servicemanagementcenter.com,.smartercitiescloud.com,.softlayer.com,.webdialogs.com,.xtify.com",
          evhndlr : true,
          domainBlacklist : ".ibm.com,.mitre.org,.learnquest.com",
 
@@ -217,21 +223,6 @@ else {
 
             window.cmTagQueue.push(['cmSetupOther', {"cm_JSFEAMasterIDSessionCookie" : true}]);
 
-            /* getting the value of IBMer for non ibm.com */
-            if(typeof (document.domain) !== 'undefined' && document.domain.indexOf('ibm.com') == -1){
-               requestServerCall = function (url) {
-                  var s = document.createElement('script');
-                  s.type = 'text/javascript';
-                  s.src = url;
-                  document.getElementsByTagName("head")[0].appendChild(s);
-               },
-               IBMISE_BOOTSTRAP = function (data) {
-                  /* IBMISP cookie value for non ibm.com */
-                  if(data.IBMer) window.NTPT_IBMer = data.IBMer;
-                  if(data.IBMIXS) window.IBMIXS = data.IBMIXS;
-               }
-               requestServerCall("//www.ibm.com/gateway/gp/getProfile/?cb=260:IBMISE_BOOTSTRAP&cc=us&lc=en");   
-            }
             /* ----------------------------- IBMDependencyRegistry -------------------------------- */
             /**
              * Id      : IBMDependencyRegistry
@@ -290,7 +281,29 @@ else {
 
             /* ----------------------------- TEALIUM IMPLEMENTATION - START -------------------------------- */
             (function(a,b,c,d) {
-               a = '//tags.tiqcdn.com/utag/ibm/main/prod/utag.js';
+               /* If site ID has 'test' value at the start or end, load utag.js from main/qa and not from main/prod */
+               var site_id = "";    
+               if (typeof (digitalData) !== 'undefined' && typeof (digitalData.page) !== 'undefined' && typeof (digitalData.page.pageInfo) !== 'undefined' 
+                  && typeof (digitalData.page.pageInfo.ibm) !== 'undefined' && typeof (digitalData.page.pageInfo.ibm.siteID) !== 'undefined'){
+                  site_id = digitalData.page.pageInfo.ibm.siteID.toLowerCase();
+               }
+               else if(document.querySelector('meta[name="IBM.WTMSite"]') !== null) {
+                  site_id = document.querySelector('meta[name="IBM.WTMSite"]').content.toLowerCase();
+               }
+               if ((site_id !== "") && ((site_id.indexOf('test') === 0) || (site_id.lastIndexOf('test') != -1 && (site_id.lastIndexOf('test') === site_id.length - 4)))) {
+                  a = '//tags.tiqcdn.com/utag/ibm/main/qa/utag.js';
+               }
+               else {
+                  if (window.isChrome56()) {
+                     /*
+                      * 20170131 - jleon: Introducing web profile for Chrome 56+ browsers
+                      */
+                     a = '//tags.tiqcdn.com/utag/ibm/web/prod/utag.js';
+                  }
+                  else {
+                     a = '//tags.tiqcdn.com/utag/ibm/main/prod/utag.js';
+                  }
+               }               
                b = document;
                c = 'script';
                d = b.createElement(c);
@@ -311,6 +324,16 @@ else {
             }
          }
    };
-   
-   v16elu.init();
+
+   /*---------------------------------------------------MAIN FUNCTION---------------------------------------------------------*/
+   if (typeof (window.ida_eluminate_enabled) !== "undefined" || typeof (window.tealium_enabled) !== "undefined") {
+      if (!window.ida_eluminate_enabled || !window.tealium_enabled) {
+      }
+      else {
+         v16elu.init()
+      }
+   }
+   else {
+      v16elu.init()
+   }
 }

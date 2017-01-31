@@ -1,7 +1,7 @@
 /**
  * Id         : /tm-v1.0/common/js/coremetrics/eluminate.js
  * Scope      : All v17 IBM pages
- * Version    : 2016.12.22.1641
+ * Version    : 2017.01.31.1242
  *
  * Script used to load Tag Management (Tealium) on IBM web pages 
  *
@@ -9,6 +9,19 @@
  *        https://github.ibm.com/tag-management/tm-v1.0.git
  *
  */
+
+/*
+ * 20170130 - jleon: Code to identify Chrome 56+ Browsers
+ */
+window.isChrome56 = window.isChrome56 || function() {
+    var raw = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
+    raw = raw ? parseInt(raw[2], 10) : false;
+    if (typeof window.chrome !== 'undefined' && raw >= 56) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 /*----------------------Ensure that old browsers don't break when referencing the console-----------------------*/
 if (!window.console) { window.console = {log: function(){}, error:function(){}, warn:function(){} }; }
@@ -55,6 +68,7 @@ else {
          'cmSetCurrencyCode',
          'cmDisplayShop9s',
          'cmDisplayShop5s',
+         'cmRetrieveUserID',
          'ibmStats.event',
          'bindPageViewWithAnalytics'];
       window.ghostQueue = [];
@@ -2660,7 +2674,29 @@ else {
 
             /* ----------------------------- TEALIUM IMPLEMENTATION - START -------------------------------- */
             (function(a,b,c,d) {
-               a = '//tags.tiqcdn.com/utag/ibm/main/prod/utag.js';
+               /* If site ID has 'test' value at the start or end, load utag.js from main/qa and not from main/prod */
+               var site_id = "";    
+               if (typeof (digitalData) !== 'undefined' && typeof (digitalData.page) !== 'undefined' && typeof (digitalData.page.pageInfo) !== 'undefined' 
+                  && typeof (digitalData.page.pageInfo.ibm) !== 'undefined' && typeof (digitalData.page.pageInfo.ibm.siteID) !== 'undefined'){
+                  site_id = digitalData.page.pageInfo.ibm.siteID.toLowerCase();
+               }
+               else if(document.querySelector('meta[name="IBM.WTMSite"]') !== null) {
+                  site_id = document.querySelector('meta[name="IBM.WTMSite"]').content.toLowerCase();
+               }
+               if ((site_id !== "") && ((site_id.indexOf('test') === 0) || (site_id.lastIndexOf('test') != -1 && (site_id.lastIndexOf('test') === site_id.length - 4)))) {
+                  a = '//tags.tiqcdn.com/utag/ibm/main/qa/utag.js';
+               }
+               else {
+                  if (window.isChrome56()) {
+                     /*
+                      * 20170131 - jleon: Introducing web profile for Chrome 56+ browsers
+                      */
+                     a = '//tags.tiqcdn.com/utag/ibm/web/prod/utag.js';
+                  }
+                  else {
+                     a = '//tags.tiqcdn.com/utag/ibm/main/prod/utag.js';
+                  }
+               }               
                b = document;
                c = 'script';
                d = b.createElement(c);
