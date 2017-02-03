@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.01.27.1533
+ * Version       : 2017.02.03.1033
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -616,7 +616,7 @@ var datalayer = {
          /*--------------------setting Category ID--------------------*/
          setCategoryID : function () {
             try {
-               window.IBMPageCategory = new String();
+               var IBMPageCategory = new String();
                if (typeof(digitalData.page.category.primaryCategory) !== "undefined") {
                   IBMPageCategory = digitalData.page.category.primaryCategory;
                }
@@ -663,6 +663,8 @@ var datalayer = {
                }
                /* 2016-07-14 - shazeeza: RTC Story# 958212 */
                digitalData.page.category.primaryCategory = IBMPageCategory;
+               /* 2017-02-03 - jleon: Saving initial value for Page Category */
+               digitalData.page.category.iniPrimaryCategory = digitalData.page.category.primaryCategory;
             }
             catch (error) {
                datalayer.log('+++DBDM-ERROR > datalayer.js > setCategoryID: ' + error);

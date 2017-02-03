@@ -3,7 +3,7 @@
  * Extension Name: coremetrics-custom-data-mappings.js
  * Scope         : Coremetrics Global ID
  * Execution     : N/A
- * Version       : 2017.01.26.1316
+ * Version       : 2017.02.03.1033
  *
  * This script creates a calls the init function of the datalayer to initiate it
  * 
@@ -174,7 +174,8 @@ try {
       b.cm_PageViewTag_pv_a21 = b["qp.ca"];
       b.cm_PageViewTag_pv_a22 = devworkParams["ibmCmaId"] || "";
       b.cm_PageViewTag_pv_a23 = devworkParams["ibmContentAreas"] || "";
-      b.cm_PageViewTag_pv_a24 = b["ddo.p.c.primaryCategory"] || b["ddo.p.c.categoryID"] || b["meta.IBM.WTMCategory"];
+      /* 2017-02-03 - jleon: Setting to initial value for Page Category */
+      b.cm_PageViewTag_pv_a24 = b["ddo.p.c.iniPrimaryCategory"] || b["ddo.p.c.categoryID"] || b["meta.IBM.WTMCategory"];
       b.cm_PageViewTag_pv_a25 = b["ddo.p.pi.ibm.topic"] || b["meta.dW.Topic"];
    }
 
