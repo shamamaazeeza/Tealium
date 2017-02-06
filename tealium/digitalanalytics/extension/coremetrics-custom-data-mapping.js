@@ -3,7 +3,7 @@
  * Extension Name: coremetrics-custom-data-mappings.js
  * Scope         : Coremetrics Global ID
  * Execution     : N/A
- * Version       : 2017.02.03.1033
+ * Version       : 2017.02.04.1655
  *
  * This script creates a calls the init function of the datalayer to initiate it
  * 
@@ -236,6 +236,8 @@ try {
       if (typeof(window.searchParams) === "undefined") window.searchParams = {};
       getNTPTVariable(searchParams);
 
+      b["ddo.p.pi.onsiteSearchTerm"] = searchParams["ibmSrchTerm"] || "";
+      b["ddo.p.pi.onsiteSearchResult"] = searchParams["ibmSrchRslts"] || "";
       b.cm_PageViewTag_pv_a21 = searchParams["ibmSrchName"] || "";
       b.cm_PageViewTag_pv_a22 = searchParams["ibmSrchTerm"] || "";
       b.cm_PageViewTag_pv_a23 = searchParams["ibmSrchRslts"] || "";
