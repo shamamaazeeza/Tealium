@@ -281,7 +281,7 @@ else {
 
             /* ----------------------------- TEALIUM IMPLEMENTATION - START -------------------------------- */
             (function(a,b,c,d) {
-               /* If site ID has 'test' value at the start or end, load utag.js from main/qa and not from main/prod */
+               /* If site ID has 'test' value at the start or end, load utag.js from main/qa or web/qa and not from main/prod */
                var site_id = "";    
                if (typeof (digitalData) !== 'undefined' && typeof (digitalData.page) !== 'undefined' && typeof (digitalData.page.pageInfo) !== 'undefined' 
                   && typeof (digitalData.page.pageInfo.ibm) !== 'undefined' && typeof (digitalData.page.pageInfo.ibm.siteID) !== 'undefined'){
@@ -291,18 +291,27 @@ else {
                   site_id = document.querySelector('meta[name="IBM.WTMSite"]').content.toLowerCase();
                }
                if ((site_id !== "") && ((site_id.indexOf('test') === 0) || (site_id.lastIndexOf('test') != -1 && (site_id.lastIndexOf('test') === site_id.length - 4)))) {
-                  a = '//tags.tiqcdn.com/utag/ibm/main/qa/utag.js';
+            	   /* 
+            	    * 20170206 - shruti: Adding web profile if URL contains ustream.tv
+            	    */
+            	   if (window.location.hostname.indexOf('ustream.tv')!= -1){
+                	   a = '//tags.tiqcdn.com/utag/ibm/web/qa/utag.js';
+            	   }
+            	   else{
+            		   a = '//tags.tiqcdn.com/utag/ibm/main/qa/utag.js';
+            	   }                
                }
                else {
-                  if (window.isChrome56()) {
-                     /*
-                      * 20170131 - jleon: Introducing web profile for Chrome 56+ browsers
-                      */
-                     a = '//tags.tiqcdn.com/utag/ibm/web/prod/utag.js';
-                  }
-                  else {
-                     a = '//tags.tiqcdn.com/utag/ibm/main/prod/utag.js';
-                  }
+            	   /*
+                    * 20170131 - jleon: Introducing web profile for Chrome 56+ browsers
+                    * 20170206 - shruti: Adding web profile if URL contains ustream.tv
+                    */
+            	   if ((window.isChrome56()) || (window.location.hostname.indexOf('ustream.tv')!= -1)){
+            		   a = '//tags.tiqcdn.com/utag/ibm/web/prod/utag.js';
+            	   }
+            	   else{
+            		   a = '//tags.tiqcdn.com/utag/ibm/main/prod/utag.js';
+            	   }            	   
                }               
                b = document;
                c = 'script';
