@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.02.06.1401
+ * Version       : 2017.02.07.1835
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -891,7 +891,8 @@ var datalayer = {
                            datalayer.util.finalizeDataLayer();
                         });
                   }
-               } else {
+               }
+               else {
                   datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > jQuery not present!... Continue');
                   /* Continue to finalize Data Layer*/
                   datalayer.util.finalizeDataLayer();
@@ -1256,18 +1257,18 @@ var datalayer = {
          /*--------------------Finalize Data Layer Call Back Function --------------------*/
          refreshFromUDO : function () {
             try {
-               digitalData.page.pageInfo.ibm.siteID = utag.data[utag2.getShortName("digitalData.page.pageInfo.ibm.siteID")] || digitalData.page.pageInfo.ibm.siteID || "IBMTESTWWW";
-               digitalData.page.category.primaryCategory = utag.data[utag2.getShortName("digitalData.page.category.primaryCategory")] || digitalData.page.category.primaryCategory || "";
-               digitalData.page.category.ibm.globalBrandTableL10 = utag.data[utag2.getShortName("digitalData.page.category.ibm.globalBrandTableL10")] || digitalData.page.category.ibm.globalBrandTableL10 || "";
-               digitalData.page.category.ibm.globalBrandTableL17 = utag.data[utag2.getShortName("digitalData.page.category.ibm.globalBrandTableL17")] || digitalData.page.category.ibm.globalBrandTableL17 || "";
-               digitalData.page.category.ibm.globalBrandTableL20 = utag.data[utag2.getShortName("digitalData.page.category.ibm.globalBrandTableL20")] || digitalData.page.category.ibm.globalBrandTableL20 || "";
-               digitalData.page.category.ibm.globalBrandTableL30 = utag.data[utag2.getShortName("digitalData.page.category.ibm.globalBrandTableL30")] || digitalData.page.category.ibm.globalBrandTableL30 || "";            
-            }
-            catch (error) {
+               if (typeof(utag) !== "undefined" && typeof(utag.data) !== "undefined" && typeof(utag2) !== "undefined") {
+                  digitalData.page.pageInfo.ibm.siteID = utag.data[utag2.getShortName("digitalData.page.pageInfo.ibm.siteID")] || digitalData.page.pageInfo.ibm.siteID || "IBMTESTWWW";
+                  digitalData.page.category.primaryCategory = utag.data[utag2.getShortName("digitalData.page.category.primaryCategory")] || digitalData.page.category.primaryCategory || "";
+                  digitalData.page.category.ibm.globalBrandTableL10 = utag.data[utag2.getShortName("digitalData.page.category.ibm.globalBrandTableL10")] || digitalData.page.category.ibm.globalBrandTableL10 || "";
+                  digitalData.page.category.ibm.globalBrandTableL17 = utag.data[utag2.getShortName("digitalData.page.category.ibm.globalBrandTableL17")] || digitalData.page.category.ibm.globalBrandTableL17 || "";
+                  digitalData.page.category.ibm.globalBrandTableL20 = utag.data[utag2.getShortName("digitalData.page.category.ibm.globalBrandTableL20")] || digitalData.page.category.ibm.globalBrandTableL20 || "";
+                  digitalData.page.category.ibm.globalBrandTableL30 = utag.data[utag2.getShortName("digitalData.page.category.ibm.globalBrandTableL30")] || digitalData.page.category.ibm.globalBrandTableL30 || "";
+               }
+            } catch (error) {
                datalayer.log('+++DBDM-ERROR > refreshFromUDO: ' + error);
             }
          },
-
          /*--------------------Finalize Data Layer Call Back Function --------------------*/
          finalizeDataLayer : function () {
             try {
@@ -1409,27 +1410,6 @@ var datalayer = {
 
             /*--------------------Set Data Layer Ready--------------------*/
             digitalData.page.isDataLayerReady = true;
-
-            /*--------------------Set UDO Variables--------------------*/
-            if (typeof(utag) !== "undefined" && typeof(utag.data) !== "undefined") {
-               utag.data.category_id      = digitalData.page.category.primaryCategory;
-               utag.data.concat_clientid  = digitalData.page.pageInfo.coremetrics.clientID;
-               utag_data.cookie_domain    = digitalData.page.pageInfo.destinationDomain;
-               utag.data.destinationURL   = digitalData.page.pageInfo.destinationURL;
-               utag.data.site_id          = digitalData.page.pageInfo.ibm.siteID;
-               utag.data.iniSiteID        = digitalData.page.pageInfo.ibm.iniSiteID;
-               utag.data.page_id          = digitalData.page.pageInfo.pageID;   
-               utag.data.referrer         = digitalData.page.pageInfo.referrer;
-               utag.data.referrerID       = digitalData.page.pageInfo.referrerID;
-               utag.data.referrerDomain   = digitalData.page.pageInfo.referrerDomain;
-               utag.data.urlID            = digitalData.page.pageInfo.urlID;
-               utag.data.pageProd         = digitalData.page.pageInfo.urlID;
-               utag.data.page_loadingTime = digitalData.page.session.pageloadEpoch;
-               utag.data.cookie_sessionID = digitalData.page.session.uSessionID;
-               utag.data.uPageViewID      = digitalData.page.session.uPageViewID;
-               utag.data.profileID        = digitalData.user.profile.uuid;
-               utag.data.IBMER_value      = digitalData.user.segment.isIBMer;
-            }
          }
          catch (error) {
             datalayer.log('+++DBDM-ERROR > update: ' + error);
@@ -1531,25 +1511,6 @@ var datalayer = {
             /*--------------------Load Coremetrics Tags by Default--------------------*/
             this.util.setCoremetricsEnabled();
             digitalData.page.pageInfo.coremetrics.isEluminateLoaded = false;
-
-            /*--------------------Set UDO Variables--------------------*/
-            utag_data.category_id      = digitalData.page.category.primaryCategory;
-            utag_data.concat_clientid  = digitalData.page.pageInfo.coremetrics.clientID;
-            utag_data.cookie_domain    = digitalData.page.pageInfo.destinationDomain;
-            utag_data.destinationURL   = digitalData.page.pageInfo.destinationURL;
-            utag_data.site_id          = digitalData.page.pageInfo.ibm.siteID;
-            utag_data.iniSiteID        = digitalData.page.pageInfo.ibm.iniSiteID;
-            utag_data.page_id          = digitalData.page.pageInfo.pageID;   
-            utag_data.referrer         = digitalData.page.pageInfo.referrer;
-            utag_data.referrerID       = digitalData.page.pageInfo.referrerID;
-            utag_data.referrerDomain   = digitalData.page.pageInfo.referrerDomain;
-            utag_data.urlID            = digitalData.page.pageInfo.urlID;
-            utag_data.pageProd         = digitalData.page.pageInfo.urlID;
-            utag_data.page_loadingTime = digitalData.page.session.pageloadEpoch;
-            utag_data.cookie_sessionID = digitalData.page.session.uSessionID;
-            utag_data.uPageViewID      = digitalData.page.session.uPageViewID;
-            utag_data.profileID        = digitalData.user.profile.uuid;
-            utag_data.IBMER_value      = digitalData.user.segment.isIBMer;
          }
          catch (error) {
             datalayer.log('+++DBDM-ERROR > init: ' + error);
