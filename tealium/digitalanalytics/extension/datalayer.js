@@ -846,33 +846,34 @@ var datalayer = {
                else if (typeof(ibmweb) !== "undefined") {
                   /* v17 and older */
 
-                  /* Set a timeout to kill the listener if it takes too long.
-                   * Set this first in case the user info is already ready when you set the listener. */
-                  userInfoTimeout = setTimeout(function () {
-                        ibmweb.queue.remove(userInfoQueue);
-                        datalayer.log('+++DBDM-LOG > getDemandbaseUserData > User Info took too long');
-                     }, waittime);
+                  if (typeof(ibmweb.comusr) !== "undefined" && typeof(ibmweb.comusr.isLoaded) !== "undefined") {
+                     /* Set a timeout to kill the listener if it takes too long.
+                      * Set this first in case the user info is already ready when you set the listener. */
+                     userInfoTimeout = setTimeout(function () {
+                           ibmweb.queue.remove(userInfoQueue);
+                           datalayer.log('+++DBDM-LOG > getDemandbaseUserData > User Info took too long');
+                        }, waittime);
 
-                  /* Set a listener to wait till the user IP data has been loaded, then call your function when it's available. */
-                  var userInfoQueue = ibmweb.queue.push(function () {
-                        return ibmweb.comusr.isLoaded();
-                     }, function () {
-                        /* Clear timeout since it returned in time. */
-                        clearTimeout(userInfoTimeout);
-                        /* Get user info now that it's ready. */
-                        datalayer.util.setUserInfoV17();
-                     });
+                     /* Set a listener to wait till the user IP data has been loaded, then call your function when it's available. */
+                     var userInfoQueue = ibmweb.queue.push(function () {
+                           return ibmweb.comusr.isLoaded();
+                        }, function () {
+                           /* Clear timeout since it returned in time. */
+                           clearTimeout(userInfoTimeout);
+                           /* Get user info now that it's ready. */
+                           datalayer.util.setUserInfoV17();
+                        });
+                  }
                }
                else {
                   datalayer.log('+++DBDM-LOG > getDemandbaseUserData > User Info not available');
                }
 
-            }
+            } 
             catch (error) {
                datalayer.log('+++DBDM-ERROR > getDemandbaseUserData: ' + error);
             }
          },
-
          /*--------------------Function to send datalayer_ready event ---------------------*/
          sendDatalayerReadyEvent: function (wt) {
             try {

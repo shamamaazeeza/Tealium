@@ -167,7 +167,7 @@ try {
    }
    
    /* Rule for Developer Works */
-   if (siteID === 'devwrk' || siteID === 'devwrks' || siteID === 'dwnext') {
+   if (siteID === 'devwrk' || siteID === 'devwrks' || siteID === 'dwnext' || siteID === "devwrkscon") {
       if (typeof (window.devworkParams) == "undefined") window.devworkParams = {};
       getNTPTVariable(devworkParams);
 
