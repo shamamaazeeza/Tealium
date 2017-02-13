@@ -3,7 +3,7 @@
  * Extension Name: coremetrics-custom-data-mappings.js
  * Scope         : Coremetrics Global ID
  * Execution     : N/A
- * Version       : 2017.02.04.1655
+ * Version       : 2017.02.09.1623
  *
  * This script creates a calls the init function of the datalayer to initiate it
  * 
@@ -229,6 +229,10 @@ try {
    if (siteID === 'ecom') {
       b.cm_PageViewTag_pv_a27 = b["meta.IBM.WTMEComStore"];
       b.cm_PageViewTag_pv_a29 = b["qp.sapQuoteNum"];
+      if (typeof(marketplaceCheckoutCustomTags) === "function" && !window.executedCheckoutTag) {
+         window.executedCheckoutTag = true;
+         marketplaceCheckoutCustomTags();
+      }
    }
    
    /* Rule for On Site Search */
@@ -373,4 +377,4 @@ function getCmCreateProductView(n){
       b["customParam_productName"] = tagArray[2];
       b["customParam_productCategory"] = tagArray[3];
    }
-}
+};

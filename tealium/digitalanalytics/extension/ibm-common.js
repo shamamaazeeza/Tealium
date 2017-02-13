@@ -3,7 +3,7 @@
  * Extension Name: ibm-common.js
  * Scope         : All Tags
  * Execution     : N/A
- * Version       : 2017.01.25.0215
+ * Version       : 2017.02.09.1623
  *
  * This script creates a calls the init function of the datalayer to initiate it
  * 
@@ -26,7 +26,8 @@ try {
    /* Refresh the search terms and results */
    if (typeof(digitalData.page.pageInfo.onsiteSearchTerm) !== "undefined") {
       datalayer.util.setSearchTerms();
-   }   
-} catch (error) {
+   }
+}
+catch (error) {
    datalayer.log('+++DBDM-ERROR > ibm-common.js: ' + error);
 }

@@ -39,7 +39,6 @@ try {
       b["ddo.p.pi.convertro.enabled"] = "true";
       datalayer.log('+++DBDM-LOG > convertro.js > Captured conversion event: ' + b["convertro_id"]);
    }
-
 }
 catch (error) {
     datalayer.log('+++DBDM-ERROR > convertro.js: ' + error);

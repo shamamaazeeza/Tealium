@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.02.07.1835
+ * Version       : 2017.02.10.1219
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -75,7 +75,7 @@ var datalayer = {
                         /* Exclude functions */
                         if (a[c]instanceof Array) {
                            b[c] = a[c].slice(0)
-                        } 
+                        }
                         else {
                            b[c] = a[c]
                         }
@@ -347,7 +347,8 @@ var datalayer = {
                   /* Re-initialize to an empty array */
                   window.cmTagQueue = [];
                }
-            } catch (error) {
+            }
+            catch (error) {
                datalayer.log('+++DBDM-ERROR > coremetricsCookieWorkaround: ' + error);
             }
          },
@@ -436,7 +437,7 @@ var datalayer = {
                if (typeof(digitalData.page.pageID) == "undefined" && typeof(digitalData.page.pageInfo.pageID) == "undefined") {
                   /* If the pageID is not provided by the page, then set it to the calculated value in urlID */
                   digitalData.page.pageInfo.pageID = digitalData.page.pageInfo.urlID;
-               } 
+               }
                else if (typeof(digitalData.page.pageID) !== "undefined") {
                   /* Support for old DDO definition of the pageID */
                   digitalData.page.pageInfo.pageID = digitalData.page.pageID;
@@ -458,15 +459,18 @@ var datalayer = {
                   if (referrerParts.length < 2) {
                      /* if the hostname has less than 2 parts, then it is valid (localhost) */
                      digitalData.page.pageInfo.referrerDomain = "";
-                  } else if (referrerParts.length > 2) {
+                  }
+                  else if (referrerParts.length > 2) {
                      /* if the hostname has three or more parts, then substract one to get the subdomain or root domain */
                      digitalData.page.pageInfo.referrerDomain = referrerParts.splice(-1 * (referrerParts.length - 1), referrerParts.length - 1).join('.');
-                  } else {
+                  }
+                  else {
                      /* if the hostname has only two parts, assume it is the root domain of the site */
                      digitalData.page.pageInfo.referrerDomain = digitalData.util.referrer.hostname;
                   }
                }
-            } catch (error) {
+            }
+            catch (error) {
                datalayer.log('+++DBDM-ERROR > setReferringURL: ' + error);
             }
          },
@@ -479,7 +483,7 @@ var datalayer = {
                      if (typeof(digitalData.user.segment.isIBMer) == "undefined" || digitalData.user.segment.isIBMer == null) {
                         digitalData.user.segment.isIBMer = 1
                      }
-                  } 
+                  }
                   else {
                      if (typeof(digitalData.user.segment.isIBMer) == "undefined" || digitalData.user.segment.isIBMer == null) {
                         digitalData.user.segment.isIBMer = 0
@@ -634,7 +638,7 @@ var datalayer = {
          /*--------------------setting Category ID--------------------*/
          setCategoryID : function () {
             try {
-               var IBMPageCategory = new String();
+               window.IBMPageCategory = new String();
                if (typeof(digitalData.page.category.primaryCategory) !== "undefined") {
                   IBMPageCategory = digitalData.page.category.primaryCategory;
                }
@@ -694,9 +698,11 @@ var datalayer = {
             try {
                if (typeof(digitalData.util.meta["IBM.SearchTerm"]) !== "undefined") {
                   digitalData.page.pageInfo.onsiteSearchTerm = String(digitalData.util.meta["IBM.SearchTerm"]) + "";
-               } else if (typeof(window.ibmSrchTerm) !== "undefined") {
+               }
+               else if (typeof(window.ibmSrchTerm) !== "undefined") {
                   digitalData.page.pageInfo.onsiteSearchTerm = window.ibmSrchTerm;
-               } else if (document.getElementById('catalog_search_result_information') !== null) {
+               }
+               else if (document.getElementById('catalog_search_result_information') !== null) {
                   var str = (document.getElementById('catalog_search_result_information').innerHTML).replace(/[""''{}\s]+/g, '').split(',');
                   for (var i = 0; i < str.length; i++) {
                      if (str[i].split(':')[0] == 'searchTerms')
@@ -706,14 +712,16 @@ var datalayer = {
 
                if (typeof(window.ibmSrchRslts) !== "undefined") {
                   digitalData.page.pageInfo.onsiteSearchResult = window.ibmSrchRslts;
-               } else if (document.getElementById('catalog_search_result_information') !== null) {
+               }
+               else if (document.getElementById('catalog_search_result_information') !== null) {
                   var str = (document.getElementById('catalog_search_result_information').innerHTML).replace(/[""''{}\s]+/g, '').split(',');
                   for (var i = 0; i < str.length; i++) {
                      if (str[i].split(':')[0] == 'totalResultCount')
                         digitalData.page.pageInfo.onsiteSearchResult = str[i].split(':')[1];
                   }
                }
-            } catch (error) {
+            }
+            catch (error) {
                datalayer.log('+++DBDM-ERROR > setSearchTerms: ' + error);
             }
          },
@@ -726,7 +734,8 @@ var datalayer = {
                   digitalData.page.pageInfo.pageHeader = digitalData.page.pageInfo.pageHeader.replace(/(<([^>]+)>)/ig,"");
                }
 
-            } catch (error) {
+            }
+            catch (error) {
                datalayer.log('+++DBDM-ERROR > setPageHeader: ' + error);
             }
          },
@@ -747,7 +756,8 @@ var datalayer = {
                digitalData.page.pageInfo.ibm.owner     = digitalData.page.pageInfo.ibm.owner     || digitalData.util.meta["owner"];
                digitalData.page.pageInfo.ibm.subject   = digitalData.page.pageInfo.ibm.subject   || digitalData.util.meta["dc.subject"];
                digitalData.page.pageInfo.ibm.type      = digitalData.page.pageInfo.ibm.type      || digitalData.util.meta["dc.type"];
-            } catch (error) {
+            }
+            catch (error) {
                datalayer.log('+++DBDM-ERROR > setDDOFromMetadata: ' + error);
             }
          },
@@ -820,10 +830,12 @@ var datalayer = {
                      /* Subscribe to the user IP data ready event and call the callback when it happens,
                       * or if it already happened ".asap" one. */
                      IBMCore.common.util.user.subscribe("userIpDataReady", "customjs", datalayer.util.setUserInfo).runAsap(datalayer.util.setUserInfo);
-                  } catch (error) {
+                  }
+                  catch (error) {
                      datalayer.log('+++DBDM-LOG > getDemandbaseUserData > IBMCore not ready: ' + error);
                   }
-               } else if (typeof(ibmweb) !== "undefined") {
+               }
+               else if (typeof(ibmweb) !== "undefined") {
                   /* v17 and older */
 
                   /* Set a timeout to kill the listener if it takes too long.
@@ -842,11 +854,13 @@ var datalayer = {
                         /* Get user info now that it's ready. */
                         datalayer.util.setUserInfoV17();
                      });
-               } else {
+               }
+               else {
                   datalayer.log('+++DBDM-LOG > getDemandbaseUserData > User Info not available');
                }
 
-            } catch (error) {
+            }
+            catch (error) {
                datalayer.log('+++DBDM-ERROR > getDemandbaseUserData: ' + error);
             }
          },
@@ -855,24 +869,27 @@ var datalayer = {
          sendDatalayerReadyEvent: function (wt) {
             try {
                waittime = wt || datalayer.WAITTIME;
-               if (typeof(jQuery) !== "undefined") {
+               if (typeof(jQuery2) !== "undefined") {
                   /* Create variables for jQuery version and support for .on() function */
-                  window.jQueryVersion = utag_data.jQueryVersion = jQuery.fn.jquery;
-                  window.isJQueryOnSupported = utag_data.isJQueryOnSupported = jQuery.fn.on ? true : false;
+                  window.jQueryVersion = utag_data.jQueryVersion = jQuery2.fn.jquery;
+                  window.isJQueryOnSupported = utag_data.isJQueryOnSupported = jQuery2.fn.on ? true : false;
 
                   /* Trigger Event for digitalData Object Ready */
                   datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > Triggering ddo_ready event!');
-                  jQuery(document).trigger('ddo_ready');
+                  jQuery2(document).trigger('ddo_ready');
 
                   if (typeof(utag2) !== "undefined" && utag2.dleReady) {
                      /* Continue finishing setting up data layer */
                      datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > dle_ready event was already triggered!');
                      datalayer.util.finalizeDataLayer();
-                  } else {
+                  }
+                  else {
                      /* Set a 3s timeout to wait for the dle_ready event */
                      dleTimeout = setTimeout(function () {
                            /* Stop listening for the dle_ready event */
-                           jQuery(document).off('dle_ready');
+                           if (window.isJQueryOnSupported) {
+                              jQuery2(document).off('dle_ready');
+                           }
                            /* Continue finishing setting up data layer */
                            datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > Timed out waiting for dle_ready event!');
                            datalayer.util.finalizeDataLayer();
@@ -880,13 +897,14 @@ var datalayer = {
 
                      /* Set Listener for DLE Readiness */
                      if (window.isJQueryOnSupported)
-                        jQuery(document).on('dle_ready', function () {
+                        jQuery2(document).on('dle_ready', function () {
                            /* Clear timeout since it returned in time. */
                            clearTimeout(dleTimeout);
                            /* Continue finishing setting up data layer */
                            datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > dle_ready event captured!');
                            if (typeof(utag2.full_dle_id) !== "undefined") {
-                              datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > DLE File: https://tags.tiqcdn.com/dle/ibm/web/' + utag2.full_dle_id + '.js');
+                              digitalData.page.pageInfo.dleURL = "https://tags.tiqcdn.com/dle/ibm/web/" + utag2.full_dle_id + ".js";
+                              datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > DLE File: ' + digitalData.page.pageInfo.dleURL);
                            }
                            datalayer.util.finalizeDataLayer();
                         });
@@ -897,7 +915,8 @@ var datalayer = {
                   /* Continue to finalize Data Layer*/
                   datalayer.util.finalizeDataLayer();
                }
-            } catch (error) {
+            }
+            catch (error) {
                datalayer.log('+++DBDM-ERROR > sendDatalayerReadyEvent > sendtDatalayerReadyEvent: ' + error);
             }
          },
@@ -954,7 +973,7 @@ var datalayer = {
                                  var d = link_text.indexOf('alt="');
                                  if (d > -1) {
                                     link_text = link_text.substring(d + 5, link_text.indexOf('"', d + 5));
-                                 } 
+                                 }
                                  else {
                                     d = link_text.indexOf('src="');
                                     if (d > -1) {
@@ -1116,17 +1135,17 @@ var datalayer = {
                      if (!obj.eventPoints && obj.eventAction && obj.eventAction == "1") obj.eventPoints = '10';
                      if (!obj.eventPoints && obj.eventAction && obj.eventAction == "2") obj.eventPoints = '20';
                      obj.type = "conversion";
-                  } 
+                  }
                   else if (obj.ibmProductTag && obj.ibmProductTag == "true") {
                      obj.type = "product";
-                  } 
+                  }
                   else if (obj.primaryCategory.toLowerCase().indexOf("rich_media_service") !== -1 || obj.primaryCategory.toLowerCase().indexOf("video player") !== -1) {
                      obj.type = "video";
                      var ibmEvAction = obj.eventName || "";
                      obj.eventName = obj.eventCategoryGroup || "";
                      obj.eventCategoryGroup = ibmEvAction;
                      obj.eventVidTimeStamp = obj.eventVidTimeStamp || "";
-                  } 
+                  }
                   else {
                      obj.type = "element";
                   }
@@ -1231,7 +1250,7 @@ var datalayer = {
                   window.bindPageViewWithAnalytics = function() {
                      if (typeof(utag) !== "undefined" && window.pageviewSPA) {
                         /* Stop listening for the dle_ready event */
-                        jQuery(document).off('dle_ready');
+                        jQuery2(document).off('dle_ready');
                         /* Initialize Data Layer */
                         datalayer.log('+++DBDM-LOG > bindPageViewWithAnalytics > Initializing Data Layer.');
                         datalayer.init();
@@ -1255,27 +1274,37 @@ var datalayer = {
          },
 
          /*--------------------Finalize Data Layer Call Back Function --------------------*/
-         refreshFromUDO : function () {
+         refreshFromUDO : function (b) {
             try {
-               if (typeof(utag) !== "undefined" && typeof(utag.data) !== "undefined" && typeof(utag2) !== "undefined") {
-                  digitalData.page.pageInfo.ibm.siteID = utag.data[utag2.getShortName("digitalData.page.pageInfo.ibm.siteID")] || digitalData.page.pageInfo.ibm.siteID || "IBMTESTWWW";
-                  digitalData.page.category.primaryCategory = utag.data[utag2.getShortName("digitalData.page.category.primaryCategory")] || digitalData.page.category.primaryCategory || "";
-                  digitalData.page.category.ibm.globalBrandTableL10 = utag.data[utag2.getShortName("digitalData.page.category.ibm.globalBrandTableL10")] || digitalData.page.category.ibm.globalBrandTableL10 || "";
-                  digitalData.page.category.ibm.globalBrandTableL17 = utag.data[utag2.getShortName("digitalData.page.category.ibm.globalBrandTableL17")] || digitalData.page.category.ibm.globalBrandTableL17 || "";
-                  digitalData.page.category.ibm.globalBrandTableL20 = utag.data[utag2.getShortName("digitalData.page.category.ibm.globalBrandTableL20")] || digitalData.page.category.ibm.globalBrandTableL20 || "";
-                  digitalData.page.category.ibm.globalBrandTableL30 = utag.data[utag2.getShortName("digitalData.page.category.ibm.globalBrandTableL30")] || digitalData.page.category.ibm.globalBrandTableL30 || "";
+               if (typeof(b) !== "undefined" && typeof(utag2) !== "undefined") {
+                  /* Site ID values */
+                  digitalData.page.pageInfo.ibm.siteID = b["ddo.p.pi.ibm.siteID"] || digitalData.page.pageInfo.ibm.siteID || "IBMTESTWWW";
+                  digitalData.page.category.primaryCategory = b["ddo.p.c.primaryCategory"] || digitalData.page.category.primaryCategory || "";
+                  /* Global Brand Table values */
+                  digitalData.page.category.ibm.globalBrandTableL10 = b["ddo.p.c.ibm.globalBrandTableL10"] || digitalData.page.category.ibm.globalBrandTableL10 || "";
+                  digitalData.page.category.ibm.globalBrandTableL17 = b["ddo.p.c.ibm.globalBrandTableL17"] || digitalData.page.category.ibm.globalBrandTableL17 || "";
+                  digitalData.page.category.ibm.globalBrandTableL20 = b["ddo.p.c.ibm.globalBrandTableL20"] || digitalData.page.category.ibm.globalBrandTableL20 || "";
+                  digitalData.page.category.ibm.globalBrandTableL30 = b["ddo.p.c.ibm.globalBrandTableL30"] || digitalData.page.category.ibm.globalBrandTableL30 || "";
+                  /* Page Services values */
+                  digitalData.page.pageInfo.convertro.enabled = b["ddo.p.pi.convertro.enabled"] || digitalData.page.pageInfo.convertro.enabled || "false";
+                  digitalData.page.pageInfo.hotjar.enabled = b["ddo.p.pi.hotjar.enabled"] || digitalData.page.pageInfo.hotjar.enabled || "false";
+                  digitalData.page.pageInfo.optimizely.enabled = b["ddo.p.pi.optimizely.enabled"] || digitalData.page.pageInfo.optimizely.enabled || "false";
+                  digitalData.page.pageInfo.optimizely.projectID = b["ddo.p.pi.optimizely.projectID"] || digitalData.page.pageInfo.optimizely.projectID || "";
+
                }
-            } catch (error) {
+            }
+            catch (error) {
                datalayer.log('+++DBDM-ERROR > refreshFromUDO: ' + error);
             }
          },
+         
          /*--------------------Finalize Data Layer Call Back Function --------------------*/
          finalizeDataLayer : function () {
             try {
+               if (typeof(utag) !== "undefined" && typeof(utag.data) !== "undefined") {
+                  datalayer.log("+++DBDM-LOG > finalizeDataLayer > Tealium Version: " + utag.data["ut.version"]);
+               }
                if (!digitalData.page.isDataLayerReady) {
-                  /* Refresh DDO variabbles from UDO */
-                  datalayer.util.refreshFromUDO();
-
                   /* setting Client ID */
                   datalayer.util.setClientID();
 
@@ -1289,10 +1318,10 @@ var datalayer = {
                   /* Set Data Layer Ready and trigger Event */
                   digitalData.page.isDataLayerReady = true;
 
-                  if (typeof(jQuery) !== "undefined") {
+                  if (typeof(jQuery2) !== "undefined") {
                      /* Trigger Event for Data Layer Ready */
                      datalayer.log('+++DBDM-LOG > finalizeDataLayer > Triggering datalayer_ready event!');
-                     jQuery(document).trigger('datalayer_ready');
+                     jQuery2(document).trigger('datalayer_ready');
                   }
                   else {
                      datalayer.log('+++DBDM-LOG > datalayer_ready event was not triggered');
@@ -1327,7 +1356,7 @@ var datalayer = {
             digitalData.util.qp         = digitalData.util.qp        || {};
             digitalData.util.referrer   = digitalData.util.referrer  || {};
 
-            digitalData.page.category.ibm         = digitalData.page.pageInfo.ibm || {};
+            digitalData.page.category.ibm         = digitalData.page.category.ibm || {};
             digitalData.page.pageInfo.ibm         = digitalData.page.pageInfo.ibm || {};
             digitalData.page.pageInfo.coremetrics = digitalData.page.pageInfo.coremetrics || {};
             digitalData.page.pageInfo.tealium     = digitalData.page.pageInfo.tealium || {};
@@ -1438,11 +1467,14 @@ var datalayer = {
             digitalData.util.qp         = digitalData.util.qp        || {};
             digitalData.util.referrer   = digitalData.util.referrer  || {};
 
-            digitalData.page.category.ibm         = digitalData.page.pageInfo.ibm || {};
+            digitalData.page.category.ibm         = digitalData.page.category.ibm || {};
             digitalData.page.pageInfo.ibm         = digitalData.page.pageInfo.ibm || {};
             digitalData.page.pageInfo.coremetrics = digitalData.page.pageInfo.coremetrics || {};
             digitalData.page.pageInfo.tealium     = digitalData.page.pageInfo.tealium || {};
             digitalData.page.pageInfo.metrics     = digitalData.page.pageInfo.metrics || {};
+            digitalData.page.pageInfo.optimizely  = digitalData.page.pageInfo.optimizely || {};
+            digitalData.page.pageInfo.hotjar      = digitalData.page.pageInfo.hotjar || {};
+            digitalData.page.pageInfo.convertro   = digitalData.page.pageInfo.convertro || {};
             digitalData.page.isDataLayerReady     = false;
             
             /*--------------------setting page loading time--------------------*/
