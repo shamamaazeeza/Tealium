@@ -10,19 +10,6 @@
  *
  */
 
-/*
- * 20170130 - jleon: Code to identify Chrome 56+ Browsers
- */
-window.isChrome56 = window.isChrome56 || function() {
-    var raw = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
-    raw = raw ? parseInt(raw[2], 10) : false;
-    if (typeof window.chrome !== 'undefined' && raw >= 56) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
 /*----------------------Ensure that old browsers don't break when referencing the console-----------------------*/
 if (!window.console) { window.console = {log: function(){}, error:function(){}, warn:function(){} }; }
 
@@ -167,32 +154,6 @@ else {
          }
       }
    })();
-
-   /*On v17 pages load jQuery version 1.7 or greater*/
-   if (typeof (jQuery) === 'undefined') {
-      if (typeof dojo !== 'undefined'){
-         var dojoVersionMinor = '';
-
-         if (dojo.version.minor < 8){ //1.6
-            dojoVersionMinor = '1.6';
-         }
-         else if (dojo.version.minor == 8){ //1.8
-            dojoVersionMinor = '1.8';
-         }
-         else if (dojo.version.minor > 8){ //1.9
-            dojoVersionMinor = '1.9';		
-         }
-
-         if (dojoVersionMinor !== ''){
-            var jQueryFilePath = "//1.www.s81c.com/common/js/dojo/"+dojoVersionMinor+"/ibmweb/jquery.js"
-            var jQueryFileref = document.createElement("script")
-            jQueryFileref.setAttribute("type","text/javascript")
-            jQueryFileref.setAttribute("src", jQueryFilePath);					
-            var firstScriptNode = document.getElementsByTagName("script")[0];
-            firstScriptNode.parentNode.insertBefore(jQueryFileref, firstScriptNode);		    
-         }
-      }
-   }
 
    (function ibmCoreAuto(){
 
@@ -2674,7 +2635,7 @@ else {
 
             /* ----------------------------- TEALIUM IMPLEMENTATION - START -------------------------------- */
             (function(a,b,c,d) {
-               /* If site ID has 'test' value at the start or end, load utag.js from main/qa and not from main/prod */
+               /* If site ID has 'test' value at the start or end, load utag.js from web/qa and not from web/prod */
                var site_id = "";    
                if (typeof (digitalData) !== 'undefined' && typeof (digitalData.page) !== 'undefined' && typeof (digitalData.page.pageInfo) !== 'undefined' 
                   && typeof (digitalData.page.pageInfo.ibm) !== 'undefined' && typeof (digitalData.page.pageInfo.ibm.siteID) !== 'undefined'){
@@ -2684,18 +2645,10 @@ else {
                   site_id = document.querySelector('meta[name="IBM.WTMSite"]').content.toLowerCase();
                }
                if ((site_id !== "") && ((site_id.indexOf('test') === 0) || (site_id.lastIndexOf('test') != -1 && (site_id.lastIndexOf('test') === site_id.length - 4)))) {
-                  a = '//tags.tiqcdn.com/utag/ibm/main/qa/utag.js';
+                  a = '//tags.tiqcdn.com/utag/ibm/web/qa/utag.js';
                }
-               else {
-                  if (window.isChrome56()) {
-                     /*
-                      * 20170131 - jleon: Introducing web profile for Chrome 56+ browsers
-                      */
-                     a = '//tags.tiqcdn.com/utag/ibm/web/prod/utag.js';
-                  }
-                  else {
-                     a = '//tags.tiqcdn.com/utag/ibm/main/prod/utag.js';
-                  }
+               else {                  
+                  a = '//tags.tiqcdn.com/utag/ibm/web/prod/utag.js';                  
                }               
                b = document;
                c = 'script';
