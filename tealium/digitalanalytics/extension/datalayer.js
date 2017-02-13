@@ -654,6 +654,26 @@ var datalayer = {
                   IBMPageCategory = decodeURIComponent(digitalData.util.qp.Category);
                }
 
+               /* for Marketplace pages add the SiteID to the category */
+               if (digitalData.page.pageInfo.ibm.siteID.substring(0,4).toLowerCase() == "ecom") {
+                  IBMPageCategory = digitalData.page.pageInfo.ibm.siteID + IBMPageCategory;
+               }
+               
+               /* adding DC.Language value category id for Support Content delivery pages */
+               if ((typeof digitalData.page.pageInfo.ibm.siteID !== "undefined") && (digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estdbl" 
+                  || digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estkcs" || digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estqst")) {
+                  if (digitalData.util.meta["dc.language"] !== null) {
+                     IBMPageCategory += "-" + digitalData.util.meta["dc.language"];
+                  }
+                  else if (digitalData.page.pageInfo.language) {
+                     IBMPageCategory += "-" + digitalData.page.pageInfo.language;
+                  }
+               }
+
+               /* 2017-02-03 - jleon: Saving initial value for Page Category */
+               digitalData.page.category.iniPrimaryCategory = IBMPageCategory;
+
+               /* IBMers from ibm.com and non-ibm.com */
                if (document.domain.indexOf("ibm.com") !== -1 && digitalData.user.segment.isIBMer) {
                   if (digitalData.page.pageInfo.ibm.siteID.substring(0,3) == "EST" || digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "serveng" 
                      || digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "extconnections"  || digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "extconnectionstest") {
@@ -667,26 +687,14 @@ var datalayer = {
                   /* for non ibm.com */
                   IBMPageCategory += "IBMER";
                }
+
+               /* Set category to error if the siteID is set to error */
                if (typeof(digitalData.page.pageInfo.ibm.siteID) !== "undefined" && digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "error") {
                   IBMPageCategory = "error";
                }
-               if (digitalData.page.pageInfo.ibm.siteID.substring(0,4).toLowerCase() == "ecom") {
-                  IBMPageCategory = digitalData.page.pageInfo.ibm.siteID + IBMPageCategory;
-               }
-               /* adding DC.Language value category id for Support Content delivery pages */
-               if ((typeof digitalData.page.pageInfo.ibm.siteID !== "undefined") && (digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estdbl" 
-                  || digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estkcs" || digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estqst")) {
-                  if (digitalData.util.meta["dc.language"] !== null) {
-                     IBMPageCategory += "-" + digitalData.util.meta["dc.language"];
-                  }
-                  else if (digitalData.page.pageInfo.language) {
-                     IBMPageCategory += "-" + digitalData.page.pageInfo.language;
-                  }
-               }
+
                /* 2016-07-14 - shazeeza: RTC Story# 958212 */
                digitalData.page.category.primaryCategory = IBMPageCategory;
-               /* 2017-02-03 - jleon: Saving initial value for Page Category */
-               digitalData.page.category.iniPrimaryCategory = digitalData.page.category.primaryCategory;
             }
             catch (error) {
                datalayer.log('+++DBDM-ERROR > setCategoryID: ' + error);
