@@ -759,6 +759,7 @@ var datalayer = {
                digitalData.page.pageInfo.publishDate   = digitalData.page.pageInfo.publishDate   || digitalData.util.meta["dc.date"];
                digitalData.page.pageInfo.publisher     = digitalData.page.pageInfo.publisher     || digitalData.util.meta["dc.publisher"];
                digitalData.page.pageInfo.rights        = digitalData.page.pageInfo.rights        || digitalData.util.meta["dc.rights"];
+               digitalData.page.pageInfo.version       = digitalData.page.pageInfo.version       || digitalData.util.meta["source"];
                digitalData.page.pageInfo.ibm.country   = digitalData.page.pageInfo.ibm.country   || digitalData.util.meta["ibm.country"];
                digitalData.page.pageInfo.ibm.industry  = digitalData.page.pageInfo.ibm.industry  || digitalData.util.meta["ibm.industry"];
                digitalData.page.pageInfo.ibm.owner     = digitalData.page.pageInfo.ibm.owner     || digitalData.util.meta["owner"];
