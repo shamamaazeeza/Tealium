@@ -1290,6 +1290,7 @@ var datalayer = {
                   digitalData.page.pageInfo.ibm.siteID = b["ddo.p.pi.ibm.siteID"] || digitalData.page.pageInfo.ibm.siteID || "IBMTESTWWW";
                   digitalData.page.category.primaryCategory = b["ddo.p.c.primaryCategory"] || digitalData.page.category.primaryCategory || "";
                   /* Global Brand Table values */
+                  digitalData.page.category.ibm = digitalData.page.category.ibm || {};
                   digitalData.page.category.ibm.globalBrandTableL10 = b["ddo.p.c.ibm.globalBrandTableL10"] || digitalData.page.category.ibm.globalBrandTableL10 || "";
                   digitalData.page.category.ibm.globalBrandTableL17 = b["ddo.p.c.ibm.globalBrandTableL17"] || digitalData.page.category.ibm.globalBrandTableL17 || "";
                   digitalData.page.category.ibm.globalBrandTableL20 = b["ddo.p.c.ibm.globalBrandTableL20"] || digitalData.page.category.ibm.globalBrandTableL20 || "";

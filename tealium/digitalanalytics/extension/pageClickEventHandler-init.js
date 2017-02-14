@@ -16,6 +16,9 @@ var tmeid = "pageClickEventHandler-init.js";
 try {
    /* Set listener for clicks on hyperlinks and buttons */
    jQuery2('body').on('click', 'a,button', function (e) {
+      if (typeof(event) === "undefined") {
+         event = e;
+      }
       datalayer.util.pageClickEventHandler(event);
    });
 } 
