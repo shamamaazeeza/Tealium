@@ -18,7 +18,12 @@ try {
    /* Initialize Data Layer */
    datalayer.log('+++DBDM-LOG > datalayer-init.js > Initializing Data Layer.');
    datalayer.init();
-   
+
+   if (window.jQueryNativeVersion) {
+      datalayer.log('+++DBDM-LOG > datalayer-init.js > Using native jQuery version: ' + window.jQueryNativeVersion);
+      digitalData.page.attribute.jQueryNativeVersion = window.jQueryNativeVersion;
+   }
+
    /* Save the current URL for SPAs and don't run pageview twice */
    window.referrerSPA = digitalData.page.pageInfo.destinationURL;
    window.pageviewSPA = false;

@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.02.10.1219
+ * Version       : 2017.02.14.2112
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -879,51 +879,41 @@ var datalayer = {
          sendDatalayerReadyEvent: function (wt) {
             try {
                waittime = wt || datalayer.WAITTIME;
-               if (typeof(jQuery2) !== "undefined") {
-                  /* Create variables for jQuery version and support for .on() function */
-                  window.jQueryVersion = utag_data.jQueryVersion = jQuery2.fn.jquery;
-                  window.isJQueryOnSupported = utag_data.isJQueryOnSupported = jQuery2.fn.on ? true : false;
 
-                  /* Trigger Event for digitalData Object Ready */
-                  datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > Triggering ddo_ready event!');
-                  jQuery2(document).trigger('ddo_ready');
+               /* Trigger Event for digitalData Object Ready */
+               datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > Triggering ddo_ready event!');
+               jQuery2(document).trigger('ddo_ready');
 
-                  if (typeof(utag2) !== "undefined" && utag2.dleReady) {
-                     /* Continue finishing setting up data layer */
-                     datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > dle_ready event was already triggered!');
-                     datalayer.util.finalizeDataLayer();
-                  }
-                  else {
-                     /* Set a 3s timeout to wait for the dle_ready event */
-                     dleTimeout = setTimeout(function () {
-                           /* Stop listening for the dle_ready event */
-                           if (window.isJQueryOnSupported) {
-                              jQuery2(document).off('dle_ready');
-                           }
-                           /* Continue finishing setting up data layer */
-                           datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > Timed out waiting for dle_ready event!');
-                           datalayer.util.finalizeDataLayer();
-                        }, waittime);
-
-                     /* Set Listener for DLE Readiness */
-                     if (window.isJQueryOnSupported)
-                        jQuery2(document).on('dle_ready', function () {
-                           /* Clear timeout since it returned in time. */
-                           clearTimeout(dleTimeout);
-                           /* Continue finishing setting up data layer */
-                           datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > dle_ready event captured!');
-                           if (typeof(utag2.full_dle_id) !== "undefined") {
-                              digitalData.page.pageInfo.dleURL = "https://tags.tiqcdn.com/dle/ibm/web/" + utag2.full_dle_id + ".js";
-                              datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > DLE File: ' + digitalData.page.pageInfo.dleURL);
-                           }
-                           datalayer.util.finalizeDataLayer();
-                        });
-                  }
+               if (typeof(utag2) !== "undefined" && utag2.dleReady) {
+                  /* Continue finishing setting up data layer */
+                  datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > dle_ready event was already triggered!');
+                  datalayer.util.finalizeDataLayer();
                }
                else {
-                  datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > jQuery not present!... Continue');
-                  /* Continue to finalize Data Layer*/
-                  datalayer.util.finalizeDataLayer();
+                  /* Set a 3s timeout to wait for the dle_ready event */
+                  dleTimeout = setTimeout(function () {
+                     /* Stop listening for the dle_ready event */
+                     if (window.isJQueryOnSupported) {
+                        jQuery2(document).off('dle_ready');
+                     }
+                     /* Continue finishing setting up data layer */
+                     datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > Timed out waiting for dle_ready event!');
+                     datalayer.util.finalizeDataLayer();
+                  }, waittime);
+
+                  /* Set Listener for DLE Readiness */
+                  if (window.isJQueryOnSupported)
+                     jQuery2(document).on('dle_ready', function () {
+                        /* Clear timeout since it returned in time. */
+                        clearTimeout(dleTimeout);
+                        /* Continue finishing setting up data layer */
+                        datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > dle_ready event captured!');
+                        if (typeof(utag2.full_dle_id) !== "undefined") {
+                           digitalData.page.pageInfo.dleURL = "https://tags.tiqcdn.com/dle/ibm/web/" + utag2.full_dle_id + ".js";
+                           datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > DLE File: ' + digitalData.page.pageInfo.dleURL);
+                        }
+                        datalayer.util.finalizeDataLayer();
+                     });
                }
             }
             catch (error) {
@@ -931,6 +921,63 @@ var datalayer = {
             }
          },
 
+         /*--------------------Function to wrap Purchase Events  --------------------*/
+         maskPurchaseEvent: function (eventAction, args) {
+            try {
+               if (eventAction === "5" || eventAction === "9") {
+                  argsArray = Array.prototype.slice.call(args);
+                  if (eventAction === "5") {
+                     window["cmCreateShopAction5Tag2"].apply(this, args);
+                     var eventInfo = {
+                        'type'           : 'purchase-tst',
+                        'eventAction'    : eventAction,
+                        'productID'      : argsArray[0] || "NOTSET",
+                        'productName'    : argsArray[1] || "",
+                        'productQuantity': argsArray[2] || "",
+                        'productPrice'   : argsArray[3] || "",
+                        'productCategory': argsArray[4] || "",
+                     }
+                     if (typeof(argsArray[5]) !== "undefined") {
+                        var attrs = argsArray[5].split("-_-");
+                        for (var d = 0; d < attrs.length; d++) {
+                           if (attrs[d] !== "") {
+                              eventInfo["cm_ShopAction5Tag_s_a" + (d + 1).toString()] = attrs[d];
+                           }
+                        }
+                     }
+                  }
+                  else {
+                     window["cmCreateShopAction9Tag2"].apply(this, args);
+                     var eventInfo = {
+                        'type'           : 'purchase-tst',
+                        'eventAction'    : eventAction,
+                        'productID'      : argsArray[0] || "",
+                        'productName'    : argsArray[1] || "",
+                        'productQuantity': argsArray[2] || "",
+                        'productPrice'   : argsArray[3] || "",
+                        'registrationID' : argsArray[4] || "",
+                        'orderID'        : argsArray[5] || "",
+                        'orderSubtotal'  : argsArray[6] || "",
+                        'productCategory': argsArray[7] || "",
+                     }
+                     if (typeof(argsArray[8]) !== "undefined") {
+                        var attrs = argsArray[8].split("-_-");
+                        for (var d = 0; d < attrs.length; d++) {
+                           if (attrs[d] !== "") {
+                              eventInfo["cm_ShopAction9Tag_s_a" + (d + 1).toString()] = attrs[d];
+                           }
+                        }
+                     }
+                  }
+                  datalayer.log('+++DBDM-LOG > maskPurchaseEvent: Purchase event captured - [' + eventAction + ']: \n' + JSON.stringify(eventInfo, null, 2));
+                  datalayer.log(args);
+                  ibmStats.event(eventInfo);
+               }
+            }
+            catch (error) {
+               datalayer.log('+++DBDM-ERROR > maskPurchaseEvent: ' + error);
+            }
+         },
          /*--------------------Function to handle the ibmStats.event call --------------------*/
          pageClickEventHandler : function (event) {
             try {
@@ -1172,6 +1219,9 @@ var datalayer = {
                }
                else if (obj.type === "product") {
                   obj.event_name = "ibmStatsEvent_product";
+               }
+               else if (obj.type === "purchase") {
+                  obj.event_name = "ibmStatsEvent_purchase";
                }
                else if (obj.type === "video" ) {
                   obj.event_name = "ibmStatsEvent_element";
