@@ -3,7 +3,7 @@
  * Extension Name: datalayer-init.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.02.04.1655
+ * Version       : 2017.02.20.1418
  *
  * This script creates a calls the init function of the datalayer to initiate it
  * 
@@ -22,6 +22,9 @@ try {
    if (window.jQueryNativeVersion) {
       datalayer.log('+++DBDM-LOG > datalayer-init.js > Using native jQuery version: ' + window.jQueryNativeVersion);
       digitalData.page.attribute.jQueryNativeVersion = window.jQueryNativeVersion;
+   }
+   else {
+      datalayer.log('+++DBDM-LOG > datalayer-init.js > Using embedded jQuery version: ' + jQuery2.fn.jquery);
    }
 
    /* Save the current URL for SPAs and don't run pageview twice */

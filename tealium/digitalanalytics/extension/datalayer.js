@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.02.14.2112
+ * Version       : 2017.02.20.1418
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -60,32 +60,32 @@ var datalayer = {
       /*--------------------Centralized log handling: Based on Tealium's --------------------*/
       log : function (a, b) {
          try {
-            if (datalayer.isLogEnabled === false) {
-               return;
-            }
-            else if (typeof(datalayer.isLogEnabled) === "undefined") {
+            if (typeof(datalayer.isLogEnabled) === "undefined") {
                /* See if either of the dldb or utagdb cookies are set to true, if so enable logging - This is based on Tealium's */
                datalayer.isLogEnabled = ((document.cookie.indexOf('dldb=true') >= 0) ? true : ((document.cookie.indexOf('utagdb=true') >= 0) ? true : false));
             }
-            if (datalayer.isLogEnabled) {
-               b = {};
-               if (typeof(a) === "object") {
-                  for (c in a) {
-                     if (typeof(a[c]) !== "function") {
-                        /* Exclude functions */
-                        if (a[c]instanceof Array) {
-                           b[c] = a[c].slice(0)
-                        }
-                        else {
-                           b[c] = a[c]
-                        }
+            b = {};
+            if (typeof(a) === "object" && datalayer.isLogEnabled) {
+               for (c in a) {
+                  if (typeof(a[c]) !== "function") {
+                     /* Exclude functions */
+                     if (a[c]instanceof Array) {
+                        b[c] = a[c].slice(0)
+                     }
+                     else {
+                        b[c] = a[c]
                      }
                   }
                }
-               else {
-                  b = a
-               }
                datalayer.logFile.push(b);
+            }
+            else {
+               b = a
+               if (typeof(a) !== "object") {
+                  datalayer.logFile.push(b);
+               }
+            }
+            if (datalayer.isLogEnabled) {
                try {
                   console.log(b)
                }
@@ -996,6 +996,18 @@ var datalayer = {
 
                /* Continue if 'link_obj' is defined */
                if (typeof (link_obj) !== 'undefined') {
+                  
+                  /* Try to grab the text, class and ID of the object clicked upon, if no values, then try from the "A" node */
+                  link_text = link_obj.text ? link_obj.text : link_obj.innerText ? link_obj.innerText : '';
+                  link_text = encodeURIComponent(link_text);
+                  link_text = decodeURIComponent(link_text.replace(/%09|%E2%96%BC/g, ""));
+                  link_text = link_text.trim();
+                  /* Get the class name for the click */
+                  link_class = link_obj.className || "";
+                  link_class = link_class.trim();
+                  /* Get the ID for the clicked upon element */
+                  link_id = link_obj.id || "";
+                  
                   /* Now, scan the parents until whether node 'A' or 'BUTTON' are found */
                   link_node = link_obj.nodeName.toLowerCase();
                   if (link_node !== "a" && link_node !== "button") {
@@ -1022,7 +1034,7 @@ var datalayer = {
                      if (nonWhiteSpaceLink) {
                         if (link_node === "a") {
                            /* get the text for the Element 'A' */
-                           link_text = link_obj.text ? link_obj.text : link_obj.innerText ? link_obj.innerText : '';
+                           link_text = link_text || (link_obj.text ? link_obj.text : link_obj.innerText ? link_obj.innerText : '') || "";
                            /* if the text for the element 'A' remains empty, see if it is an image and get the alink_text text */
                            if ((link_text == "" || /^\s+$/.test(link_text)) && typeof(link_obj.innerHTML) !== "undefined") {
                               link_text = link_obj.innerHTML.toLowerCase();
@@ -1071,11 +1083,11 @@ var datalayer = {
                         if (link_href.indexOf("-_-") !== -1) link_href = link_href.replace(/-_-/g, "---");
 
                         /* Get the class name for the click */
-                        link_class = link_obj.className || "";
+                        link_class = link_class || link_obj.className || "";
                         link_class = link_class.trim();
 
                         /* Get the ID for the clicked upon element */
-                        link_id = link_obj.id || "";
+                        link_id = link_id || link_obj.id || "";
 
                         /* +++ DOWNLOAD LINK: Determine if the click was done to download a file */
                         var c = datalayer.DOWNLOADTYPES.split(",");
@@ -1363,7 +1375,7 @@ var datalayer = {
          finalizeDataLayer : function () {
             try {
                if (typeof(utag) !== "undefined" && typeof(utag.data) !== "undefined") {
-                  datalayer.log("+++DBDM-LOG > finalizeDataLayer > Tealium Version: " + utag.data["ut.version"]);
+                  datalayer.log("+++DBDM-LOG > finalizeDataLayer > Tealium Version: [" + utag.data["ut.version"] + "] - Environment: [" + utag.data["ut.env"] + "]");
                }
                if (!digitalData.page.isDataLayerReady) {
                   /* setting Client ID */

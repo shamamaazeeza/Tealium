@@ -3,7 +3,7 @@
  * Extension Name: jquery-init.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.02.10.1219
+ * Version       : 2017.02.20.1150
  *
  * This script sets listerners for pagecliks
  *
@@ -16,10 +16,7 @@ var tmeid = "pageClickEventHandler-init.js";
 try {
    /* Set listener for clicks on hyperlinks and buttons */
    jQuery2('body').on('click', 'a,button', function (e) {
-      if (typeof(event) === "undefined") {
-         event = e;
-      }
-      datalayer.util.pageClickEventHandler(event);
+      datalayer.util.pageClickEventHandler(e);
    });
 } 
 catch (error) {
