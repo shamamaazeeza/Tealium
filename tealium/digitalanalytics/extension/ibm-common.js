@@ -3,7 +3,7 @@
  * Extension Name: ibm-common.js
  * Scope         : All Tags
  * Execution     : N/A
- * Version       : 2017.02.09.1623
+ * Version       : 2017.02.21.1000
  *
  * This script creates a calls the init function of the datalayer to initiate it
  * 
@@ -27,6 +27,8 @@ try {
    if (typeof(digitalData.page.pageInfo.onsiteSearchTerm) !== "undefined") {
       datalayer.util.setSearchTerms();
    }
+   /*--------------------Get Mobile OS for User Agent--------------------*/
+   digitalData.page.attribute.agentMobileOS = datalayer.util.getMobileOperatingSystem();   
 }
 catch (error) {
    datalayer.log('+++DBDM-ERROR > ibm-common.js: ' + error);

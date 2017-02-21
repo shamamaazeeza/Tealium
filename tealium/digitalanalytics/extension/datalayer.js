@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.02.20.1418
+ * Version       : 2017.02.21.1000
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -339,7 +339,8 @@ var datalayer = {
          /*--------------------Coremetrics Cookie Migration [workaround]--------------------*/
          coremetricsCookieWorkaround: function () {
             try {
-               /* This function checks for if the "cmTagQueue" array exists, makes a copy, then re-initializes it.
+               /**
+                *  This function checks for if the "cmTagQueue" array exists, makes a copy, then re-initializes it.
                 * This is to prevent the queue from executing before the cmSetClientID gets called from the tag template.
                 * Note: This required a tag template as well.
                 */
@@ -375,6 +376,37 @@ var datalayer = {
                datalayer.log('+++DBDM-ERROR > getCookie: ' + error);
             }
          },        
+
+         /*--------------------Add getMobileOperatingSystem function--------------------*/
+         getMobileOperatingSystem : function (name) {
+            /**
+             * Determine the mobile operating system based on the User Agent.
+             * This function returns one of 'ios', 'android', 'windows-phone', or 'unknown'.
+             *
+             * @returns {String}
+             */
+            try {
+               var os, userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+               /* Windows Phone must come first because its UA also contains "Android" */
+               if (/windows phone/i.test(userAgent)) {
+                  os = "windows-phone";
+               }
+               else if (/android/i.test(userAgent)) {
+                  os = "android";
+               }
+               else if (/ipad|iphone|ipod/i.test(userAgent) && !window.MSStream) {
+                  /* iOS detection from: http://stackoverflow.com/a/9039885/177710 */
+                  os = "ios";
+               }
+               else {
+                  os = "unknown";
+               }
+               return os;            }
+            catch (error) {
+               datalayer.log('+++DBDM-ERROR > getMobileOperatingSystem: ' + error);
+            }
+         },
          
          /*--------------------Set setUserInfo from DemandBase--------------------*/
          setUserInfo : function () {
@@ -1440,6 +1472,9 @@ var datalayer = {
             /*--------------------setting page loading time--------------------*/
             this.util.setPageLoadEpoch(0); 
 
+            /*--------------------Get Mobile OS for User Agent--------------------*/
+            digitalData.page.attribute.agentMobileOS = this.util.getMobileOperatingSystem();
+
             /*--------------------Set Cookies--------------------*/
             this.util.readCookies();
 
@@ -1557,6 +1592,9 @@ var datalayer = {
 
             /*--------------------Coremetics Cookie Migration [workaround]--------------------*/
             this.util.coremetricsCookieWorkaround();
+
+            /*--------------------Get Mobile OS for User Agent--------------------*/
+            digitalData.page.attribute.agentMobileOS = this.util.getMobileOperatingSystem();
 
             /*--------------------Set Cookies--------------------*/
             this.util.readCookies();
