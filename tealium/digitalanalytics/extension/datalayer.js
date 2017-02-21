@@ -44,6 +44,8 @@ var datalayer = {
       
       WAITTIME      : 3000,
       
+      TOPANCESTORLEVEL : 10,
+      
       UDOTODDOREFRESH : {
          /* List of variables from DLE that need to be updated in DDO */
          "ddo.p.pi.ibm.siteID"            : "digitalData.page.pageInfo.ibm.siteID",
@@ -1011,7 +1013,7 @@ var datalayer = {
                   /* Now, scan the parents until whether node 'A' or 'BUTTON' are found */
                   link_node = link_obj.nodeName.toLowerCase();
                   if (link_node !== "a" && link_node !== "button") {
-                     for (var d = 0; d < 5; d++) {
+                     for (var d = 0; d < datalayer.TOPANCESTORLEVEL; d++) {
                         if (typeof (link_obj) !== "undefined" && link_obj.parentNode) link_obj = link_obj.parentNode;
                         link_node = (link_obj !== null && link_obj.nodeName) ? link_obj.nodeName.toLowerCase() : "";
                         if (link_node === "a" || link_node === "button") break;
