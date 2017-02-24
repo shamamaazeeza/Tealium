@@ -62,10 +62,8 @@ var datalayer = {
       /*--------------------Centralized log handling: Based on Tealium's --------------------*/
       log : function (a, b) {
          try {
-            if (typeof(datalayer.isLogEnabled) === "undefined") {
-               /* See if either of the dldb or utagdb cookies are set to true, if so enable logging - This is based on Tealium's */
-               datalayer.isLogEnabled = ((document.cookie.indexOf('dldb=true') >= 0) ? true : ((document.cookie.indexOf('utagdb=true') >= 0) ? true : false));
-            }
+            /* See if either of the dldb or utagdb cookies are set to true, if so enable logging - This is based on Tealium's */
+            datalayer.isLogEnabled = ((document.cookie.indexOf('dldb=true') >= 0) ? true : ((document.cookie.indexOf('utagdb=true') >= 0) ? true : false));
             b = {};
             if (typeof(a) === "object" && datalayer.isLogEnabled) {
                for (c in a) {
@@ -751,6 +749,8 @@ var datalayer = {
                         digitalData.page.pageInfo.onsiteSearchTerm = str[i].split(':')[1];
                   }
                }
+               /* 2017-02-24 - jleon: Ensure that we decode the value for the search term - per developerWorks issue  */
+               digitalData.page.pageInfo.onsiteSearchTerm = decodeURIComponent(digitalData.page.pageInfo.onsiteSearchTerm);
 
                if (typeof(window.ibmSrchRslts) !== "undefined") {
                   digitalData.page.pageInfo.onsiteSearchResult = window.ibmSrchRslts;
