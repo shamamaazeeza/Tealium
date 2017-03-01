@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.02.21.1000
+ * Version       : 2017.02.27.1725
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -564,6 +564,7 @@ var datalayer = {
             try {
                /* Session ID is based on the Tealium cookie ID and the Tealium session ID */
                digitalData.page.session.uSessionID = digitalData.util.cp["utag_main_v_id"] + "-" + digitalData.util.cp["utag_main_ses_id"];
+               //digitalData.page.session.uSessionID = digitalData.page.pageInfo.coremetrics.visitorID + "-" + digitalData.util.cp["utag_main_ses_id"];
                /* Unique Pageview ID is based on the unique session ID and the pageload epoch, the value is hashed */
                digitalData.page.session.uPageViewID = this.sha256(digitalData.page.session.uSessionID + '-' + digitalData.page.session.pageloadEpoch);
             }
@@ -1105,7 +1106,9 @@ var datalayer = {
                            hrefObj.href = hrefObj.href; /* Get around issues with IE */
                            link_hrefdomain = hrefObj.hostname.split('.').splice(-2, 2).join('.');
                            /* Get rid of the protocol for the link_href value */
-                           link_href = hrefObj.hostname + (hrefObj.pathname[0]==='/' ? hrefObj.pathname : '/'+hrefObj.pathname) + hrefObj.hash + hrefObj.search
+                           /* 20170227 - jleon: Leaving prootocol to href
+                            * link_href = hrefObj.hostname + (hrefObj.pathname[0]==='/' ? hrefObj.pathname : '/'+hrefObj.pathname) + hrefObj.hash + hrefObj.search
+                            */
                         }
                         else if (/^javascript:.+$|^IPT:.+$|^ipt:.+$/.test(link_href)) {
                            link_hrefnq = (link_href.split('?'))[0].toLowerCase();

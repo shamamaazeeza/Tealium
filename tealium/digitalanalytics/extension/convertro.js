@@ -31,8 +31,7 @@ var PREFIXMAPPING = {
 try {
     /* Only run this logic on utag.view events that are completed conversions */
    if (b["ut.event"] === "link" && typeof(utag.data["ddo.p.pi.convertro.enabled"]) !== "undefined" && utag.data["ddo.p.pi.convertro.enabled"] === "true" 
-      && typeof(b["type"]) !== "undefined" && b["type"] === "conversion" && b["eventAction"] === "2" && typeof(PREFIXMAPPING[b["primaryCategory"]]) !== "undefined"
-      && b["eventName"] !== "ALL-CHAT-BUTTONS") {
+      && typeof(b["type"]) !== "undefined" && b["type"] === "conversion" && b["eventAction"] === "2" && typeof(PREFIXMAPPING[b["primaryCategory"]]) !== "undefined") {
       /* set variables for convertro */
       b["convertro_type"] = "Conversion";
       b["convertro_id"] = (b["primaryCategory"] || 'UNKNOWN') + '-' + (b["ddo.p.s.uSessionID"] || 'UNKNOWN') + '-' + (b["ddo.p.s.pageloadEpoch"] || 'UNKNOWN');
