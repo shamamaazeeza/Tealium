@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.03.02.0042
+ * Version       : 2017.03.02.1156
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -866,7 +866,7 @@ var datalayer = {
          /*--------------------Function to get Demandbase User data from v18--------------------*/
          getDemandbaseUserData: function (wt) {
             try {
-               waittime = wt || datalayer.WAITTIME;
+               var waittime = wt || datalayer.WAITTIME;
                /* Set userInfo from DemandBase */
                if (typeof(IBMCore) !== "undefined") {
                   /* v18+ */
@@ -913,7 +913,7 @@ var datalayer = {
          /*--------------------Function to send datalayer_ready event ---------------------*/
          sendDatalayerReadyEvent: function (wt) {
             try {
-               waittime = wt || datalayer.WAITTIME;
+               var waittime = wt || datalayer.WAITTIME;
 
                /* Trigger Event for digitalData Object Ready */
                datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > Triggering ddo_ready event!');
@@ -1362,7 +1362,7 @@ var datalayer = {
                         jQuery2(document).off('dle_ready');
                         /* Initialize Data Layer */
                         datalayer.log('+++DBDM-LOG > bindPageViewWithAnalytics > Initializing Data Layer.');
-                        datalayer.init();
+                        datalayer.init(1);
                         /* Set referring URL to current page */
                         datalayer.util.setReferringURL(window.referrerSPA);
                         /* Save the current URL for SPAs */
@@ -1444,127 +1444,21 @@ var datalayer = {
          },
       },
 
-      /*--------------------Init Function for DataLayer--------------------*/
-      update : function () {
+      /*--------------------Update Function for DataLayer--------------------*/
+      update : function (r) {
          try {
-            /* Set up digitalData object */
-            window.digitalData = window.digitalData || {};
-
-            digitalData.page = digitalData.page || {};
-            digitalData.user = digitalData.user || {};
-            digitalData.util = digitalData.util || {};
-
-            digitalData.page.attribute  = digitalData.page.attribute || {};
-            digitalData.page.category   = digitalData.page.category  || {};
-            digitalData.page.pageInfo   = digitalData.page.pageInfo  || {};
-            digitalData.page.session    = digitalData.page.session   || {};
-            digitalData.user.profile    = digitalData.user.profile   || {};
-            digitalData.user.segment    = digitalData.user.segment   || {};
-            digitalData.user.userInfo   = digitalData.user.userInfo  || {};
-            digitalData.util.cp         = digitalData.util.cp        || {};
-            digitalData.util.meta       = digitalData.util.meta      || {};
-            digitalData.util.qp         = digitalData.util.qp        || {};
-            digitalData.util.referrer   = digitalData.util.referrer  || {};
-
-            digitalData.page.category.ibm         = digitalData.page.category.ibm || {};
-            digitalData.page.pageInfo.ibm         = digitalData.page.pageInfo.ibm || {};
-            digitalData.page.pageInfo.coremetrics = digitalData.page.pageInfo.coremetrics || {};
-            digitalData.page.pageInfo.tealium     = digitalData.page.pageInfo.tealium || {};
-            digitalData.page.pageInfo.metrics     = digitalData.page.pageInfo.metrics || {};
-
-            /*--------------------setting page loading time--------------------*/
-            this.util.setPageLoadEpoch(0); 
-
-            /*--------------------Get Mobile OS for User Agent--------------------*/
-            digitalData.page.attribute.agentMobileOS = this.util.getMobileOperatingSystem();
-
-            /*--------------------Set Cookies--------------------*/
-            this.util.readCookies();
-
-            /*--------------------Set Metadata Elements--------------------*/
-            this.util.readMetaData();
-
-            /*--------------------Set Query String Elements--------------------*/
-            this.util.readQueryStrings();
-
-            /*--------------------Get referring URL--------------------*/
-            this.util.getReferringURL();
-
-            /*--------------------Set PAGEID/URLID in DDO--------------------*/
-            this.util.setPageID();
-
-            /*--------------------Set referral URLID and referral domain in DDO--------------------*/
-            this.util.setReferringURL();
-
-            /*--------------------Set IBMER value--------------------*/
-            this.util.setIBMer();
-
-            /*--------------------Set IBM ID Profile ID--------------------*/
-            this.util.setProfileID();
-
-            /*--------------------Set Session ID value--------------------*/
-            this.util.setSessionID();
-
-            /*--------------------Set Site ID--------------------*/
-            this.util.setSiteID();
-
-            /*--------------------setting Client ID--------------------*/
-            this.util.setClientID();
-
-            /*--------------------setting Category ID--------------------*/
-            this.util.setCategoryID();
-
-            /*--------------------setting Search Terms from Enterprise Search--------------------*/
-            this.util.setSearchTerms();
-
-            /*--------------------setting Page Header--------------------*/
-            this.util.setPageHeader()
-
-            /*--------------------Set DDO from Metadata Valuesr--------------------*/
-            this.util.setDDOFromMetadata();
-
-            /*--------------------Set Destination URL--------------------*/
-            digitalData.page.pageInfo.destinationURL = window.location.href || "";
-
-            /*--------------------Set Destination URL Domain--------------------*/
-            digitalData.page.pageInfo.destinationDomain = document.domain.split('.').splice(-2, 2).join('.') || "";
-            if (digitalData.page.pageInfo.destinationDomain === "github.io") {
-               /* 2017-03-02 - jleon: Domain name for github.io needs another level up - ibm-bluemix.github.io */
-               digitalData.page.pageInfo.destinationDomain = document.domain.split('.').splice(-3, 3).join('.');
-            }
-
-            /*--------------------Set Page Name--------------------*/
-            digitalData.page.pageInfo.pageName = document.title || "";
-
-            /*--------------------Set DLE ID for Page--------------------*/
-            digitalData.page.pageInfo.dleID = this.util.sha256(digitalData.page.pageInfo.urlID);
-
-            /*--------------------Load Coremetrics Tags by Default--------------------*/
-            this.util.setCoremetricsEnabled();
-            digitalData.page.pageInfo.coremetrics.isEluminateLoaded = digitalData.page.pageInfo.coremetrics.isEluminateLoaded || false;
-
-            /*--------------------Set userInfo from DemandBase--------------------*/
-            try {
-               /* Subscribe to the user IP data ready event and call the callback when it happens, or if 
-                * it already happened ".asap" one.
-                */
-               IBMCore.common.util.user.subscribe("userIpDataReady", "customjs", datalayer.util.setUserInfo).runAsap(datalayer.util.setUserInfo);
-            }
-            catch (error) {
-               datalayer.log('+++DBDM-LOG > update > IBMCore not ready: ' + error);
-            }
-
-            /*--------------------Set Data Layer Ready--------------------*/
-            digitalData.page.isDataLayerReady = true;
+            var reset = r || 0;
+            datalayer.init(reset);
          }
          catch (error) {
             datalayer.log('+++DBDM-ERROR > update: ' + error);
          }
       },
-
+      
       /*--------------------Init Function for DataLayer--------------------*/
-      init : function () {
+      init : function (r) {
          try {
+            var reset = r || 0;
             /* Set up digitalData object */
             window.digitalData = window.digitalData || {};
 
@@ -1595,7 +1489,7 @@ var datalayer = {
             digitalData.page.isDataLayerReady     = false;
             
             /*--------------------setting page loading time--------------------*/
-            this.util.setPageLoadEpoch(0); 
+            this.util.setPageLoadEpoch(reset); 
 
             /*--------------------Coremetics Cookie Migration [workaround]--------------------*/
             this.util.coremetricsCookieWorkaround();

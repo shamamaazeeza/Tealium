@@ -3,7 +3,7 @@
  * Extension Name: ibm-common.js
  * Scope         : All Tags
  * Execution     : N/A
- * Version       : 2017.02.21.1000
+ * Version       : 2017.03.02.1156
  *
  * This script creates a calls the init function of the datalayer to initiate it
  * 
@@ -15,7 +15,7 @@ var tmeid = "ibm-common.js";
 try {
    /* Ensure that the digitalData Object has not been reset by the page */
    if (typeof(window.digitalData.page.isDataLayerReady) === "undefined") {
-      datalayer.update();
+      datalayer.init(0);
       datalayer.log('+++DBDM-LOG > ibm-common.js: digitalData was reset, recreating datalayer');
    }
    /* Ensure that we capture the CoreID6 cookie ID */
