@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.02.27.1725
+ * Version       : 2017.03.02.0042
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -1528,6 +1528,10 @@ var datalayer = {
 
             /*--------------------Set Destination URL Domain--------------------*/
             digitalData.page.pageInfo.destinationDomain = document.domain.split('.').splice(-2, 2).join('.') || "";
+            if (digitalData.page.pageInfo.destinationDomain === "github.io") {
+               /* 2017-03-02 - jleon: Domain name for github.io needs another level up - ibm-bluemix.github.io */
+               digitalData.page.pageInfo.destinationDomain = document.domain.split('.').splice(-3, 3).join('.');
+            }
 
             /*--------------------Set Page Name--------------------*/
             digitalData.page.pageInfo.pageName = document.title || "";
@@ -1649,6 +1653,10 @@ var datalayer = {
 
             /*--------------------Set Destination URL Domain--------------------*/
             digitalData.page.pageInfo.destinationDomain = document.domain.split('.').splice(-2, 2).join('.') || "";
+            if ( digitalData.page.pageInfo.destinationDomain === "github.io") {
+               /* 2017-03-02 - jleon: Domain name for github.io needs another level up - ibm-bluemix.github.io */
+               digitalData.page.pageInfo.destinationDomain = document.domain.split('.').splice(-3, 3).join('.');
+            }
 
             /*--------------------Set Page Name--------------------*/
             digitalData.page.pageInfo.pageName = document.title || "";
