@@ -3,7 +3,7 @@
  * Extension Name: ibm-common.js
  * Scope         : All Tags
  * Execution     : N/A
- * Version       : 2017.03.04.1130
+ * Version       : 2017.03.04.1212
  *
  * This script creates a calls the init function of the datalayer to initiate it
  * 
@@ -31,12 +31,6 @@ try {
    if (typeof(digitalData.page.pageInfo.onsiteSearchTerm) !== "undefined") {
       datalayer.util.setSearchTerms();
    }
-   /* Just make sure that the current destinationURL is properly set on SPAs */
-   if (window.pageviewSPA && digitalData.page.pageInfo.destinationURL !== window.location.href) {
-      digitalData.page.pageInfo.destinationURL = window.location.href || "";
-   }
-   /*--------------------Get Mobile OS for User Agent--------------------*/
-   digitalData.page.attribute.agentMobileOS = datalayer.util.getMobileOperatingSystem();   
 }
 catch (error) {
    datalayer.log('+++DBDM-ERROR > ibm-common.js: ' + error);
