@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.03.02.1156
+ * Version       : 2017.03.04.1130
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -38,7 +38,7 @@ var datalayer = {
          
       DOWNLOADTYPES : "123,avi,bqy,doc,docx,dot,eps,exe,flv,gif,jpg,lwp,mas,mov,mp3,mp4,odp,ods,odt,otp,ots,ott,pdf,png,pot,pps,ppt,pptx,prz,rss,rtf,sh,stc,sti,stw,swf,sxc,sxi,sxw,tar,txt,wav,wma,wmv,xls,xlsx,xml,zip",
       
-      DOMAINLIST    : "bluemix.net,cognos.com,ibm.biz,ibm.co,ibm.com,ibmcloud.com,ibmdw.net,jazz.net,lotuslive.com,mybluemix.net,securityintelligence.com,servicemanagementcenter.com,smartercitiescloud.com,softlayer.com,webdialogs.com,xtify.com",
+      DOMAINLIST    : "bluemix.net,cognos.com,ibm.biz,ibm.co,ibm.com,ibmcloud.com,ibm-bluemix.github.io,ibmdw.net,jazz.net,lotuslive.com,mybluemix.net,securityintelligence.com,servicemanagementcenter.com,smartercitiescloud.com,softlayer.com,watsonanalytics.com,webdialogs.com,xtify.com",
       
       TESTDOMAINS   : "dev.nwtw.ibm.com,testdata.coremetrics.com,localhost,wwwbeta-sso.toronto.ca.ibm.com",
       
@@ -95,7 +95,7 @@ var datalayer = {
          catch (error) {}
       },
 
-      util : {
+      fn : {
          /*--------------------Add SHA256 Hash Functions--------------------*/
          /* 2016-08-04 - jleon: RTC Story# 978510 - https://github.com/jbt/js-crypto */
          sha256 : function() {function e(a,b){return a>>>b|a<<32-b}for(var b=1,a,m=[],n=[];18>++b;)for(a=b*b;312>a;a+=b)m[a]=1;b=1;for(a=0;313>b;)m[++b]||(n[a]=Math.pow(b,.5)%1*4294967296|0,m[a++]=Math.pow(b,1/3)%1*4294967296|0);return function(g){for(var l=n.slice(b=0),c=unescape(encodeURI(g)),h=[],d=c.length,k=[],f,p;b<d;)k[b>>2]|=(c.charCodeAt(b)&255)<<8*(3-b++%4);d*=8;k[d>>5]|=128<<24-d%32;k[p=d+64>>5|15]=d;for(b=0;b<p;b+=16){for(c=l.slice(a=0,8);64>a;c[4]+=f)h[a]=16>a?k[a+b]:(e(f=h[a-2],17)^e(f,19)^f>>>10)+(h[a-7]|0)+(e(f=h[a-15],7)^e(f,18)^f>>>3)+(h[a-16]|0),c.unshift((f=(c.pop()+(e(g=c[4],6)^e(g,11)^e(g,25))+((g&c[5]^~g&c[6])+m[a])|0)+(h[a++]|0))+(e(d=c[0],2)^e(d,13)^e(d,22))+(d&c[1]^c[1]&c[2]^c[2]&d));for(a=8;a--;)l[a]=c[a]+l[a]}for(c="";63>a;)c+=(l[++a>>3]>>4*(7-a%8)&15).toString(16);return c}}(),
@@ -355,23 +355,39 @@ var datalayer = {
          },
 
          /*--------------------Add setCookie function--------------------*/
-         setCookie : function (name, value) {
+         setCookie: function (name, value, days) {
             try {
-               document.cookie=name + "=" + escape(value) + "; path=/";
+               var expires = "";
+               if (days) {
+                  var date = new Date();
+                  date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                  expires = "; expires=" + date.toUTCString();
+               }
+               document.cookie = name + "=" + value + expires + "; path=/";
             }
             catch (error) {
                datalayer.log('+++DBDM-ERROR > setCookie: ' + error);
             }
-         },        
-
+         },
+         
          /*--------------------Add getCookie function--------------------*/
          getCookie : function (name) {
             try {
-               match = document.cookie.match(new RegExp(name + '=([^;]+)'));
+               var match = document.cookie.match(new RegExp(name + '=([^;]+)'));
                if (match) return match[1];
             }
             catch (error) {
                datalayer.log('+++DBDM-ERROR > getCookie: ' + error);
+            }
+         },        
+
+         /*--------------------Add deleteCookie function--------------------*/
+         deleteCookie : function (name) {
+            try {
+               document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/';
+            }
+            catch (error) {
+               datalayer.log('+++DBDM-ERROR > deleteCookie: ' + error);
             }
          },        
 
@@ -506,6 +522,7 @@ var datalayer = {
                datalayer.log('+++DBDM-ERROR > setReferringURL: ' + error);
             }
          },
+         
          /*--------------------setting IBMER value--------------------*/
          setIBMer : function () {
             try {
@@ -751,7 +768,9 @@ var datalayer = {
                   }
                }
                /* 2017-02-24 - jleon: Ensure that we decode the value for the search term - per developerWorks issue  */
-               digitalData.page.pageInfo.onsiteSearchTerm = decodeURIComponent(digitalData.page.pageInfo.onsiteSearchTerm);
+               if (typeof(digitalData.page.pageInfo.onsiteSearchTerm) !== "undefined") {
+                  digitalData.page.pageInfo.onsiteSearchTerm = decodeURIComponent(digitalData.page.pageInfo.onsiteSearchTerm);
+               }
 
                if (typeof(window.ibmSrchRslts) !== "undefined") {
                   digitalData.page.pageInfo.onsiteSearchResult = window.ibmSrchRslts;
@@ -873,7 +892,7 @@ var datalayer = {
                   try {
                      /* Subscribe to the user IP data ready event and call the callback when it happens,
                       * or if it already happened ".asap" one. */
-                     IBMCore.common.util.user.subscribe("userIpDataReady", "customjs", datalayer.util.setUserInfo).runAsap(datalayer.util.setUserInfo);
+                     IBMCore.common.util.user.subscribe("userIpDataReady", "customjs", datalayer.fn.setUserInfo).runAsap(datalayer.fn.setUserInfo);
                   }
                   catch (error) {
                      datalayer.log('+++DBDM-LOG > getDemandbaseUserData > IBMCore not ready: ' + error);
@@ -885,7 +904,7 @@ var datalayer = {
                   if (typeof(ibmweb.comusr) !== "undefined" && typeof(ibmweb.comusr.isLoaded) !== "undefined") {
                      /* Set a timeout to kill the listener if it takes too long.
                       * Set this first in case the user info is already ready when you set the listener. */
-                     userInfoTimeout = setTimeout(function () {
+                     var userInfoTimeout = setTimeout(function () {
                            ibmweb.queue.remove(userInfoQueue);
                            datalayer.log('+++DBDM-LOG > getDemandbaseUserData > User Info took too long');
                         }, waittime);
@@ -897,7 +916,7 @@ var datalayer = {
                            /* Clear timeout since it returned in time. */
                            clearTimeout(userInfoTimeout);
                            /* Get user info now that it's ready. */
-                           datalayer.util.setUserInfoV17();
+                           datalayer.fn.setUserInfoV17();
                         });
                   }
                }
@@ -908,6 +927,43 @@ var datalayer = {
             } 
             catch (error) {
                datalayer.log('+++DBDM-ERROR > getDemandbaseUserData: ' + error);
+            }
+         },
+
+         /*--------------------Getting the Bluemix Anonynous ID--------------------*/
+         getAnonymousID: function (wt) {
+            try {
+               var waittime = wt || datalayer.WAITTIME;
+               console.time("getAnonymousID");
+
+               /* See if the Anonymous ID is already in the Cookie */
+               digitalData.user.profile.auid = datalayer.fn.getCookie('BMAID');
+               if (digitalData.user.profile.auid) {
+                  console.timeEnd("getAnonymousID");
+               }
+               else {
+                  datalayer.log('+++DBDM-LOG > getAnonymousID > Fetching anonymous ID from Bluemix (timeout: ' + waittime + 'ms)');
+                  jQuery.ajax({
+                     url: "https://console.ng.bluemix.net/analytics/bmaid",
+                     method: "GET",
+                     timeout: waittime,
+                     success: function (response) {
+                        if (response.BMAID) {
+                           /* If the BMAID is set then set it to DDO and to cookie */
+                           datalayer.fn.setCookie('BMAID', response.BMAID, 7300);
+                           digitalData.user.profile.auid = response.BMAID;
+                           datalayer.log('+++DBDM-LOG > getAnonymousID > Fetched anonymous ID from Bluemix');
+                           console.timeEnd("getAnonymousID");
+                        }
+                     },
+                     error: function (xhr, ajaxOptions, error) {
+                        datalayer.log('+++DBDM-ERROR > getAnonymousID > Ajax call error: ' + error);
+                     }
+                  });
+               }
+            }
+            catch (error) {
+               datalayer.log('+++DBDM-ERROR > getAnonymousID: ' + error);
             }
          },
          /*--------------------Function to send datalayer_ready event ---------------------*/
@@ -922,7 +978,7 @@ var datalayer = {
                if (typeof(utag2) !== "undefined" && utag2.dleReady) {
                   /* Continue finishing setting up data layer */
                   datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > dle_ready event was already triggered!');
-                  datalayer.util.finalizeDataLayer();
+                  datalayer.fn.finalizeDataLayer();
                }
                else {
                   /* Set a 3s timeout to wait for the dle_ready event */
@@ -933,7 +989,7 @@ var datalayer = {
                      }
                      /* Continue finishing setting up data layer */
                      datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > Timed out waiting for dle_ready event!');
-                     datalayer.util.finalizeDataLayer();
+                     datalayer.fn.finalizeDataLayer();
                   }, waittime);
 
                   /* Set Listener for DLE Readiness */
@@ -947,7 +1003,7 @@ var datalayer = {
                            digitalData.page.pageInfo.dleURL = "https://tags.tiqcdn.com/dle/ibm/web/" + utag2.full_dle_id + ".js";
                            datalayer.log('+++DBDM-LOG > sendDatalayerReadyEvent > DLE File: ' + digitalData.page.pageInfo.dleURL);
                         }
-                        datalayer.util.finalizeDataLayer();
+                        datalayer.fn.finalizeDataLayer();
                      });
                }
             }
@@ -1132,7 +1188,7 @@ var datalayer = {
                            rexp = new RegExp(c[d].toLowerCase() + '$');
                            if (rexp.test(link_hrefnq)) {
                               /* parse Query Strings */
-                              var link_hrefqs = datalayer.util.parseQueryString(link_href);
+                              var link_hrefqs = datalayer.fn.parseQueryString(link_href);
                               link_type = 'DOWNLOAD LINK';
                               /* For downloads eventName is set to the attachment name from the targetURL or current page */
                               eventName = link_hrefqs.attachment || link_hrefqs.FILE || link_hrefqs.attachmentName || link_hrefqs.htmlfid || digitalData.util.qp.attachment || digitalData.util.qp.FILE || digitalData.util.qp.attachmentName || digitalData.util.qp.htmlfid || link_href;
@@ -1260,11 +1316,11 @@ var datalayer = {
                /* Set name and ID for event */
                if (obj.type === "conversion") {
                   obj.event_name = "ibmStatsEvent_conversion";
-                  obj.cm_ConversionEventTag_cid = datalayer.util.parseEventNameGen(obj.eventName,256);
+                  obj.cm_ConversionEventTag_cid = datalayer.fn.parseEventNameGen(obj.eventName,256);
                }
                else if (obj.type === "pageclick") {
                   obj.event_name = "ibmStatsEvent_element";
-                  obj.cm_ElementTag_eid = datalayer.util.parseEventNameGen(obj.eventName,50);
+                  obj.cm_ElementTag_eid = datalayer.fn.parseEventNameGen(obj.eventName,50);
                }
                else if (obj.type === "product") {
                   obj.event_name = "ibmStatsEvent_product";
@@ -1274,11 +1330,11 @@ var datalayer = {
                }
                else if (obj.type === "video" ) {
                   obj.event_name = "ibmStatsEvent_element";
-                  obj.cm_ElementTag_eid = datalayer.util.parseEventNameGen(obj.eventName,50);
+                  obj.cm_ElementTag_eid = datalayer.fn.parseEventNameGen(obj.eventName,50);
                }
                else {
                   obj.event_name = "ibmStatsEvent_element";
-                  obj.cm_ElementTag_eid = datalayer.util.parseEventNameGen(obj.eventName,50);
+                  obj.cm_ElementTag_eid = datalayer.fn.parseEventNameGen(obj.eventName,50);
                }
               
                /* Set EventType for Data Layer */
@@ -1296,7 +1352,7 @@ var datalayer = {
                         var dataConversion = JSON.parse(JSON.stringify(data));
                         dataConversion.event_name="ibmStatsEvent_conversion";
                         dataConversion.type = dataConversion.eventType = "conversion"
-                        dataConversion.cm_ConversionEventTag_cid = datalayer.util.parseEventNameGen(obj.eventName,256);
+                        dataConversion.cm_ConversionEventTag_cid = datalayer.fn.parseEventNameGen(obj.eventName,256);
                         delete dataConversion.cm_ElementTag_eid;
                         dataConversion.eventAction = 1;
                         datalayer.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
@@ -1306,7 +1362,7 @@ var datalayer = {
                         var dataConversion = JSON.parse(JSON.stringify(data));
                         dataConversion.event_name="ibmStatsEvent_conversion";
                         dataConversion.type = dataConversion.eventType = "conversion"
-                        dataConversion.cm_ConversionEventTag_cid = datalayer.util.parseEventNameGen(obj.eventName,256);
+                        dataConversion.cm_ConversionEventTag_cid = datalayer.fn.parseEventNameGen(obj.eventName,256);
                         delete dataConversion.cm_ElementTag_eid;
                         dataConversion.eventAction = 2;
                         datalayer.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
@@ -1319,11 +1375,11 @@ var datalayer = {
                else {
                   /* For checking the Product Id from previous ECOM pages */
                   if (digitalData.page.pageInfo.ibm.iniSiteID.toLowerCase().indexOf("ecom") !== -1 || digitalData.page.pageInfo.ibm.siteID.toLowerCase().indexOf("ecom") !== -1) {
-                     var prevProdID = datalayer.util.getCookie("prevProdID");
+                     var prevProdID = datalayer.fn.getCookie("prevProdID");
                      if (prevProdID !== null && typeof(digitalData.product) !== "undefined" && typeof(digitalData.product[0].productInfo.productID) !== "undefined") {
                         if (digitalData.product[0].productInfo.productID == prevProdID) data.event_name = "doNotFire";
                      }
-                     datalayer.util.setCookie("prevProdID", obj.productID);
+                     datalayer.fn.setCookie("prevProdID", obj.productID);
                   }
                   if (data.event_name !== "doNotFire") {
                      datalayer.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + data.type + ': \n' + JSON.stringify(data, null, 2));
@@ -1351,7 +1407,7 @@ var datalayer = {
                         datalayer.update();
                         datalayer.log('+++DBDM-WARNING > marketing-events.js: digitalData was reset, recreating datalayer');
                      }
-                     datalayer.util.ibmStatsEventHandler(obj);
+                     datalayer.fn.ibmStatsEventHandler(obj);
                   };
                }
                if (typeof(bindPageViewWithAnalytics) === "undefined" || (typeof(bindPageViewWithAnalytics) === "function" && bindPageViewWithAnalytics.isGhost)) {
@@ -1364,11 +1420,11 @@ var datalayer = {
                         datalayer.log('+++DBDM-LOG > bindPageViewWithAnalytics > Initializing Data Layer.');
                         datalayer.init(1);
                         /* Set referring URL to current page */
-                        datalayer.util.setReferringURL(window.referrerSPA);
+                        datalayer.fn.setReferringURL(window.referrerSPA);
                         /* Save the current URL for SPAs */
                         window.referrerSPA = digitalData.page.pageInfo.destinationURL;
                         /* Send jQuery event for ddo_ready */ 
-                        datalayer.util.sendDatalayerReadyEvent();
+                        datalayer.fn.sendDatalayerReadyEvent();
                      }
                      else {
                         /* Do not run pageview twice for SPAs */
@@ -1416,14 +1472,14 @@ var datalayer = {
                }
                if (!digitalData.page.isDataLayerReady) {
                   /* setting Client ID */
-                  datalayer.util.setClientID();
+                  datalayer.fn.setClientID();
 
                   /* Update Cookies */
-                  datalayer.util.readCookies();
+                  datalayer.fn.readCookies();
 
                   /* Initialize ibmStats.event */
                   datalayer.log('+++DBDM-LOG > finalizeDataLayer > Defining ibmStats.event()');
-                  datalayer.util.ibmStatsEventInit();
+                  datalayer.fn.ibmStatsEventInit();
 
                   /* Set Data Layer Ready and trigger Event */
                   digitalData.page.isDataLayerReady = true;
@@ -1454,11 +1510,12 @@ var datalayer = {
             datalayer.log('+++DBDM-ERROR > update: ' + error);
          }
       },
-      
+
       /*--------------------Init Function for DataLayer--------------------*/
       init : function (r) {
          try {
             var reset = r || 0;
+            
             /* Set up digitalData object */
             window.digitalData = window.digitalData || {};
 
@@ -1489,58 +1546,68 @@ var datalayer = {
             digitalData.page.isDataLayerReady     = false;
             
             /*--------------------setting page loading time--------------------*/
-            this.util.setPageLoadEpoch(reset); 
+            this.fn.setPageLoadEpoch(reset); 
 
             /*--------------------Coremetics Cookie Migration [workaround]--------------------*/
-            this.util.coremetricsCookieWorkaround();
+            this.fn.coremetricsCookieWorkaround();
 
             /*--------------------Get Mobile OS for User Agent--------------------*/
-            digitalData.page.attribute.agentMobileOS = this.util.getMobileOperatingSystem();
-
+            digitalData.page.attribute.agentMobileOS = this.fn.getMobileOperatingSystem();
+            
             /*--------------------Set Cookies--------------------*/
-            this.util.readCookies();
+            this.fn.readCookies();
 
             /*--------------------Set Metadata Elements--------------------*/
-            this.util.readMetaData();
+            this.fn.readMetaData();
 
             /*--------------------Set Query String Elements--------------------*/
-            this.util.readQueryStrings();
+            this.fn.readQueryStrings();
 
             /*--------------------Get referring URL--------------------*/
-            this.util.getReferringURL();
+            this.fn.getReferringURL();
 
             /*--------------------Set PAGEID/URLID in DDO--------------------*/
-            this.util.setPageID();
+            this.fn.setPageID();
 
             /*--------------------Set referral URLID and referral domain in DDO--------------------*/
-            this.util.setReferringURL();
+            this.fn.setReferringURL();
 
             /*--------------------Set IBMER value--------------------*/
-            this.util.setIBMer();
+            this.fn.setIBMer();
 
             /*--------------------Set IBM ID Profile ID--------------------*/
-            this.util.setProfileID();
+            this.fn.setProfileID();
 
             /*--------------------Set Session ID value--------------------*/
-            this.util.setSessionID();
+            this.fn.setSessionID();
 
             /*--------------------Set Site ID--------------------*/
-            this.util.setSiteID();
+            this.fn.setSiteID();
 
             /*--------------------setting Client ID--------------------*/
-            this.util.setClientID();
+            this.fn.setClientID();
 
             /*--------------------setting Category ID--------------------*/
-            this.util.setCategoryID();
+            this.fn.setCategoryID();
             
+            /*--------------------get anonymous ID from Bluemix--------------------*/
+            var siteID = digitalData.page.pageInfo.ibm.siteID.toLowerCase().replace(/^test|test$/,"");
+            if (siteID === 'devwrk' || siteID === 'devwrks' || siteID === 'dwnext' || siteID === "devwrkscon") {
+               /* set timeout to 2s */
+               this.fn.getAnonymousID(2000);
+            }
+            else {
+               digitalData.user.profile.auid = datalayer.fn.getCookie('BMAID');
+            }
+
             /*--------------------setting Search Terms from Enterprise Search--------------------*/
-            this.util.setSearchTerms();
+            this.fn.setSearchTerms();
 
             /*--------------------setting Page Header--------------------*/
-            this.util.setPageHeader()
+            this.fn.setPageHeader()
 
             /*--------------------Set DDO from Metadata Valuesr--------------------*/
-            this.util.setDDOFromMetadata();
+            this.fn.setDDOFromMetadata();
 
             /*--------------------Set Destination URL--------------------*/
             digitalData.page.pageInfo.destinationURL = window.location.href || "";
@@ -1556,10 +1623,10 @@ var datalayer = {
             digitalData.page.pageInfo.pageName = document.title || "";
 
             /*--------------------Set DLE ID for Page--------------------*/
-            digitalData.page.pageInfo.dleID = this.util.sha256(digitalData.page.pageInfo.urlID);
+            digitalData.page.pageInfo.dleID = this.fn.sha256(digitalData.page.pageInfo.urlID);
 
             /*--------------------Load Coremetrics Tags by Default--------------------*/
-            this.util.setCoremetricsEnabled();
+            this.fn.setCoremetricsEnabled();
             digitalData.page.pageInfo.coremetrics.isEluminateLoaded = false;
          }
          catch (error) {
@@ -1567,3 +1634,39 @@ var datalayer = {
          }
       },
 };
+
+/**
+ * -----------------MAIN FUNCTION-----------------
+ *        Auto initialize datalayer object
+ */
+(function () {
+   /* create aliases to functions */
+   datalayer.util = datalayer.fn;
+   window.dl = datalayer;
+
+   try {
+      /* Initialize Data Layer */
+      datalayer.log('+++DBDM-LOG > datalayer.js > Initializing Data Layer.');
+      datalayer.init();
+
+      if (window.jQueryNativeVersion) {
+         datalayer.log('+++DBDM-LOG > datalayer.js > Using native jQuery version: ' + window.jQueryNativeVersion);
+         digitalData.page.attribute.jQueryNativeVersion = window.jQueryNativeVersion;
+      }
+      else {
+         datalayer.log('+++DBDM-LOG > datalayer.js > Using embedded jQuery version: ' + jQuery2.fn.jquery);
+      }
+
+      /* Save the current URL for SPAs and don't run pageview twice */
+      window.referrerSPA = digitalData.page.pageInfo.destinationURL;
+      window.pageviewSPA = false;
+
+      /* Get demandbase data from v18 */
+      datalayer.fn.getDemandbaseUserData();
+
+      /* Send jQuery event for ddo_ready */
+      datalayer.fn.sendDatalayerReadyEvent();
+   } catch (error) {
+      datalayer.log('+++DBDM-ERROR > datalayer.js: ' + error);
+   }
+})();

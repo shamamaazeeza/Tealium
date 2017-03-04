@@ -3,7 +3,7 @@
  * Extension Name: ibm-common.js
  * Scope         : All Tags
  * Execution     : N/A
- * Version       : 2017.03.02.1156
+ * Version       : 2017.03.04.1130
  *
  * This script creates a calls the init function of the datalayer to initiate it
  * 
@@ -20,12 +20,20 @@ try {
    }
    /* Ensure that we capture the CoreID6 cookie ID */
    if (typeof(window.digitalData.page.pageInfo.coremetrics.visitorID) === "undefined") {
-      datalayer.util.readCookies();
+      datalayer.fn.readCookies();
       datalayer.log('+++DBDM-LOG > ibm-common.js: Reading first-party cookies');
+   }
+   /* Ensure that we capture the anonymous ID from the cookie */
+   if (typeof(window.digitalData.user.profile.auid) === "undefined") {
+      digitalData.user.profile.auid = datalayer.fn.getCookie('BMAID');
    }
    /* Refresh the search terms and results */
    if (typeof(digitalData.page.pageInfo.onsiteSearchTerm) !== "undefined") {
       datalayer.util.setSearchTerms();
+   }
+   /* Just make sure that the current destinationURL is properly set on SPAs */
+   if (window.pageviewSPA && digitalData.page.pageInfo.destinationURL !== window.location.href) {
+      digitalData.page.pageInfo.destinationURL = window.location.href || "";
    }
    /*--------------------Get Mobile OS for User Agent--------------------*/
    digitalData.page.attribute.agentMobileOS = datalayer.util.getMobileOperatingSystem();   
