@@ -315,8 +315,8 @@ try {
                   /* 2016-09-16 - shruti: Code optimization. Used JSON instead of if-else
                    * process each entry to look for matches based on the default value previously defined
                    */
-                  for (var i = 0; i < datalayer.PAGEIDQUERYSTRINGSDEFAULT.length; i++) {
-                     var t = datalayer.PAGEIDQUERYSTRINGSDEFAULT[i];               
+                  for (var i = 0; i < dl.PAGEIDQUERYSTRINGSDEFAULT.length; i++) {
+                     var t = dl.PAGEIDQUERYSTRINGSDEFAULT[i];               
                      if (pathName.indexOf(t.pathNameSubstring) === 0 && typeof(digitalData.page.attribute.pageidQueryStrings) == "undefined") {               
                         /* Set PageID Query Strings */ 
                         digitalData.page.attribute.pageidQueryStrings = t.qsParameter;
@@ -829,7 +829,7 @@ try {
                /* If the siteID prefix or suffix is "test" or if the full domain of the hostname is in 
                 * the TESTDOMAINS array then set Client ID to 80200000 (test instance)
                 */
-               if (digitalData.page.pageInfo.ibm.siteID.toLowerCase().match(/^test|test$/) || (datalayer.TESTDOMAINS.split(",").indexOf(document.location.hostname.replace(/^[^\.]+./,"")) !== -1)) {
+               if (digitalData.page.pageInfo.ibm.siteID.toLowerCase().match(/^test|test$/) || (dl.TESTDOMAINS.split(",").indexOf(document.location.hostname.replace(/^[^\.]+./,"")) !== -1)) {
                   digitalData.page.pageInfo.coremetrics.clientID = "80200000|" + digitalData.page.pageInfo.ibm.siteID;
                }
                else {
@@ -961,20 +961,20 @@ try {
          /*--------------------Set DDO from Metadata Valuesr--------------------*/
          setDDOFromMetadata: function () {
             try {
-               digitalData.page.pageInfo.description   = digitalData.page.pageInfo.description   || digitalData.util.meta["description"];
-               digitalData.page.pageInfo.effectiveDate = digitalData.page.pageInfo.effectiveDate || digitalData.util.meta["ibm.effective"];
-               digitalData.page.pageInfo.expiryDate    = digitalData.page.pageInfo.expiryDate    || digitalData.util.meta["ibm.expires"];
-               digitalData.page.pageInfo.keywords      = digitalData.page.pageInfo.keywords      || digitalData.util.meta["keywords"];
-               digitalData.page.pageInfo.language      = digitalData.page.pageInfo.language      || digitalData.util.meta["dc.language"];
-               digitalData.page.pageInfo.publishDate   = digitalData.page.pageInfo.publishDate   || digitalData.util.meta["dc.date"];
-               digitalData.page.pageInfo.publisher     = digitalData.page.pageInfo.publisher     || digitalData.util.meta["dc.publisher"];
-               digitalData.page.pageInfo.rights        = digitalData.page.pageInfo.rights        || digitalData.util.meta["dc.rights"];
-               digitalData.page.pageInfo.version       = digitalData.page.pageInfo.version       || digitalData.util.meta["source"];
-               digitalData.page.pageInfo.ibm.country   = digitalData.page.pageInfo.ibm.country   || digitalData.util.meta["ibm.country"];
-               digitalData.page.pageInfo.ibm.industry  = digitalData.page.pageInfo.ibm.industry  || digitalData.util.meta["ibm.industry"];
-               digitalData.page.pageInfo.ibm.owner     = digitalData.page.pageInfo.ibm.owner     || digitalData.util.meta["owner"];
-               digitalData.page.pageInfo.ibm.subject   = digitalData.page.pageInfo.ibm.subject   || digitalData.util.meta["dc.subject"];
-               digitalData.page.pageInfo.ibm.type      = digitalData.page.pageInfo.ibm.type      || digitalData.util.meta["dc.type"];
+               digitalData.page.pageInfo.description   = digitalData.page.pageInfo.description   || digitalData.util.meta["description"] || "";
+               digitalData.page.pageInfo.effectiveDate = digitalData.page.pageInfo.effectiveDate || digitalData.util.meta["ibm.effective"] || "";
+               digitalData.page.pageInfo.expiryDate    = digitalData.page.pageInfo.expiryDate    || digitalData.util.meta["ibm.expires"] || "";
+               digitalData.page.pageInfo.keywords      = digitalData.page.pageInfo.keywords      || digitalData.util.meta["keywords"] || "";
+               digitalData.page.pageInfo.language      = digitalData.page.pageInfo.language      || digitalData.util.meta["dc.language"] || "";
+               digitalData.page.pageInfo.publishDate   = digitalData.page.pageInfo.publishDate   || digitalData.util.meta["dc.date"] || "";
+               digitalData.page.pageInfo.publisher     = digitalData.page.pageInfo.publisher     || digitalData.util.meta["dc.publisher"] || "";
+               digitalData.page.pageInfo.rights        = digitalData.page.pageInfo.rights        || digitalData.util.meta["dc.rights"] || "";
+               digitalData.page.pageInfo.version       = digitalData.page.pageInfo.version       || digitalData.util.meta["source"] || "";
+               digitalData.page.pageInfo.ibm.country   = digitalData.page.pageInfo.ibm.country   || digitalData.util.meta["ibm.country"] || "";
+               digitalData.page.pageInfo.ibm.industry  = digitalData.page.pageInfo.ibm.industry  || digitalData.util.meta["ibm.industry"] || "";
+               digitalData.page.pageInfo.ibm.owner     = digitalData.page.pageInfo.ibm.owner     || digitalData.util.meta["owner"] || "";
+               digitalData.page.pageInfo.ibm.subject   = digitalData.page.pageInfo.ibm.subject   || digitalData.util.meta["dc.subject"] || "";
+               digitalData.page.pageInfo.ibm.type      = digitalData.page.pageInfo.ibm.type      || digitalData.util.meta["dc.type"] || "";
             }
             catch (error) {
                dl.log('+++DBDM-ERROR > setDDOFromMetadata: ' + error);
@@ -1041,14 +1041,14 @@ try {
          /*--------------------Function to get Demandbase User data from v18--------------------*/
          getDemandbaseUserData: function (wt) {
             try {
-               var waittime = wt || datalayer.WAITTIME;
+               var waittime = wt || dl.WAITTIME;
                /* Set userInfo from DemandBase */
                if (typeof(IBMCore) !== "undefined") {
                   /* v18+ */
                   try {
                      /* Subscribe to the user IP data ready event and call the callback when it happens,
                       * or if it already happened ".asap" one. */
-                     IBMCore.common.util.user.subscribe("userIpDataReady", "customjs", datalayer.fn.setUserInfo).runAsap(datalayer.fn.setUserInfo);
+                     IBMCore.common.util.user.subscribe("userIpDataReady", "customjs", dl.fn.setUserInfo).runAsap(dl.fn.setUserInfo);
                   }
                   catch (error) {
                      dl.log('+++DBDM-LOG > getDemandbaseUserData > IBMCore not ready: ' + error);
@@ -1072,14 +1072,13 @@ try {
                         /* Clear timeout since it returned in time. */
                         clearTimeout(userInfoTimeout);
                         /* Get user info now that it's ready. */
-                        datalayer.fn.setUserInfoV17();
+                        dl.fn.setUserInfoV17();
                      });
                   }
                }
                else {
                   dl.log('+++DBDM-LOG > getDemandbaseUserData > User Info not available');
                }
-
             } 
             catch (error) {
                dl.log('+++DBDM-ERROR > getDemandbaseUserData: ' + error);
@@ -1089,11 +1088,11 @@ try {
          /*--------------------Getting the Bluemix Anonynous ID--------------------*/
          getAnonymousID: function (wt) {
             try {
-               var waittime = wt || datalayer.WAITTIME;
+               var waittime = wt || dl.WAITTIME;
                console.time("getAnonymousID");
 
                /* See if the Anonymous ID is already in the Cookie */
-               digitalData.user.profile.auid = datalayer.fn.getCookie('BMAID');
+               digitalData.user.profile.auid = dl.fn.getCookie('BMAID');
                if (digitalData.user.profile.auid) {
                   console.timeEnd("getAnonymousID");
                }
@@ -1106,7 +1105,7 @@ try {
                      success: function (response) {
                         if (response.BMAID) {
                            /* If the BMAID is set then set it to DDO and to cookie */
-                           datalayer.fn.setCookie('BMAID', response.BMAID, 7300);
+                           dl.fn.setCookie('BMAID', response.BMAID, 7300);
                            digitalData.user.profile.auid = response.BMAID;
                            dl.log('+++DBDM-LOG > getAnonymousID > Fetched anonymous ID from Bluemix');
                            console.timeEnd("getAnonymousID");
@@ -1213,7 +1212,7 @@ try {
                   /* Now, scan the parents until whether node 'A' or 'BUTTON' are found */
                   link_node = link_obj.nodeName.toLowerCase();
                   if (link_node !== "a" && link_node !== "button") {
-                     for (var d = 0; d < datalayer.TOPANCESTORLEVEL; d++) {
+                     for (var d = 0; d < dl.TOPANCESTORLEVEL; d++) {
                         if (typeof (link_obj) !== "undefined" && link_obj.parentNode) link_obj = link_obj.parentNode;
                         link_node = (link_obj !== null && link_obj.nodeName) ? link_obj.nodeName.toLowerCase() : "";
                         if (link_node === "a" || link_node === "button") break;
@@ -1294,12 +1293,12 @@ try {
                         link_id = link_id || link_obj.id || "";
 
                         /* +++ DOWNLOAD LINK: Determine if the click was done to download a file */
-                        var c = datalayer.DOWNLOADTYPES.split(",");
+                        var c = dl.DOWNLOADTYPES.split(",");
                         for (var d=0; d<c.length; d++) {
                            rexp = new RegExp(c[d].toLowerCase() + '$');
                            if (rexp.test(link_hrefnq)) {
                               /* parse Query Strings */
-                              var link_hrefqs = datalayer.fn.parseQueryString(link_href);
+                              var link_hrefqs = dl.fn.parseQueryString(link_href);
                               link_type = 'DOWNLOAD LINK';
                               /* For downloads eventName is set to the attachment name from the targetURL or current page */
                               eventName = link_hrefqs.attachment || link_hrefqs.FILE || link_hrefqs.attachmentName || link_hrefqs.htmlfid || digitalData.util.qp.attachment || digitalData.util.qp.FILE || digitalData.util.qp.attachmentName || digitalData.util.qp.htmlfid || link_href;
@@ -1311,7 +1310,7 @@ try {
 
                         /* +++ EXTERNAL LINK: Determine if the click was done on an non-IBM link */
                         if (link_type === "") {
-                           if (datalayer.DOMAINLIST.split(",").indexOf(link_hrefdomain) == -1 && !/^javascript:.+$|^Blank HREF$|^IPT:.+$|^ipt:.+$/.test(link_href)) {
+                           if (dl.DOMAINLIST.split(",").indexOf(link_hrefdomain) == -1 && !/^javascript:.+$|^Blank HREF$|^IPT:.+$|^ipt:.+$/.test(link_href)) {
                               link_type = 'EXTERNAL LINK';
                               eventName = link_href;
                               /* set category for LEGACY support of events */
@@ -1427,11 +1426,11 @@ try {
                /* Set name and ID for event */
                if (obj.type === "conversion") {
                   obj.event_name = "ibmStatsEvent_conversion";
-                  obj.cm_ConversionEventTag_cid = datalayer.fn.parseEventNameGen(obj.eventName,256);
+                  obj.cm_ConversionEventTag_cid = dl.fn.parseEventNameGen(obj.eventName,256);
                }
                else if (obj.type === "pageclick") {
                   obj.event_name = "ibmStatsEvent_element";
-                  obj.cm_ElementTag_eid = datalayer.fn.parseEventNameGen(obj.eventName,50);
+                  obj.cm_ElementTag_eid = dl.fn.parseEventNameGen(obj.eventName,50);
                }
                else if (obj.type === "product") {
                   obj.event_name = "ibmStatsEvent_product";
@@ -1441,11 +1440,11 @@ try {
                }
                else if (obj.type === "video" ) {
                   obj.event_name = "ibmStatsEvent_element";
-                  obj.cm_ElementTag_eid = datalayer.fn.parseEventNameGen(obj.eventName,50);
+                  obj.cm_ElementTag_eid = dl.fn.parseEventNameGen(obj.eventName,50);
                }
                else {
                   obj.event_name = "ibmStatsEvent_element";
-                  obj.cm_ElementTag_eid = datalayer.fn.parseEventNameGen(obj.eventName,50);
+                  obj.cm_ElementTag_eid = dl.fn.parseEventNameGen(obj.eventName,50);
                }
 
                /* Set EventType for Data Layer */
@@ -1463,7 +1462,7 @@ try {
                         var dataConversion = JSON.parse(JSON.stringify(data));
                         dataConversion.event_name="ibmStatsEvent_conversion";
                         dataConversion.type = dataConversion.eventType = "conversion"
-                           dataConversion.cm_ConversionEventTag_cid = datalayer.fn.parseEventNameGen(obj.eventName,256);
+                           dataConversion.cm_ConversionEventTag_cid = dl.fn.parseEventNameGen(obj.eventName,256);
                         delete dataConversion.cm_ElementTag_eid;
                         dataConversion.eventAction = 1;
                         dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
@@ -1473,7 +1472,7 @@ try {
                         var dataConversion = JSON.parse(JSON.stringify(data));
                         dataConversion.event_name="ibmStatsEvent_conversion";
                         dataConversion.type = dataConversion.eventType = "conversion"
-                           dataConversion.cm_ConversionEventTag_cid = datalayer.fn.parseEventNameGen(obj.eventName,256);
+                           dataConversion.cm_ConversionEventTag_cid = dl.fn.parseEventNameGen(obj.eventName,256);
                         delete dataConversion.cm_ElementTag_eid;
                         dataConversion.eventAction = 2;
                         dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
@@ -1486,11 +1485,11 @@ try {
                else {
                   /* For checking the Product Id from previous ECOM pages */
                   if (digitalData.page.pageInfo.ibm.iniSiteID.toLowerCase().indexOf("ecom") !== -1 || digitalData.page.pageInfo.ibm.siteID.toLowerCase().indexOf("ecom") !== -1) {
-                     var prevProdID = datalayer.fn.getCookie("prevProdID");
+                     var prevProdID = dl.fn.getCookie("prevProdID");
                      if (prevProdID !== null && typeof(digitalData.product) !== "undefined" && typeof(digitalData.product[0].productInfo.productID) !== "undefined") {
                         if (digitalData.product[0].productInfo.productID == prevProdID) data.event_name = "doNotFire";
                      }
-                     datalayer.fn.setCookie("prevProdID", obj.productID);
+                     dl.fn.setCookie("prevProdID", obj.productID);
                   }
                   if (data.event_name !== "doNotFire") {
                      dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + data.type + ': \n' + JSON.stringify(data, null, 2));
@@ -1518,7 +1517,7 @@ try {
                         datalayer.update();
                         dl.log('+++DBDM-WARNING > marketing-events.js: digitalData was reset, recreating datalayer');
                      }
-                     datalayer.fn.ibmStatsEventHandler(obj);
+                     dl.fn.ibmStatsEventHandler(obj);
                   };
                }
                if (typeof(createPageviewTagForSPA) === "undefined" || (typeof(createPageviewTagForSPA) === "function" && createPageviewTagForSPA.isGhost)) {
@@ -1529,13 +1528,13 @@ try {
                         jQuery2(document).off('dle_ready');
                         /* Initialize Data Layer */
                         dl.log('+++DBDM-LOG > bindPageViewWithAnalytics > Initializing Data Layer.');
-                        datalayer.init(1);
+                        dl.init(1);
                         /* Set referring URL to current page */
-                        datalayer.fn.setReferringURL(window.referrerSPA);
+                        dl.fn.setReferringURL(window.referrerSPA);
                         /* Save the current URL for SPAs */
                         window.referrerSPA = digitalData.page.pageInfo.destinationURL;
                         /* Send jQuery event for ddo_ready */ 
-                        datalayer.fn.sendDatalayerReadyEvent();
+                        dl.fn.sendDatalayerReadyEvent();
                      }
                      else {
                         /* Do not run pageview twice for SPAs */
@@ -1974,6 +1973,182 @@ try {
    cm.prepareAndSend = function (b) {
       try {
          cm.initialized = true;
+		 
+		 if (cm.data.test_domains.indexOf("," + location.hostname + ',') > -1) {
+		    cm.data.test = true;
+		 }
+		 if (cm.data.test) {
+			cm.data.ClientID = cm.data.TestClientID;
+			cm.data.DataCollectionMethod = cm.data.TestDataCollectionMethod || false;
+			cm.data.DataCollectionDomain = cm.data.TestDataCollectionDomain || "testdata.coremetrics.com";
+		 } 
+		 if (cm.data.ClientID) {
+			cmSetClientID(cm.data.ClientID, cm.data.DataCollectionMethod, cm.data.DataCollectionDomain, cm.data.CookieDomain);
+		}
+		if (window.cmTagQueue_copy) {
+			window.cmTagQueue = window.cmTagQueue_copy;
+			cmExecuteTagQueue();
+		}
+		if (cm.data.cmSetupOther && window.cmSetupOther) {
+			window.cmSetupOther(cm.data.cmSetupOther);
+		} else if (cm.data.cmSetupOther && !window.cmSetupOther) {
+		    dl.log('+++DBDM-LOG > cmSetupOther is not defined. This probably means the coreMetrics library has not initialized correctly.');
+			//utag.DB("cmSetupOther is not defined. This probably means the coreMetrics library has not initialized correctly.");
+		}
+		if (cm.data.a === "view") {
+			e = "PageviewTag_";
+			cm.data.pv_a = cm.concat_attr("pv_a", e, 50);
+			cm.data.pv = cm.concat_attr("pv", e, 15);
+			if (cm.data["ManualPageviewTag_ul"]) {
+				f = "ManualPageviewTag_";
+				cmCreateManualPageviewTag(cm.data[e + "pi"], cm.data[e + "cg"], cm.data[f + "ul"], cm.data[f + "rf"], cm.data.pv_a, cm.data[e + "se"], cm.data[e + "sr"], cm.data.pv);
+			} else {
+				cmCreatePageviewTag(cm.data[e + "pi"], cm.data[e + "cg"], cm.data[e + "se"], cm.data[e + "sr"], cm.data.pv_a, cm.data.pv);
+			}
+			if (typeof(datalayer) !== "undefined" && typeof(datalayer.util) !== "undefined" && typeof(datalayer.util.readCookies) !== "undefined") {
+				datalayer.util.readCookies();
+			}
+			if (!window.purchaseMasked) {
+				window.purchaseMasked = true;
+				window.cmCreateShopAction5Tag2 = window.cmCreateShopAction5Tag;
+				window.cmCreateShopAction9Tag2 = window.cmCreateShopAction9Tag;
+				window.cmCreateShopAction5Tag = function() {
+					datalayer.util.maskPurchaseEvent("5", arguments);
+				}
+				window.cmCreateShopAction9Tag = function() {
+					datalayer.util.maskPurchaseEvent("9", arguments);
+				}
+			}
+		} else if (cm.data.a == "link" && cm.data["ManualLinkClickTag_hr"]) {
+			e = "ManualLinkClickTag_";
+			cmCreateManualLinkClickTag(cm.data[e + "hr"], cm.data[e + "nm"], cm.data[e + "pi"]);
+			cm.data[e + "hr"] = "";
+			return;
+		}
+		if (cm.data["ManualImpressionTag_pi"] && (cm.data["ManualImpressionTag_cm_sp"] || cm.data["ManualImpressionTag_cm_re"])) {
+			e = "ManualImpressionTag_";
+			cmStartTagSet();
+			if (typeof cm.data[e + "cm_re"] === "string") {
+				cm.data[e + "cm_re"] = cm.data[e + "cm_re"].split(',');
+			}
+			if (typeof cm.data[e + "cm_sp"] === "string") {
+				cm.data[e + "cm_sp"] = cm.data[e + "cm_sp"].split(',');
+			}
+			if (cm.data[e + "cm_re"] instanceof Array && cm.data[e + "cm_re"].length > 0) {
+				for (f = 0; f < cm.data[e + "cm_re"].length; f++) {
+					var cmnew = new _cm("tid", "9");
+					cmnew.cm_re = cm.data[e + "cm_re"][f];
+					cmnew.pi = cm.data[e + "pi"] || c1(cm.ci);
+					cmnew.st = cm_ClientTS;
+					cmnew.write(1);
+				}
+			}
+			if (cm.data[e + "cm_sp"] instanceof Array && cm.data[e + "cm_sp"].length > 0) {
+				for (f = 0; f < cm.data[e + "cm_sp"].length; f++) {
+					var cmnew = new _cm("tid", "9");
+					cmnew.cm_sp = cm.data[e + "cm_sp"][f];
+					cmnew.pi = cm.data[e + "pi"] || c1(cm.ci);
+					cmnew.st = cm_ClientTS;
+					cmnew.write(1);
+				}
+			}
+			cmSendTagSet();
+			cm.data[e + "pi"] = "";
+		}
+		if (cm.data.order_id || cm.data["ShopAction9Tag_on"]) {
+			b._cevent = "purchase";
+		}
+		if (b._cevent === "purchase") {
+			if (cm.data.order_currency) cmSetupOther({
+				"cm_currencyCode": cm.data.order_currency
+			});
+			e = "ShopAction9Tag_";
+			cm.data[e + "on"] = cm.data[e + "on"] || cm.data.order_id;
+			cm.data[e + "tr"] = cm.data[e + "tr"] || cm.data.order_subtotal;
+			cm.data[e + "cd"] = cm.data[e + "cd"] || cm.data.customer_id || utag.data["cp.utag_main_ses_id"];
+			cm.data[e + "pr"] = cm.data[e + "pr"] || cm.data.product_id;
+			cm.data[e + "pm"] = cm.data[e + "pm"] || cm.data.product_name;
+			cm.data[e + "qt"] = cm.data[e + "qt"] || cm.data.product_quantity;
+			cm.data[e + "bp"] = cm.data[e + "bp"] || cm.data.product_unit_price;
+			cm.data[e + "cg"] = cm.data[e + "cg"] || cm.data.product_category;
+			for (f = 0; f < cm.data[e + "pr"].length; f++) {
+				cm.data.s_a = cm.concat_attr("s_a", e, 50, f);
+				cm.data.sx = cm.concat_attr("sx", e, 15, f);
+				cmCreateShopAction9Tag2(cm.data[e + "pr"][f], cm.data[e + "pm"][f], cm.data[e + "qt"][f], cm.data[e + "bp"][f], cm.data[e + "cd"], cm.data[e + "on"], cm.data[e + "tr"], cm.data[e + "cg"][f], cm.data.s_a, cm.data.sx);
+			}
+			cmDisplayShops();
+		}
+		if (cm.data.tid["3"] || b._cevent === "purchase") {
+			e = "OrderTag_";
+			cm.data[e + "on"] = cm.data["ShopAction9Tag_on"] || cm.data[e + "on"];
+			cm.data[e + "tr"] = cm.data["ShopAction9Tag_tr"] || cm.data[e + "tr"];
+			cm.data[e + "cd"] = cm.data["ShopAction9Tag_cd"] || cm.data[e + "cd"];
+			cm.data[e + "sg"] = cm.data[e + "sg"] || cm.data.order_shipping;
+			cm.data[e + "ct"] = cm.data[e + "ct"] || cm.data.customer_city;
+			cm.data[e + "sa"] = cm.data[e + "sa"] || cm.data.customer_state;
+			cm.data[e + "zp"] = cm.data[e + "zp"] || cm.data.customer_zip;
+			cm.data.o_a = cm.concat_attr("o_a", e, 50);
+			cm.data.or = cm.concat_attr("or", e, 15);
+			cmCreateOrderTag(cm.data[e + "on"], cm.data[e + "tr"], cm.data[e + "sg"], cm.data[e + "cd"], cm.data[e + "ct"], cm.data[e + "sa"], cm.data[e + "zp"], cm.data.o_a, cm.data.or);
+		}
+		if (cm.data.tid["2"] || b._cevent === "register" || (cm.data["RegistrationTag_em"] && b._cevent === "purchase")) {
+			e = "RegistrationTag_";
+			cm.data[e + "cd"] = cm.data["ShopAction9Tag_cd"] || cm.data[e + "cd"] || cm.data.customer_id || utag.data["cp.utag_main_ses_id"];
+			cm.data[e + "ct"] = cm.data[e + "ct"] || cm.data.customer_city;
+			cm.data[e + "sa"] = cm.data[e + "sa"] || cm.data.customer_state;
+			cm.data[e + "zp"] = cm.data[e + "zp"] || cm.data.customer_zip;
+			cm.data[e + "cy"] = cm.data[e + "cy"] || cm.data.customer_country;
+			cm.data.rg = cm.concat_attr("rg", e, 50);
+			cmCreateRegistrationTag(cm.data[e + "cd"], cm.data[e + "em"], cm.data[e + "ct"], cm.data[e + "sa"], cm.data[e + "zp"], cm.data[e + "cy"], cm.data.rg);
+		}
+		if ((cm.data.tid["4"] && b._cevent != "purchase") || b._cevent === "cartview") {
+			if (cm.data.order_currency) cmSetupOther({
+				"cm_currencyCode": cm.data.order_currency
+			});
+			e = "ShopAction5Tag_";
+			cm.data[e + "pr"] = cm.data[e + "pr"] || cm.data.product_id;
+			cm.data[e + "pm"] = cm.data[e + "pm"] || cm.data.product_name;
+			cm.data[e + "qt"] = cm.data[e + "qt"] || cm.data.product_quantity;
+			cm.data[e + "bp"] = cm.data[e + "bp"] || cm.data.product_unit_price;
+			cm.data[e + "cg"] = cm.data[e + "cg"] || cm.data.product_category;
+			for (f = 0; f < cm.data[e + "pr"].length; f++) {
+				cm.data.s_a = cm.concat_attr("s_a", e, 50, f);
+				cm.data.sx = cm.concat_attr("sx", e, 15, f);
+				cmCreateShopAction5Tag2(cm.data[e + "pr"][f], cm.data[e + "pm"][f], cm.data[e + "qt"][f], cm.data[e + "bp"][f], cm.data[e + "cg"][f], cm.data.s_a, cm.data.sx);
+			}
+			cmDisplayShops();
+		}
+		if ((cm.data.tid["5"] && b._cevent != "purchase") || b._cevent === "prodview") {
+			e = "ProductviewTag_";
+			cm.data[e + "pr"] = cm.data[e + "pr"] || cm.data.product_id;
+			cm.data[e + "pm"] = cm.data[e + "pm"] || cm.data.product_name;
+			cm.data[e + "cg"] = cm.data[e + "cg"] || cm.data.product_category;
+			cm.data.pr_a = cm.concat_attr("pr_a", e, 50);
+			if (cm.data[e + "pr"] instanceof Array && cm.data[e + "pr"].length > 1) {
+				for (f = 0; f < cm.data[e + "pr"].length; f++) {
+					cm.data.pr_a = cm.concat_attr("pr_a", e, 50, f);
+					cmCreateProductviewTag(cm.data[e + "pr"][f], cm.data[e + "pm"][f], cm.data[e + "cg"][f], cm.data.pr_a);
+				}
+			} else {
+				cmCreateProductviewTag(cm.data[e + "pr"] + '', cm.data[e + "pm"] + '', cm.data[e + "cg"] + '', cm.data.pr_a, cm.data[e + "cm_vc"]);
+			}
+		}
+		if (cm.data.tid["14"] || cm.data["ConversionEventTag_cid"] || b._cevent === "conversion") {
+			e = "ConversionEventTag_";
+			cm.data[e + "cid"] = cm.data[e + "cid"] || "conversion";
+			cm.data[e + "cat"] = cm.data[e + "cat"] || "2";
+			cm.data.c_a = cm.concat_attr("c_a", e, 50);
+			cm.data.cx = cm.concat_attr("cx", e, 5);
+			cmCreateConversionEventTag(cm.data[e + "cid"], cm.data[e + "cat"], cm.data[e + "ccid"], cm.data[e + "cpt"], cm.data.c_a, cm.data.cx);
+			cm.data[e + "cid"] = "";
+		}
+		if (cm.data.tid["15"] || cm.data["ElementTag_eid"]) {
+			e = "ElementTag_";
+			cm.data.e_a = cm.concat_attr("e_a", e, 50);
+			cmCreateElementTag(cm.data[e + "eid"], cm.data[e + "ecat"], cm.data.e_a);
+			cm.data[e + "eid"] = "";
+		}
+		 //translating utag script ends		 
       }
       catch (error) {
          dl.log('+++DBDM-ERROR > coremetrics > prepareAndSend: ' + error);
@@ -2085,19 +2260,20 @@ try {
          window.referrerSPA = digitalData.page.pageInfo.destinationURL;
          window.pageviewSPA = false;
 
-         /* Set listener for clicks on hyperlinks and buttons */
-         jQuery2(document).
-         jQuery2('body').on('click', 'a,button', function (e) {
-            datalayer.util.pageClickEventHandler(e);
-         });
-
+         /* Set listener for clicks on hyperlinks and buttons on DOM ready */
+         jQuery2(document).ready(function() {
+		    jQuery2('body').on('click', 'a,button', function (e) {
+               datalayer.util.pageClickEventHandler(e);
+            });
+		 });
+		 
 
          /************************* SEND PAGEVIEW **********************************/
 
 
          /* Initialize ibmStats.event */
          dl.log('+++DBDM-LOG: Defining ibmStats.event()');
-         datalayer.fn.ibmStatsEventInit();
+         dl.fn.ibmStatsEventInit();
 
          /* Set Data Layer Ready and trigger Event */
          digitalData.page.isDataLayerReady = true;
