@@ -14,7 +14,7 @@ try {
    /*----------------------Ensure that old browsers don't break when referencing the console-----------------------*/
    if (!window.console) { window.console = {log: function(){}, error:function(){}, warn:function(){}, time:function(){}, timeEnd:function(){} }; }
 
-   console.time("ida_sdk.js");
+   var scriptStartTime = window.performance.now();
 
    if (window.isIdaStatsLoaded) {
       /* ida_stats.js has been loaded already, stop loading */
@@ -1087,12 +1087,14 @@ try {
          getAnonymousID: function (wt) {
             try {
                var waittime = wt || dl.WAITTIME;
-               console.time("getAnonymousID");
-
+     		   var fnStartTime = window.performance.now();		 
+               
                /* See if the Anonymous ID is already in the Cookie */
                digitalData.user.profile.auid = dl.fn.getCookie('BMAID');
-               if (digitalData.user.profile.auid) {
-                  console.timeEnd("getAnonymousID");
+               if (digitalData.user.profile.auid) {                  
+			      /* Get execution time in milliseconds */
+		          var fnEndTime = window.performance.now();		 
+		          console.log('getAnonymousID execution time: ' + (fnEndTime - fnStartTime));
                }
                else {
                   dl.log('+++DBDM-LOG > getAnonymousID > Fetching anonymous ID from Bluemix (timeout: ' + waittime + 'ms)');
@@ -1106,7 +1108,9 @@ try {
                            dl.fn.setCookie('BMAID', response.BMAID, 7300);
                            digitalData.user.profile.auid = response.BMAID;
                            dl.log('+++DBDM-LOG > getAnonymousID > Fetched anonymous ID from Bluemix');
-                           console.timeEnd("getAnonymousID");
+                           /* Get execution time in milliseconds */
+		                   var fnEndTime = window.performance.now();		 
+		                   console.log('getAnonymousID execution time: ' + (fnEndTime - fnStartTime));
                         }
                      },
                      error: function (xhr, ajaxOptions, error) {
@@ -1464,7 +1468,9 @@ try {
                         delete dataConversion.cm_ElementTag_eid;
                         dataConversion.eventAction = 1;
                         dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
-                        utag.link(dataConversion);                        
+						/* flatten the dataConversion into dl.data */
+						dl.fn.processDataObject(dataConversion, dl.data);
+                        cm.exec("link", dl.data); 						
                      }
                      else if (data.eventVidTimeStamp.toLowerCase() == "end" || data.eventCategoryGroup.toLowerCase() == "finish") {
                         var dataConversion = JSON.parse(JSON.stringify(data));
@@ -1474,11 +1480,15 @@ try {
                         delete dataConversion.cm_ElementTag_eid;
                         dataConversion.eventAction = 2;
                         dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
-                        utag.link(dataConversion);
+                        /* flatten the dataConversion into dl.data */
+						dl.fn.processDataObject(dataConversion, dl.data);
+                        cm.exec("link", dl.data); 	
                      }
                   }
-                  dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + data.type + ': \n' + JSON.stringify(data, null, 2));
-                  utag.link(data);
+                  dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + data.type + ': \n' + JSON.stringify(data, null, 2));                  
+				  /* flatten the data into dl.data */
+				  dl.fn.processDataObject(data, dl.data);
+                  cm.exec("link", dl.data); 	                  
                }
                else {
                   /* For checking the Product Id from previous ECOM pages */
@@ -1491,7 +1501,9 @@ try {
                   }
                   if (data.event_name !== "doNotFire") {
                      dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + data.type + ': \n' + JSON.stringify(data, null, 2));
-                     utag.link(data);
+                     /* flatten the data into dl.data */
+				     dl.fn.processDataObject(data, dl.data);
+                     cm.exec("link", dl.data); 
                   }
                }
                /* print out the data layer available for the event */
@@ -1511,8 +1523,8 @@ try {
                   /*-------------------- ibmStats.event handler--------------------*/
                   ibmStats.event = function (obj) {
                      /* Ensure that the digitalData Object has not been reset by the page */
-                     if (typeof(digitalData.page.isDataLayerReady) === "undefined") {
-                        datalayer.update();
+                     if (typeof(digitalData.page.isDataLayerReady) === "undefined") {                        
+						dl.init(0);
                         dl.log('+++DBDM-WARNING > marketing-events.js: digitalData was reset, recreating datalayer');
                      }
                      dl.fn.ibmStatsEventHandler(obj);
@@ -2523,8 +2535,11 @@ try {
 
          /* Trigger Event for Data Layer Ready */
          dl.log('+++DBDM-LOG: Triggering datalayer_ready event!');
-         jQuery2(document).trigger('datalayer_ready');
-         console.timeEnd("ida_sdk.js");         
+         jQuery2(document).trigger('datalayer_ready');         
+   		 
+		 /* Get execution time in milliseconds */
+		 var scriptEndTime = window.performance.now();		 
+		 console.log('Execution time: ' + (scriptEndTime - scriptStartTime));
       }
       catch (error) {
          dl.log('+++DBDM-ERROR > ida_sdk.js: ' + error);
@@ -2532,6 +2547,8 @@ try {
    })();
 }
 catch (error) {
-   console.timeEnd("ida_sdk.js");
+   /* Get execution time in milliseconds */ 
+   var scriptEndTime = window.performance.now();   
+   console.log('Execution time: ' + (scriptEndTime - scriptStartTime));
    console.error('+++DBDM-ERROR > ida_sdk.js: ' + error);
 }
