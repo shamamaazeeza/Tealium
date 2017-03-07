@@ -1527,9 +1527,15 @@ var datalayer = {
             digitalData.page.category   = digitalData.page.category  || {};
             digitalData.page.pageInfo   = digitalData.page.pageInfo  || {};
             digitalData.page.session    = digitalData.page.session   || {};
+            /* 2017-03-07 - jleon: For some reason some pages are initializing profile as an Array */
+            /* 
             digitalData.user.profile    = digitalData.user.profile   || {};
             digitalData.user.segment    = digitalData.user.segment   || {};
             digitalData.user.userInfo   = digitalData.user.userInfo  || {};
+            */
+            digitalData.user.profile    = {};
+            digitalData.user.segment    = {};
+            digitalData.user.userInfo   = {};
             digitalData.util.cp         = digitalData.util.cp        || {};
             digitalData.util.meta       = digitalData.util.meta      || {};
             digitalData.util.qp         = digitalData.util.qp        || {};
