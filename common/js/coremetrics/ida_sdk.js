@@ -2189,7 +2189,7 @@ try {
          /* Rule for Sales Portal */
          if (siteID.indexOf('ins') === 0) {
             if (typeof (window.saleParams) === "undefined") window.saleParams = {};
-            getNTPTVariable(saleParams);
+            cm.getNTPTVariable(saleParams);
             
             b.cm_PageViewTag_pv_a21 = b["ddo.p.pi.m.PageAttributes"] || b["meta.IBM.PageAttributes"] || "";
             b.cm_PageViewTag_pv_a22 = saleParams["RepID"]            || b["meta.RepID"]              || "";
@@ -2203,7 +2203,7 @@ try {
          /* Rule for Support - Problem reporting */
          if (siteID === 'estcht' || siteID === 'estxsr') {
             if (typeof(window.supportParams) === "undefined") window.supportParams = {};
-            getNTPTVariable(supportParams);
+            cm.getNTPTVariable(supportParams);
          
             b.cm_PageViewTag_pv_a21 = supportParams["SR_DOMAIN"] || "";
             b.cm_PageViewTag_pv_a22 = supportParams["SR_EMAILADDRESS"] || "";
@@ -2232,8 +2232,8 @@ try {
          /* Rule for Support - Content Navigation */
          if (siteID === 'estmob' || siteID === 'estspa' || siteID === 'estspe') {
             if (typeof(window.supportParams) === "undefined") window.supportParams = {};
-            getNTPTVariable(supportParams);      
-            getCmCreateProductView();
+            cm.getNTPTVariable(supportParams);      
+            cm.getCmCreateProductView();
             
             b.cm_PageViewTag_pv_a21 = supportParams["SP.CAMCO"] || "";
             b.cm_PageViewTag_pv_a22 = supportParams["SP.AVPCompanyName"] || "";
@@ -2246,7 +2246,7 @@ try {
 
          /* Rule for Support - Fix Delivery profile */
          if (siteID === 'estfix' || siteID === 'estset') {
-            getCmCreateProductView();
+            cm.getCmCreateProductView();
             
             b.cm_PageViewTag_pv_a25 = b["customParam_productID"]       || "";
             b.cm_PageViewTag_pv_a26 = b["customParam_productName"]     || "";
@@ -2267,7 +2267,7 @@ try {
          /* Rule for Think Leader */
          if (siteID === 'thinkleaders') {
             if (typeof (window.thinkParams) == "undefined") window.thinkParams = {};
-            getNTPTVariable(thinkParams);
+            cm.getNTPTVariable(thinkParams);
 
             b.cm_PageViewTag_pv_a24 = thinkParams["ibmTMuser"]  || "";
          }
@@ -2275,7 +2275,7 @@ try {
          /* Rule for Partner World */
          if (siteID === 'partnerworld' || siteID === 'contlisten' || siteID === 'pw') {
             if (typeof(window.pwParams) === "undefined") window.pwParams = {};
-            getNTPTVariable(pwParams);      
+            cm.getNTPTVariable(pwParams);      
          
             b.cm_PageViewTag_pv_a21 = pwParams["pw_bp_id"]  || "";
             b.cm_PageViewTag_pv_a22 = pwParams["pw_ce_id"]  || "";
@@ -2309,7 +2309,7 @@ try {
          /* Rule for Developer Works */
          if (siteID === 'devwrk' || siteID === 'devwrks' || siteID === 'dwnext' || siteID === "devwrkscon") {
             if (typeof (window.devworkParams) == "undefined") window.devworkParams = {};
-            getNTPTVariable(devworkParams);
+            cm.getNTPTVariable(devworkParams);
          
             if (typeof(b["qp.ca"]) !== "undefined") {
                b.cm_PageViewTag_pv_a21 = b["qp.ca"].replace(/-_-/g, "---") || "";
@@ -2380,7 +2380,7 @@ try {
          /* Rule for On Site Search */
          if (siteID === 'sitesearch') {
             if (typeof(window.searchParams) === "undefined") window.searchParams = {};
-            getNTPTVariable(searchParams);
+            cm.getNTPTVariable(searchParams);
 
             b["ddo.p.pi.onsiteSearchTerm"] = searchParams["ibmSrchTerm"] || "";
             b["ddo.p.pi.onsiteSearchResult"] = searchParams["ibmSrchRslts"] || "";
@@ -2483,6 +2483,43 @@ try {
          dl.log('+++DBDM-ERROR > coremetrics > extension: ' + error);
       }
    };
+
+   /*--------------------Set NTPT attributes --------------------*/
+   cm.getNTPTVariable = function (addParams) {   
+	   if (typeof(window.NTPT_PGEXTRA) !== "undefined") {
+		  var arr1 = NTPT_PGEXTRA.split('&'),
+		  j = 0;
+		  for (var i = 0; i < arr1.length; i++) {
+			 var arr2 = arr1[i].split('=');
+			 addParams[arr2[0]] = arr2[1];
+		  }
+	   }
+   }
+
+   /*--------------------Add attributes --------------------*/
+   cm.addAttributes = function (clientArray,value) {   
+  	   if(typeof (clientArray[value]) != "undefined"){
+		  utagVal = "customParam_"+value.replace(/\./g,"_");
+		  b[utagVal] = clientArray[value];
+	   }
+   }
+
+   /*--------------------Set data for Support portal --------------------*/
+   cm.getCmCreateProductView = function (n) {   		
+	   var scripts = document.getElementsByTagName("script"),
+	   tagArray = "";
+	   for (i=0; i <scripts.length; i++) {
+		  if(scripts[i].innerHTML.indexOf("cmCreateProductviewTag") !== -1){
+			 tagArray = (scripts[i].innerHTML).split(/[""''(,)]+/);
+			 break;
+		  }
+	   }
+	   if(tagArray.length > 0){
+		  b["customParam_productID"] = tagArray[1];
+		  b["customParam_productName"] = tagArray[2];
+		  b["customParam_productCategory"] = tagArray[3];
+	   }
+	};
 
    /*--------------------Initialize Coremetrics --------------------*/
    cm.initClient = function () {
@@ -2918,6 +2955,6 @@ try {
 catch (error) {
    /* Get execution time in milliseconds */ 
    var scriptEndTime = window.performance.now();   
-  // dl.log('+++DBDM-LOG > ida_sdk.js: Execution time: ' + (scriptEndTime - scriptStartTime) + 'ms');
+   dl.log('+++DBDM-LOG > ida_sdk.js: Execution time: ' + (scriptEndTime - scriptStartTime) + 'ms');
    console.error('+++DBDM-ERROR > ida_sdk.js: ' + error);
 }
