@@ -1470,9 +1470,7 @@ try {
                         delete dataConversion.cm_ElementTag_eid;
                         dataConversion.eventAction = 1;
                         dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
-                        /* flatten the dataConversion into dl.data */
-                        dl.fn.processDataObject(digitalData, dataConversion);
-                        cm.exec("link", dataConversion); 						
+                        dl.fn.event("link", dataConversion); 						
                      }
                      else if (data.eventVidTimeStamp.toLowerCase() == "end" || data.eventCategoryGroup.toLowerCase() == "finish") {
                         var dataConversion = JSON.parse(JSON.stringify(data));
@@ -1482,15 +1480,11 @@ try {
                         delete dataConversion.cm_ElementTag_eid;
                         dataConversion.eventAction = 2;
                         dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
-                        /* flatten the dataConversion into dl.data */
-                        dl.fn.processDataObject(digitalData, dataConversion);
-                        cm.exec("link", dataConversion); 	
+                        dl.fn.event("link", dataConversion); 	
                      }
                   }
                   dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + data.type + ': \n' + JSON.stringify(data, null, 2));
-                  /* flatten the data into dl.data */
-                  dl.fn.processDataObject(digitalData, data);
-                  cm.exec("link", data); 	                  
+                  dl.fn.event("link", data); 	                  
                }
                else {
                   /* For checking the Product Id from previous ECOM pages */
@@ -1503,9 +1497,7 @@ try {
                   }
                   if (data.event_name !== "doNotFire") {
                      dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + data.type + ': \n' + JSON.stringify(data, null, 2));
-                     /* flatten the data into dl.data */
-                     dl.fn.processDataObject(digitalData, data);
-                     cm.exec("link", data); 
+                     dl.fn.event("link", data); 
                   }
                }
                /* print out the data layer available for the event */
@@ -1535,9 +1527,7 @@ try {
                if (typeof(createPageviewTagForSPA) === "undefined" || (typeof(createPageviewTagForSPA) === "function" && createPageviewTagForSPA.isGhost)) {
                   /*-------------------- Ajax function to bind page view tag -----------------------------*/
                   window.createPageviewTagForSPA = function() {
-                     if (typeof(utag) !== "undefined" && window.pageviewSPA) {
-                        /* Stop listening for the dle_ready event */
-                        jQuery2(document).off('dle_ready');
+                     if (window.pageviewSPA) {
                         /* Initialize Data Layer */
                         dl.log('+++DBDM-LOG > bindPageViewWithAnalytics > Initializing Data Layer.');
                         dl.init(1);
@@ -1545,8 +1535,11 @@ try {
                         dl.fn.setReferringURL(window.referrerSPA);
                         /* Save the current URL for SPAs */
                         window.referrerSPA = digitalData.page.pageInfo.destinationURL;
-                        /* Send jQuery event for ddo_ready */ 
-                        dl.fn.sendDatalayerReadyEvent();
+                        /************************* SEND PAGEVIEW **********************************/
+                        dl.log('+++DBDM-LOG: Sending pageview tag to Coremetrics');
+                        /* flatten the DDO into dl.data */
+                        data = {};
+                        dl.fn.event("view", data);
                      }
                      else {
                         /* Do not run pageview twice for SPAs */
@@ -1562,7 +1555,7 @@ try {
             }
          },
 
-         /*--------------------Function to handle the ibmStats.event call --------------------*/
+         /*--------------------Function to load remote scripts --------------------*/
          loadScript : function (script,callback) {
             try {
                var a = script,
@@ -1580,6 +1573,44 @@ try {
             }
             catch (error) {
                dl.log('+++DBDM-ERROR > loadScript: ' + error);
+            }
+         },
+         
+         /*--------------------Function to handle event calls --------------------*/
+         event : function (a,b) {
+            try {
+
+               /************************* PRE-EVENT **********************************/
+               /* Ensure that the digitalData Object has not been reset by the page */
+               if (typeof(window.digitalData.page.isDataLayerReady) === "undefined") {
+                  datalayer.init(0);
+                  datalayer.log('+++DBDM-LOG > ibm-common.js: digitalData was reset, recreating datalayer');
+               }
+               /* Ensure that we capture the CoreID6 cookie ID */
+               if (typeof(window.digitalData.page.pageInfo.coremetrics.visitorID) === "undefined") {
+                  datalayer.fn.readCookies();
+                  datalayer.log('+++DBDM-LOG > ibm-common.js: Reading first-party cookies');
+               }
+               /* Ensure that we capture the anonymous ID from the cookie */
+               if (typeof(window.digitalData.user.profile.auid) === "undefined") {
+                  digitalData.user.profile.auid = datalayer.fn.getCookie('BMAID');
+               }
+               /* Refresh the search terms and results */
+               if (typeof(digitalData.page.pageInfo.onsiteSearchTerm) !== "undefined") {
+                  datalayer.util.setSearchTerms();
+               }
+
+               /************************* SEND COREMETRICS EVENT **********************************/
+               dl.log('+++DBDM-LOG > event: Execute ' + a + ' event');
+               /* flatten the DDO into object */
+               dl.fn.processDataObject(digitalData, b);
+               cm.exec(a, b);
+
+               /************************* POST-EVENT **********************************/
+            
+            }
+            catch (error) {
+               dl.log('+++DBDM-ERROR > event: ' + error);
             }
          },
    };
@@ -2302,7 +2333,7 @@ try {
             e = "ShopAction9Tag_";
             cm.data[e + "on"] = cm.data[e + "on"] || cm.data.order_id;
             cm.data[e + "tr"] = cm.data[e + "tr"] || cm.data.order_subtotal;
-            cm.data[e + "cd"] = cm.data[e + "cd"] || cm.data.customer_id || utag.data["cp.utag_main_ses_id"];
+            cm.data[e + "cd"] = cm.data[e + "cd"] || cm.data.customer_id || b["ddo.p.pi.coremetrics.visitorID"] || "";
             cm.data[e + "pr"] = cm.data[e + "pr"] || cm.data.product_id;
             cm.data[e + "pm"] = cm.data[e + "pm"] || cm.data.product_name;
             cm.data[e + "qt"] = cm.data[e + "qt"] || cm.data.product_quantity;
@@ -2332,7 +2363,7 @@ try {
          }
          if (cm.data.tid["2"] || b._cevent === "register" || (cm.data["RegistrationTag_em"] && b._cevent === "purchase")) {
             e = "RegistrationTag_";
-            cm.data[e + "cd"] = cm.data["ShopAction9Tag_cd"] || cm.data[e + "cd"] || cm.data.customer_id || utag.data["cp.utag_main_ses_id"];
+            cm.data[e + "cd"] = cm.data["ShopAction9Tag_cd"] || cm.data[e + "cd"] || cm.data.customer_id || b["ddo.p.pi.coremetrics.visitorID"] || "";
             cm.data[e + "ct"] = cm.data[e + "ct"] || cm.data.customer_city;
             cm.data[e + "sa"] = cm.data[e + "sa"] || cm.data.customer_state;
             cm.data[e + "zp"] = cm.data[e + "zp"] || cm.data.customer_zip;
@@ -2466,7 +2497,7 @@ try {
 
          if (cm.initialized) {
             /* Prepare and send the tag to Coremetrics */
-            cm.prepareAndSend(a,b);
+            cm.prepareAndSend(b);
          }
          else {
             /* not initialized, and eluminate is not yet loaded, queue call, save attrs and incoming object */
@@ -2537,8 +2568,7 @@ try {
          dl.log('+++DBDM-LOG: Sending pageview tag to Coremetrics');
          /* flatten the DDO into dl.data */
          data = {};
-         dl.fn.processDataObject(digitalData, data);
-         cm.exec("view", data);
+         dl.fn.event("view", data);
 
          /* Initialize ibmStats.event */
          dl.log('+++DBDM-LOG: Defining ibmStats.event()');
