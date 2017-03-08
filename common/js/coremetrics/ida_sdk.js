@@ -1,7 +1,7 @@
 /**
  * Id         : /tm-v1.0/common/js/coremetrics/ida_sdk.js
  * Scope      : All v18+ IBM pages
- * Version    : 2017.03.05.1632
+ * Version    : 2017.03.07.2152
  *
  * Script used to load the Coremetrics SDK on IBM web pages 
  *
@@ -15,6 +15,8 @@ try {
    if (!window.console) { window.console = {log: function(){}, error:function(){}, warn:function(){}, time:function(){}, timeEnd:function(){} }; }
 
    var scriptStartTime = window.performance.now();
+
+   dl.log('+++DBDM-LOG > ida_sdk.js: START');
 
    if (window.isIdaStatsLoaded) {
       /* ida_stats.js has been loaded already, stop loading */
@@ -1093,8 +1095,8 @@ try {
                digitalData.user.profile.auid = dl.fn.getCookie('BMAID');
                if (digitalData.user.profile.auid) {                  
 			      /* Get execution time in milliseconds */
-		          var fnEndTime = window.performance.now();		 
-		          console.log('getAnonymousID execution time: ' + (fnEndTime - fnStartTime));
+		          var fnEndTime = window.performance.now();
+		          dl.log('+++DBDM-LOG > getAnonymousID > Execution time: ' + (fnEndTime - fnStartTime) + 'ms)');
                }
                else {
                   dl.log('+++DBDM-LOG > getAnonymousID > Fetching anonymous ID from Bluemix (timeout: ' + waittime + 'ms)');
@@ -1110,7 +1112,7 @@ try {
                            dl.log('+++DBDM-LOG > getAnonymousID > Fetched anonymous ID from Bluemix');
                            /* Get execution time in milliseconds */
 		                   var fnEndTime = window.performance.now();		 
-		                   console.log('getAnonymousID execution time: ' + (fnEndTime - fnStartTime));
+		                   dl.log('+++DBDM-LOG > getAnonymousID > Execution time: ' + (fnEndTime - fnStartTime) + 'ms)');
                         }
                      },
                      error: function (xhr, ajaxOptions, error) {
@@ -1468,9 +1470,9 @@ try {
                         delete dataConversion.cm_ElementTag_eid;
                         dataConversion.eventAction = 1;
                         dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
-						/* flatten the dataConversion into dl.data */
-						dl.fn.processDataObject(dataConversion, dl.data);
-                        cm.exec("link", dl.data); 						
+                        /* flatten the dataConversion into dl.data */
+                        dl.fn.processDataObject(digitalData, dataConversion);
+                        cm.exec("link", dataConversion); 						
                      }
                      else if (data.eventVidTimeStamp.toLowerCase() == "end" || data.eventCategoryGroup.toLowerCase() == "finish") {
                         var dataConversion = JSON.parse(JSON.stringify(data));
@@ -1481,14 +1483,14 @@ try {
                         dataConversion.eventAction = 2;
                         dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
                         /* flatten the dataConversion into dl.data */
-						dl.fn.processDataObject(dataConversion, dl.data);
-                        cm.exec("link", dl.data); 	
+                        dl.fn.processDataObject(digitalData, dataConversion);
+                        cm.exec("link", dataConversion); 	
                      }
                   }
-                  dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + data.type + ': \n' + JSON.stringify(data, null, 2));                  
-				  /* flatten the data into dl.data */
-				  dl.fn.processDataObject(data, dl.data);
-                  cm.exec("link", dl.data); 	                  
+                  dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + data.type + ': \n' + JSON.stringify(data, null, 2));
+                  /* flatten the data into dl.data */
+                  dl.fn.processDataObject(digitalData, data);
+                  cm.exec("link", data); 	                  
                }
                else {
                   /* For checking the Product Id from previous ECOM pages */
@@ -1502,8 +1504,8 @@ try {
                   if (data.event_name !== "doNotFire") {
                      dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + data.type + ': \n' + JSON.stringify(data, null, 2));
                      /* flatten the data into dl.data */
-				     dl.fn.processDataObject(data, dl.data);
-                     cm.exec("link", dl.data); 
+                     dl.fn.processDataObject(digitalData, data);
+                     cm.exec("link", data); 
                   }
                }
                /* print out the data layer available for the event */
@@ -2118,6 +2120,15 @@ try {
    };
 
    /*--------------------Initialize Coremetrics --------------------*/
+   cm.extension = function (b) {
+      try {
+      }
+      catch (error) {
+         dl.log('+++DBDM-ERROR > coremetrics > extension: ' + error);
+      }
+   };
+
+   /*--------------------Initialize Coremetrics --------------------*/
    cm.initClient = function () {
       try {
          /* set cmTagQueue */
@@ -2447,6 +2458,9 @@ try {
             product_unit_price: []
          };
 
+         /* Call extension to set variables based on siteID */
+         cm.extension(b);
+         
          /* Map all attributes for Tag */
          cm.mapAttributes(b);
 
@@ -2499,7 +2513,6 @@ try {
    (function () {
       /* create aliases to datalayer functions */
       datalayer.util = datalayer.fn;
-      dl.data = {};
 
       try {
          /* Set Environment for Coremetrics and SDK */
@@ -2523,8 +2536,9 @@ try {
          /************************* SEND PAGEVIEW **********************************/
          dl.log('+++DBDM-LOG: Sending pageview tag to Coremetrics');
          /* flatten the DDO into dl.data */
-         dl.fn.processDataObject(digitalData, dl.data);
-         cm.exec("view", dl.data);
+         data = {};
+         dl.fn.processDataObject(digitalData, data);
+         cm.exec("view", data);
 
          /* Initialize ibmStats.event */
          dl.log('+++DBDM-LOG: Defining ibmStats.event()');
@@ -2539,7 +2553,7 @@ try {
    		 
 		 /* Get execution time in milliseconds */
 		 var scriptEndTime = window.performance.now();		 
-		 console.log('Execution time: ' + (scriptEndTime - scriptStartTime));
+		 dl.log('+++DBDM-LOG > ida_sdk.js: Execution time: ' + (scriptEndTime - scriptStartTime) + 'ms');
       }
       catch (error) {
          dl.log('+++DBDM-ERROR > ida_sdk.js: ' + error);
@@ -2549,6 +2563,6 @@ try {
 catch (error) {
    /* Get execution time in milliseconds */ 
    var scriptEndTime = window.performance.now();   
-   console.log('Execution time: ' + (scriptEndTime - scriptStartTime));
+   dl.log('+++DBDM-LOG > ida_sdk.js: Execution time: ' + (scriptEndTime - scriptStartTime) + 'ms');
    console.error('+++DBDM-ERROR > ida_sdk.js: ' + error);
 }
