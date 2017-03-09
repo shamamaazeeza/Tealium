@@ -66,7 +66,7 @@ try {
       throw new Error('Another version of the SDK has been loaded.');
    }
    window.isIdaStatsLoaded = true;
-   
+
    /**
     * 
     ************************************************MODULE: GHOSTFUNCTIONS *******************************************
@@ -826,7 +826,7 @@ try {
             try {
                /* Check if we have the latest value for siteID */
                digitalData.page.pageInfo.ibm.siteID = digitalData.page.pageInfo.ibm.siteID || "IBMTESTWWW";
-               
+
                /* If the siteID prefix or suffix is "test" or if the full domain of the hostname is in 
                 * the TESTDOMAINS array then set Client ID to 80200000 (test instance)
                 */
@@ -1091,7 +1091,7 @@ try {
             try {
                var waittime = wt || dl.WAITTIME;
                var fnStartTime = window.performance.now();
-               
+
                /* See if the Anonymous ID is already in the Cookie */
                digitalData.user.profile.auid = dl.fn.getCookie('BMAID');
                if (digitalData.user.profile.auid) {
@@ -1473,7 +1473,7 @@ try {
                         delete dataConversion.cm_ElementTag_eid;
                         dataConversion.eventAction = 1;
                         dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
-                        dl.fn.event("link", dataConversion); 						
+                        dl.fn.event("link", dataConversion);
                      }
                      else if (data.eventVidTimeStamp.toLowerCase() == "end" || data.eventCategoryGroup.toLowerCase() == "finish") {
                         var dataConversion = JSON.parse(JSON.stringify(data));
@@ -1483,11 +1483,11 @@ try {
                         delete dataConversion.cm_ElementTag_eid;
                         dataConversion.eventAction = 2;
                         dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
-                        dl.fn.event("link", dataConversion); 	
+                        dl.fn.event("link", dataConversion);
                      }
                   }
                   dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + data.type + ': \n' + JSON.stringify(data, null, 2));
-                  dl.fn.event("link", data); 	                  
+                  dl.fn.event("link", data);
                }
                else {
                   /* For checking the Product Id from previous ECOM pages */
@@ -1578,7 +1578,7 @@ try {
                dl.log('+++DBDM-ERROR > loadScript: ' + error);
             }
          },
-         
+
          /*--------------------Function to handle event calls --------------------*/
          event : function (a,b) {
             try {
@@ -1610,14 +1610,14 @@ try {
                cm.exec(a, b);
 
                /************************* POST-EVENT **********************************/
-            
+
             }
             catch (error) {
                dl.log('+++DBDM-ERROR > event: ' + error);
             }
          },
    };
-   
+
    /*--------------------Init Function for DataLayer--------------------*/
    dl.init = function (r) {
       try {
@@ -1743,22 +1743,22 @@ try {
     *
     */
    dl.ddo_to_shortname_map = {
-      "digitalData.": "ddo.",
-      "digitalData.page.": "ddo.p.",
-      "digitalData.page.attribute.": "ddo.p.a.",
-      "digitalData.page.category.": "ddo.p.c.",
-      "digitalData.page.pageInfo.": "ddo.p.pi.",
-      "digitalData.page.pageInfo.metrics.": "ddo.p.pi.m.",
-      "digitalData.page.session.": "ddo.p.s.",
-      "digitalData.user.": "ddo.u.",
-      "digitalData.user.profile.": "ddo.u.p.",
-      "digitalData.user.segment.": "ddo.u.s.",
-      "digitalData.user.userInfo.": "ddo.u.ui.",
-      "digitalData.product.": "ddo.pr.",
-      "digitalData.product.productInfo.": "ddo.pr.pri.",
-      "digitalData.util.cp.": "cp.",
-      "digitalData.util.meta.": "meta.",
-      "digitalData.util.qp.": "qp."
+         "digitalData.": "ddo.",
+         "digitalData.page.": "ddo.p.",
+         "digitalData.page.attribute.": "ddo.p.a.",
+         "digitalData.page.category.": "ddo.p.c.",
+         "digitalData.page.pageInfo.": "ddo.p.pi.",
+         "digitalData.page.pageInfo.metrics.": "ddo.p.pi.m.",
+         "digitalData.page.session.": "ddo.p.s.",
+         "digitalData.user.": "ddo.u.",
+         "digitalData.user.profile.": "ddo.u.p.",
+         "digitalData.user.segment.": "ddo.u.s.",
+         "digitalData.user.userInfo.": "ddo.u.ui.",
+         "digitalData.product.": "ddo.pr.",
+         "digitalData.product.productInfo.": "ddo.pr.pri.",
+         "digitalData.util.cp.": "cp.",
+         "digitalData.util.meta.": "meta.",
+         "digitalData.util.qp.": "qp."
    }
 
    //Build shortname_to_ddo_map
@@ -1790,11 +1790,11 @@ try {
    };
 
    dl.fn.typeOf = function(e){return ({}).toString.call(e).match(/\s([a-zA-Z]+)/)[1].toLowerCase();}
-   
+
    //Ignore keys in the data layer that start with the following text.
    //Expecting an object of strings
    dl.ignore_keys = {
-      //"util": 1
+         //"util": 1
    };
 
    //Specify a prefix for data layer elements being sent to the utag_data object.
@@ -2159,10 +2159,10 @@ try {
    /*--------------------Initialize Coremetrics --------------------*/
    cm.extension = function (b) {
       try {
-   
+
          /* Set siteID to accommodate TEST site IDs, "test" can be a prefix or suffix */
          var siteID = b["ddo.p.pi.ibm.iniSiteID"].toLowerCase().replace(/^test|test$/,"");
-         
+
          /* Common Attributes Rule */
          b.cm_PageViewTag_pv_a21 = b["ddo.p.pi.templateVersion"] || "";
          b.cm_PageViewTag_pv_a22 = b["ddo.p.pi.ibm.docid"] || "";
@@ -2171,7 +2171,7 @@ try {
          b.cm_PageViewTag_pv_a26 = b["qp.lot"]  || "";
          b.cm_PageViewTag_pv_a27 = b["qp.lsot"] || "";
          b.cm_PageViewTag_pv_a28 = b["qp.lpg"]  || "";
-         
+
          /* Rule for Cloud Exchange */
          if (siteID.indexOf('cloudexchange') > -1 || siteID.indexOf('cloud_mw') > -1) {
             b.cm_PageViewTag_pv_a21 = b["ddo.p.a.cspClient"]; // client ID
@@ -2181,12 +2181,12 @@ try {
             b.cm_PageViewTag_pv_a25 = b["ddo.p.a.cspICN"];
             b.cm_PageViewTag_pv_a26 = b["ddo.p.a.cspCMClientId"];
          }
-         
+
          /* Rule for Sales Portal */
          if (siteID.indexOf('ins') === 0) {
             if (typeof (window.saleParams) === "undefined") window.saleParams = {};
             cm.getNTPTVariable(saleParams);
-            
+
             b.cm_PageViewTag_pv_a21 = b["ddo.p.pi.m.PageAttributes"] || b["meta.IBM.PageAttributes"] || "";
             b.cm_PageViewTag_pv_a22 = saleParams["RepID"]            || b["meta.RepID"]              || "";
             b.cm_PageViewTag_pv_a23 = saleParams["rep_group"]        || b["meta.rep_group"]          || "";
@@ -2195,12 +2195,12 @@ try {
             b.cm_PageViewTag_pv_a26 = b["ddo.p.pi.m.PopID"]          || b["meta.PopID"]              || "";
             b.cm_PageViewTag_pv_a27 = b["ddo.p.pi.m.NewContent"]     || "";
          }
-         
+
          /* Rule for Support - Problem reporting */
          if (siteID === 'estcht' || siteID === 'estxsr') {
             if (typeof(window.supportParams) === "undefined") window.supportParams = {};
             cm.getNTPTVariable(supportParams);
-         
+
             b.cm_PageViewTag_pv_a21 = supportParams["SR_DOMAIN"] || "";
             b.cm_PageViewTag_pv_a22 = supportParams["SR_EMAILADDRESS"] || "";
             b.cm_PageViewTag_pv_a23 = supportParams["SR_ICN"] || "";
@@ -2230,7 +2230,7 @@ try {
             if (typeof(window.supportParams) === "undefined") window.supportParams = {};
             cm.getNTPTVariable(supportParams);      
             cm.getCmCreateProductView();
-            
+
             b.cm_PageViewTag_pv_a21 = supportParams["SP.CAMCO"] || "";
             b.cm_PageViewTag_pv_a22 = supportParams["SP.AVPCompanyName"] || "";
             b.cm_PageViewTag_pv_a23 = supportParams["SP.WICO"] || "";
@@ -2243,23 +2243,23 @@ try {
          /* Rule for Support - Fix Delivery profile */
          if (siteID === 'estfix' || siteID === 'estset') {
             cm.getCmCreateProductView();
-            
+
             b.cm_PageViewTag_pv_a25 = b["customParam_productID"]       || "";
             b.cm_PageViewTag_pv_a26 = b["customParam_productName"]     || "";
             b.cm_PageViewTag_pv_a27 = b["customParam_productCategory"] || "";
          }
-         
+
          /* Rule for IBM Cloud */
          if (siteID === 'mktibmcloud' || siteID === 'cloud') {
             b.cm_PageViewTag_pv_a28 = b["ddo.p.pi.ibm.UseCase"]  || b["meta.IBM.UseCase"]  || "";
             b.cm_PageViewTag_pv_a29 = b["ddo.p.pi.ibm.Solution"] || b["meta.IBM.Solution"] || "";
          }
-         
+
          /* Rule for SA_Message */
          if (siteID === 'cuf04' || siteID === "osol") {
             b.cm_PageViewTag_pv_a24 = window.SA_Message || "";
          }
-         
+
          /* Rule for Think Leader */
          if (siteID === 'thinkleaders') {
             if (typeof (window.thinkParams) == "undefined") window.thinkParams = {};
@@ -2272,7 +2272,7 @@ try {
          if (siteID === 'partnerworld' || siteID === 'contlisten' || siteID === 'pw') {
             if (typeof(window.pwParams) === "undefined") window.pwParams = {};
             cm.getNTPTVariable(pwParams);      
-         
+
             b.cm_PageViewTag_pv_a21 = pwParams["pw_bp_id"]  || "";
             b.cm_PageViewTag_pv_a22 = pwParams["pw_ce_id"]  || "";
             b.cm_PageViewTag_pv_a23 = pwParams["pw_locale"] || "";
@@ -2285,7 +2285,7 @@ try {
             b.cm_PageViewTag_pv_a30 = pwParams["business_unit"] || "";
             b.cm_PageViewTag_pv_a31 = pwParams["content_id"]    || "";
             b.cm_PageViewTag_pv_a32 = pwParams["resource_type"] || "";
-         
+
             /* initialize window.digitalData.page.attribute.extraFields if needed */
             if (typeof(window.digitalData.page.attribute.extraFields) === "undefined") {
                if (typeof(window.CM_EXTRA) !== "undefined" && window.CM_EXTRA !== "") {
@@ -2299,14 +2299,14 @@ try {
                   }
                }
             }
-         
+
          }
-         
+
          /* Rule for Developer Works */
          if (siteID === 'devwrk' || siteID === 'devwrks' || siteID === 'dwnext' || siteID === "devwrkscon") {
             if (typeof (window.devworkParams) == "undefined") window.devworkParams = {};
             cm.getNTPTVariable(devworkParams);
-         
+
             if (typeof(b["qp.ca"]) !== "undefined") {
                b.cm_PageViewTag_pv_a21 = b["qp.ca"].replace(/-_-/g, "---") || "";
             }
@@ -2316,11 +2316,11 @@ try {
             b.cm_PageViewTag_pv_a24 = b["ddo.p.c.iniPrimaryCategory"] || b["ddo.p.c.categoryID"] || b["meta.IBM.WTMCategory"];
             b.cm_PageViewTag_pv_a25 = b["ddo.p.pi.ibm.topic"] || b["meta.dW.Topic"];
          }
-         
+
          /* Rule for SSI */
          if (siteID === 'e021') {
             var ssiParams = {}, tokens, i, temp;
-         
+
             if (typeof(digitalData.util.meta.contentinfo) !== "undefined" && digitalData.util.meta.contentinfo.indexOf('~') !== -1) {
                tokens = digitalData.util.meta.contentinfo.split('~');
                for (i=0, tl=tokens.length; i < tl; i++) {
@@ -2328,7 +2328,7 @@ try {
                   ssiParams[temp[0].toUpperCase()] = window.decodeURIComponent(temp[1]);
                }
             }
-            
+
             b.cm_PageViewTag_pv_a21 = digitalData.util.qp.htmlfid  || ssiParams.HTMLFID || ((typeof(digitalData.util.qp.supplier) !== "undefined" && typeof(digitalData.util.qp.letternum) !== "undefined") ? digitalData.util.qp.supplier + "/" + digitalData.util.qp.letternum : "");
             b.cm_PageViewTag_pv_a22 = digitalData.util.qp.appname  || ""; 
             b.cm_PageViewTag_pv_a23 = digitalData.util.qp.infotype || ssiParams.INFOTYPE || "";
@@ -2336,25 +2336,25 @@ try {
                if (location.href.indexOf('/rep_ca/') !== -1) b.cm_PageViewTag_pv_a23 = 'AN';
                else if (location.href.indexOf('/rep_oc/') !== -1) b.cm_PageViewTag_pv_a23 = 'OC';
                else if (location.href.indexOf('/rep_sm/') !== -1 || location.href.indexOf('/rep_rp/') !== -1) b.cm_PageViewTag_pv_a23 = 'DD';
-         
+
             }
             b.cm_PageViewTag_pv_a24 = digitalData.util.qp.subtype  || ssiParams.INFOSUBTYPE || ssiParams.SUBTYPE || "";
-			if (b.cm_PageViewTag_pv_a24 === "") {
-				if (location.href.indexOf('/rep_ca/') !== -1) b.cm_PageViewTag_pv_a24 = 'CA';
-				else if (location.href.indexOf('/rep_oc/') !== -1) b.cm_PageViewTag_pv_a24 = 'NA';
-				else if (location.href.indexOf('/rep_sm/') !== -1) b.cm_PageViewTag_pv_a24 = 'SM';
-				else if (location.href.indexOf('/rep_rp/') !== -1) b.cm_PageViewTag_pv_a24 = 'RP';        
-			}
-		    b.cm_PageViewTag_pv_a25 = digitalData.util.meta.contentinfo || "";
-		    b.cm_PageViewTag_pv_a26 = digitalData.util.qp.docURL   || "";
-		    b.cm_PageViewTag_pv_a27 = digitalData.util.qp.lang     || "";
-		    b.cm_PageViewTag_pv_a28 = digitalData.util.qp.request_locale || "";
-		    b.cm_PageViewTag_pv_a29 = ssiParams.ASSETTYPE || "";
-		    b.cm_PageViewTag_pv_a30 = ssiParams.DOCTYPE || "";
-		    b.cm_PageViewTag_pv_a31 = ssiParams.CGCODE || "";
-		    b.cm_PageViewTag_pv_a32 = digitalData.util.qp.ctype || ssiParams.CONTENT_TYPE || "";
-		    b.cm_PageViewTag_pv_a33 = digitalData.util.qp.ctry || "";
-		 }
+            if (b.cm_PageViewTag_pv_a24 === "") {
+               if (location.href.indexOf('/rep_ca/') !== -1) b.cm_PageViewTag_pv_a24 = 'CA';
+               else if (location.href.indexOf('/rep_oc/') !== -1) b.cm_PageViewTag_pv_a24 = 'NA';
+               else if (location.href.indexOf('/rep_sm/') !== -1) b.cm_PageViewTag_pv_a24 = 'SM';
+               else if (location.href.indexOf('/rep_rp/') !== -1) b.cm_PageViewTag_pv_a24 = 'RP';        
+            }
+            b.cm_PageViewTag_pv_a25 = digitalData.util.meta.contentinfo || "";
+            b.cm_PageViewTag_pv_a26 = digitalData.util.qp.docURL   || "";
+            b.cm_PageViewTag_pv_a27 = digitalData.util.qp.lang     || "";
+            b.cm_PageViewTag_pv_a28 = digitalData.util.qp.request_locale || "";
+            b.cm_PageViewTag_pv_a29 = ssiParams.ASSETTYPE || "";
+            b.cm_PageViewTag_pv_a30 = ssiParams.DOCTYPE || "";
+            b.cm_PageViewTag_pv_a31 = ssiParams.CGCODE || "";
+            b.cm_PageViewTag_pv_a32 = digitalData.util.qp.ctype || ssiParams.CONTENT_TYPE || "";
+            b.cm_PageViewTag_pv_a33 = digitalData.util.qp.ctry || "";
+         }
 
          /* Rule for Support - Fix Delivery */
          if (siteID === 'estfix' || siteID === 'estset') {
@@ -2362,7 +2362,7 @@ try {
             b.cm_PageViewTag_pv_a21 = b["customParam_productName"];
             b.cm_PageViewTag_pv_a22 = b["customParam_productCategory"];
          }
-         
+
          /* Rule for ECOM */
          if (siteID === 'ecom') {
             b.cm_PageViewTag_pv_a27 = b["meta.IBM.WTMEComStore"];
@@ -2372,7 +2372,7 @@ try {
                marketplaceCheckoutCustomTags();
             }
          }
-         
+
          /* Rule for On Site Search */
          if (siteID === 'sitesearch') {
             if (typeof(window.searchParams) === "undefined") window.searchParams = {};
@@ -2391,24 +2391,24 @@ try {
             b.cm_PageViewTag_pv_a29 = searchParams["ibm.WTMSite"] || "";
          }
 
-		 /* Rule for Bluemix Demand Base tag */
-		 if ((siteID === 'bluemix' || siteID === 'bluemixTest') 
-			&& b.event_name && b.event_name.toLowerCase() === 'demandbaseelement') {
-			b.cm_ElementTag_e_a29 = demandBase["DB_company_name"] || "";
-			b.cm_ElementTag_e_a30 = demandBase["DB_annual_sales"] || "";
-			b.cm_ElementTag_e_a31 = demandBase["DB_audience"] || "";
-			b.cm_ElementTag_e_a32 = demandBase["DB_audience_segment"] || "";
-			b.cm_ElementTag_e_a33 = demandBase["DB_b2b"] || "";
-			b.cm_ElementTag_e_a34 = demandBase["DB_b2c"] || "";
-			b.cm_ElementTag_e_a35 = demandBase["DB_employee_count"] || "";
-			b.cm_ElementTag_e_a36 = demandBase["DB_country"] || "";
-			b.cm_ElementTag_e_a37 = demandBase["DB_city"] || "";
-			b.cm_ElementTag_e_a38 = demandBase["DB_forbes_2000"] || "";
-			b.cm_ElementTag_e_a39 = demandBase["DB_forbes_1000"] || "";
-			b.cm_ElementTag_e_a40 = demandBase["DB_industry"] || "";
-			b.cm_ElementTag_e_a41 = demandBase["DB_sub_industry"] || "";
-			b.cm_ElementTag_e_a42 = demandBase["DB_revenue_range"] || "";
-			b.cm_ElementTag_e_a43 = demandBase["DB_employee_range"] || "";
+         /* Rule for Bluemix Demand Base tag */
+         if ((siteID === 'bluemix' || siteID === 'bluemixTest') 
+               && b.event_name && b.event_name.toLowerCase() === 'demandbaseelement') {
+            b.cm_ElementTag_e_a29 = demandBase["DB_company_name"] || "";
+            b.cm_ElementTag_e_a30 = demandBase["DB_annual_sales"] || "";
+            b.cm_ElementTag_e_a31 = demandBase["DB_audience"] || "";
+            b.cm_ElementTag_e_a32 = demandBase["DB_audience_segment"] || "";
+            b.cm_ElementTag_e_a33 = demandBase["DB_b2b"] || "";
+            b.cm_ElementTag_e_a34 = demandBase["DB_b2c"] || "";
+            b.cm_ElementTag_e_a35 = demandBase["DB_employee_count"] || "";
+            b.cm_ElementTag_e_a36 = demandBase["DB_country"] || "";
+            b.cm_ElementTag_e_a37 = demandBase["DB_city"] || "";
+            b.cm_ElementTag_e_a38 = demandBase["DB_forbes_2000"] || "";
+            b.cm_ElementTag_e_a39 = demandBase["DB_forbes_1000"] || "";
+            b.cm_ElementTag_e_a40 = demandBase["DB_industry"] || "";
+            b.cm_ElementTag_e_a41 = demandBase["DB_sub_industry"] || "";
+            b.cm_ElementTag_e_a42 = demandBase["DB_revenue_range"] || "";
+            b.cm_ElementTag_e_a43 = demandBase["DB_employee_range"] || "";
             b.cm_ElementTag_e_a44 = demandBase["DB_demandbase_sid"] || "";
             b.cm_ElementTag_e_a45 = demandBase["DB_ip"] || "";
             b.cm_ElementTag_e_a46 = demandBase["DB_country_name"] || "";
@@ -2417,7 +2417,7 @@ try {
             b.cm_ElementTag_e_a49 = demandBase["DB_state"] || "";
             b.cm_ElementTag_e_a50 = demandBase["DB_watch_list"] || "";
          }
-   
+
          /* Rule for link tracking for developerWorks */
          if (siteID === 'dwnext' && b.eventName && b.eventName.toLowerCase() === 'pagelinks') {
             b.cm_ElementTag_e_a22 = b["evCustomCE_cspClient"] || b["evCustomSSI_htmlfid"] || b["evCustomSales_popid"] || b["evCustomIWM_docid"];
@@ -2428,7 +2428,7 @@ try {
             b.cm_ElementTag_e_a27 = b["evCustomCE_cspCMClientId"];
             b.cm_ElementTag_e_a28 = b["evCustomCE_cspAdvSrchOpt"];
          }
-         
+
          /* Rule for ibmStats.event tracking for element tags */
          if (b.event_name && b.event_name.toLowerCase() === 'ibmstatsevent_element') {
             b.cm_ElementTag_e_a22 = b["formName"];
@@ -2481,40 +2481,40 @@ try {
 
    /*--------------------Set NTPT attributes --------------------*/
    cm.getNTPTVariable = function (addParams) {   
-	   if (typeof(window.NTPT_PGEXTRA) !== "undefined") {
-		  var arr1 = NTPT_PGEXTRA.split('&'),
-		  j = 0;
-		  for (var i = 0; i < arr1.length; i++) {
-			 var arr2 = arr1[i].split('=');
-			 addParams[arr2[0]] = arr2[1];
-		  }
-	   }
+      if (typeof(window.NTPT_PGEXTRA) !== "undefined") {
+         var arr1 = NTPT_PGEXTRA.split('&'),
+         j = 0;
+         for (var i = 0; i < arr1.length; i++) {
+            var arr2 = arr1[i].split('=');
+            addParams[arr2[0]] = arr2[1];
+         }
+      }
    }
 
    /*--------------------Add attributes --------------------*/
    cm.addAttributes = function (clientArray,value) {   
-  	   if(typeof (clientArray[value]) != "undefined"){
-		  utagVal = "customParam_"+value.replace(/\./g,"_");
-		  b[utagVal] = clientArray[value];
-	   }
+      if(typeof (clientArray[value]) != "undefined"){
+         utagVal = "customParam_"+value.replace(/\./g,"_");
+         b[utagVal] = clientArray[value];
+      }
    }
 
    /*--------------------Set data for Support portal --------------------*/
-   cm.getCmCreateProductView = function (n) {   		
-	   var scripts = document.getElementsByTagName("script"),
-	   tagArray = "";
-	   for (i=0; i <scripts.length; i++) {
-		  if(scripts[i].innerHTML.indexOf("cmCreateProductviewTag") !== -1){
-			 tagArray = (scripts[i].innerHTML).split(/[""''(,)]+/);
-			 break;
-		  }
-	   }
-	   if(tagArray.length > 0){
-		  b["customParam_productID"] = tagArray[1];
-		  b["customParam_productName"] = tagArray[2];
-		  b["customParam_productCategory"] = tagArray[3];
-	   }
-	};
+   cm.getCmCreateProductView = function (n) {
+      var scripts = document.getElementsByTagName("script"),
+      tagArray = "";
+      for (i=0; i <scripts.length; i++) {
+         if(scripts[i].innerHTML.indexOf("cmCreateProductviewTag") !== -1){
+            tagArray = (scripts[i].innerHTML).split(/[""''(,)]+/);
+            break;
+         }
+      }
+      if(tagArray.length > 0){
+         b["customParam_productID"] = tagArray[1];
+         b["customParam_productName"] = tagArray[2];
+         b["customParam_productCategory"] = tagArray[3];
+      }
+   };
 
    /*--------------------Initialize Coremetrics --------------------*/
    cm.initClient = function () {
@@ -2533,7 +2533,7 @@ try {
             cmTagQueue.push(['cmSetupCookieMigration', true, true, v16elu.NTPT_DOMAINLIST]);
          }
          cmTagQueue.push(['cmSetupOther', {"cm_JSFEAMasterIDSessionCookie" : true}]);
-         
+
          /* Set Coremetrics behavior for cookies and encryption */
          if (typeof(digitalData.page.pageInfo.ibm.iniSiteID) !== "undefined" && digitalData.page.pageInfo.ibm.iniSiteID.toLowerCase() === "ecom") {
             cmTagQueue.push(['cmSetupNormalization', 'krypto-_-krypto']); 
@@ -2592,7 +2592,7 @@ try {
       }
       return attrStr;
    };
-   
+
    /*--------------------Prepare the tag and send it to Coremetrics--------------------*/
    cm.prepareAndSend = function (b) {
       try {
@@ -2784,7 +2784,7 @@ try {
          dl.log('+++DBDM-ERROR > coremetrics > prepareAndSend: ' + error);
       }
    };
-   
+
    /*--------------------Callback function for eluminate.js--------------------*/
    cm.callBack = function () {
       try {
@@ -2811,44 +2811,44 @@ try {
          dl.log('+++DBDM-ERROR > coremetrics > callBack: ' + error);
       }
    }
-   
+
    /*--------------------Main Coremetrics Function: Execute Coremetrics Tag--------------------*/
    cm.exec = function (a, b) {
       try {
          cm.data = {
-            qsp_delim: "&",
-            kvp_delim: "=",
-            a: a,
-            base_url: '//libs.coremetrics.com/eluminate.js',
-            ClientID: '50200000',
-            TestClientID: '80200000',
-            DataCollectionMethod: true,
-            DataCollectionDomain: 'data.coremetrics.com',
-            CookieDomain: 'ibm.com',
-            test_domains: ',dev.nwtw.ibm.com,testdata.coremetrics.com,',
-            tid: {},
-            test: false,
-            pv_a: "",
-            pv: "",
-            s_a: "",
-            sx: "",
-            o_a: "",
-            or: "",
-            rg: "",
-            pr_a: "",
-            c_a: "",
-            cx: "",
-            e_a: "",
-            product_id: [],
-            product_name: [],
-            product_category: [],
-            product_quantity: [],
-            product_unit_price: []
+               qsp_delim: "&",
+               kvp_delim: "=",
+               a: a,
+               base_url: '//libs.coremetrics.com/eluminate.js',
+               ClientID: '50200000',
+               TestClientID: '80200000',
+               DataCollectionMethod: true,
+               DataCollectionDomain: 'data.coremetrics.com',
+               CookieDomain: 'ibm.com',
+               test_domains: ',dev.nwtw.ibm.com,testdata.coremetrics.com,',
+               tid: {},
+               test: false,
+               pv_a: "",
+               pv: "",
+               s_a: "",
+               sx: "",
+               o_a: "",
+               or: "",
+               rg: "",
+               pr_a: "",
+               c_a: "",
+               cx: "",
+               e_a: "",
+               product_id: [],
+               product_name: [],
+               product_category: [],
+               product_quantity: [],
+               product_unit_price: []
          };
 
          /* Call extension to set variables based on siteID */
          cm.extension(b);
-         
+
          /* Map all attributes for Tag */
          cm.mapAttributes(b);
 
