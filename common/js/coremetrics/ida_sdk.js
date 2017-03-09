@@ -1,7 +1,7 @@
 /**
  * Id         : /tm-v1.0/common/js/coremetrics/ida_sdk.js
  * Scope      : All v18+ IBM pages
- * Version    : 2017.03.07.2152
+ * Version    : 2017.03.08.2023
  *
  * Script used to load the Coremetrics SDK on IBM web pages 
  *
@@ -11,27 +11,20 @@
  */
 
 try {
+   var scriptStartTime = window.performance.now();
+
    /*----------------------Ensure that old browsers don't break when referencing the console-----------------------*/
    if (!window.console) { window.console = {log: function(){}, error:function(){}, warn:function(){}, time:function(){}, timeEnd:function(){} }; }
 
-   var scriptStartTime = window.performance.now();
-
-   dl.log('+++DBDM-LOG > ida_sdk.js: START');
-
-   if (window.isIdaStatsLoaded) {
-      /* ida_stats.js has been loaded already, stop loading */
-      throw new Error('Another version of the SDK has already been loaded.');
-   }
-   window.isIdaStatsLoaded = true;
    window.ibmStats = window.ibmStats || {};
    window.datalayer = window.datalayer || {};
-   window.dl = datalayer;
+   window.dl = window.datalayer;
 
    /* To store all messages being sent by the solution */
-   dl.logFile = [];
+   dl.logFile = dl.logFile || [];
 
    /*--------------------Centralized log manager --------------------*/
-   dl.log = function (a, b) {
+   dl.log = dl.log || function (a, b) {
       try {
          /* See if either of the dldb or utagdb cookies are set to true, if so enable logging */
          dl.isLogEnabled = ((document.cookie.indexOf('dldb=true') >= 0) ? true : ((document.cookie.indexOf('utagdb=true') >= 0) ? true : false));
@@ -66,6 +59,14 @@ try {
       catch (error) {}
    };
 
+   dl.log('+++DBDM-LOG > ida_sdk.js: START MAIN BLOCK');
+
+   if (window.isIdaStatsLoaded) {
+      /* ida_stats.js has been loaded already, stop loading */
+      throw new Error('Another version of the SDK has been loaded.');
+   }
+   window.isIdaStatsLoaded = true;
+   
    /**
     * 
     ************************************************MODULE: GHOSTFUNCTIONS *******************************************
@@ -1089,18 +1090,18 @@ try {
          getAnonymousID: function (wt) {
             try {
                var waittime = wt || dl.WAITTIME;
-     		   var fnStartTime = window.performance.now();		 
+               var fnStartTime = window.performance.now();
                
                /* See if the Anonymous ID is already in the Cookie */
                digitalData.user.profile.auid = dl.fn.getCookie('BMAID');
-               if (digitalData.user.profile.auid) {                  
-			      /* Get execution time in milliseconds */
-		          var fnEndTime = window.performance.now();
-		          dl.log('+++DBDM-LOG > getAnonymousID > Execution time: ' + (fnEndTime - fnStartTime) + 'ms)');
+               if (digitalData.user.profile.auid) {
+                  /* Get execution time in milliseconds */
+                  var fnEndTime = window.performance.now();
+                  dl.log('+++DBDM-LOG > getAnonymousID > Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms');
                }
                else {
-                  dl.log('+++DBDM-LOG > getAnonymousID > Fetching anonymous ID from Bluemix (timeout: ' + waittime + 'ms)');
-                  jQuery.ajax({
+                  dl.log('+++DBDM-LOG > getAnonymousID > Getting anonymous ID from Bluemix (timeout set to ' + waittime + 'ms)');
+                  jQuery2.ajax({
                      url: "https://console.ng.bluemix.net/analytics/bmaid",
                      method: "GET",
                      timeout: waittime,
@@ -1111,12 +1112,14 @@ try {
                            digitalData.user.profile.auid = response.BMAID;
                            dl.log('+++DBDM-LOG > getAnonymousID > Fetched anonymous ID from Bluemix');
                            /* Get execution time in milliseconds */
-		                   var fnEndTime = window.performance.now();		 
-		                   dl.log('+++DBDM-LOG > getAnonymousID > Execution time: ' + (fnEndTime - fnStartTime) + 'ms)');
+                           var fnEndTime = window.performance.now();
+                           dl.log('+++DBDM-LOG > getAnonymousID > Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms');
                         }
                      },
                      error: function (xhr, ajaxOptions, error) {
+                        var fnEndTime = window.performance.now();
                         dl.log('+++DBDM-ERROR > getAnonymousID > Ajax call error: ' + error);
+                        dl.log('+++DBDM-LOG > getAnonymousID > Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms');
                      }
                   });
                }
@@ -1517,8 +1520,8 @@ try {
                   /*-------------------- ibmStats.event handler--------------------*/
                   ibmStats.event = function (obj) {
                      /* Ensure that the digitalData Object has not been reset by the page */
-                     if (typeof(digitalData.page.isDataLayerReady) === "undefined") {                        
-						dl.init(0);
+                     if (typeof(digitalData.page.isDataLayerReady) === "undefined") {
+                        dl.init(0);
                         dl.log('+++DBDM-WARNING > marketing-events.js: digitalData was reset, recreating datalayer');
                      }
                      dl.fn.ibmStatsEventHandler(obj);
@@ -1695,7 +1698,7 @@ try {
          dl.fn.setCategoryID();
 
          /*--------------------demandBase User Data--------------------*/
-         dl.fn.getDemandbaseUserData();
+         //dl.fn.getDemandbaseUserData();
 
          /*--------------------get anonymous ID from Bluemix--------------------*/
          dl.fn.getAnonymousID(2000);
@@ -1752,7 +1755,10 @@ try {
       "digitalData.user.segment.": "ddo.u.s.",
       "digitalData.user.userInfo.": "ddo.u.ui.",
       "digitalData.product.": "ddo.pr.",
-      "digitalData.product.productInfo.": "ddo.pr.pri."
+      "digitalData.product.productInfo.": "ddo.pr.pri.",
+      "digitalData.util.cp.": "cp.",
+      "digitalData.util.meta.": "meta.",
+      "digitalData.util.qp.": "qp."
    }
 
    //Build shortname_to_ddo_map
@@ -1788,7 +1794,7 @@ try {
    //Ignore keys in the data layer that start with the following text.
    //Expecting an object of strings
    dl.ignore_keys = {
-      "util": 1
+      //"util": 1
    };
 
    //Specify a prefix for data layer elements being sent to the utag_data object.
@@ -2153,16 +2159,6 @@ try {
    /*--------------------Initialize Coremetrics --------------------*/
    cm.extension = function (b) {
       try {
-	     /* setting Client ID */
-	     if (b["ddo.p.pi.coremetrics.clientID"] !== digitalData.page.pageInfo.coremetrics.clientID || b["ddo.p.pi.ibm.siteID"] !== digitalData.page.pageInfo.ibm.siteID) {
-		    datalayer.util.setClientID();
-		    b["ddo.p.pi.coremetrics.clientID"] = digitalData.page.pageInfo.coremetrics.clientID;
-	     }
-   
-         /* DDO isn't populating keywords for some reason so going to set it based on the meta value */
-         if (typeof(b["ddo.p.pi.keywords"]) === 'undefined') {
-            b["ddo.p.pi.keywords"] = b["meta.keywords"];
-         }
    
          /* Set siteID to accommodate TEST site IDs, "test" can be a prefix or suffix */
          var siteID = b["ddo.p.pi.ibm.iniSiteID"].toLowerCase().replace(/^test|test$/,"");
@@ -2177,8 +2173,8 @@ try {
          b.cm_PageViewTag_pv_a28 = b["qp.lpg"]  || "";
          
          /* Rule for Cloud Exchange */
-         if (siteID.indexOf('cloudexchange') > -1) {
-            b.cm_PageViewTag_pv_a21 = b["ddo.p.a.cspClient"];
+         if (siteID.indexOf('cloudexchange') > -1 || siteID.indexOf('cloud_mw') > -1) {
+            b.cm_PageViewTag_pv_a21 = b["ddo.p.a.cspClient"]; // client ID
             b.cm_PageViewTag_pv_a22 = b["ddo.p.a.cspOffering"];
             b.cm_PageViewTag_pv_a23 = b["ddo.p.a.cspSAPSiteId"];
             b.cm_PageViewTag_pv_a24 = b["ddo.p.a.cspCustHubId"];
@@ -2398,7 +2394,6 @@ try {
 		 /* Rule for Bluemix Demand Base tag */
 		 if ((siteID === 'bluemix' || siteID === 'bluemixTest') 
 			&& b.event_name && b.event_name.toLowerCase() === 'demandbaseelement') {
-			demandBaseAPICall();
 			b.cm_ElementTag_e_a29 = demandBase["DB_company_name"] || "";
 			b.cm_ElementTag_e_a30 = demandBase["DB_annual_sales"] || "";
 			b.cm_ElementTag_e_a31 = demandBase["DB_audience"] || "";
@@ -2941,11 +2936,10 @@ try {
 
          /* Trigger Event for Data Layer Ready */
          dl.log('+++DBDM-LOG: Triggering datalayer_ready event!');
-         jQuery2(document).trigger('datalayer_ready');         
-   		 
-		 /* Get execution time in milliseconds */
-		 var scriptEndTime = window.performance.now();		 
-		 dl.log('+++DBDM-LOG > ida_sdk.js: Execution time: ' + (scriptEndTime - scriptStartTime) + 'ms');
+         jQuery2(document).trigger('datalayer_ready');
+         /* Get execution time in milliseconds */
+         var scriptEndTime = window.performance.now();
+         dl.log('+++DBDM-LOG > ida_sdk.js: END MAIN BLOCK. Execution time: ' + Math.round(scriptEndTime - scriptStartTime) + 'ms. Now, accepting events...');
       }
       catch (error) {
          dl.log('+++DBDM-ERROR > ida_sdk.js: ' + error);
@@ -2955,6 +2949,6 @@ try {
 catch (error) {
    /* Get execution time in milliseconds */ 
    var scriptEndTime = window.performance.now();   
-   dl.log('+++DBDM-LOG > ida_sdk.js: Execution time: ' + (scriptEndTime - scriptStartTime) + 'ms');
-   console.error('+++DBDM-ERROR > ida_sdk.js: ' + error);
+   dl.log('+++DBDM-ERROR > ida_sdk.js: ' + error);
+   dl.log('+++DBDM-LOG > ida_sdk.js: END MAIN BLOCK. Execution time: ' + Math.round(scriptEndTime - scriptStartTime) + 'ms');
 }
