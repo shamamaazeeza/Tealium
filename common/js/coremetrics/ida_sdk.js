@@ -29,7 +29,7 @@ try {
          /* See if either of the dldb or utagdb cookies are set to true, if so enable logging */
          dl.isLogEnabled = ((document.cookie.indexOf('dldb=true') >= 0) ? true : ((document.cookie.indexOf('utagdb=true') >= 0) ? true : false));
          b = {};
-         if (typeof(a) === "object" && datalayer.isLogEnabled) {
+         if (typeof(a) === "object" && dl.isLogEnabled) {
             for (c in a) {
                if (typeof(a[c]) !== "function") {
                   /* Exclude functions */
@@ -1559,19 +1559,21 @@ try {
          },
 
          /*--------------------Function to load remote scripts --------------------*/
-         loadScript : function (script,callback) {
+         loadScript : function (script,type,callback) {
             try {
-               var a = script,
-               b = document,
-               c = 'script',
-               d = b.createElement(c);
-               d.src = a;
-               d.type = 'text/java' + c;
+               var b = document,
+               c = type || 'javascript',
+               d = b.createElement('script');
+               var loadScriptStartTime = window.performance.now();
+
+               d.src = script;
+               d.type = 'application/' + c;
                d.async = true;
-               a = b.getElementsByTagName(c)[0];
+               a = b.getElementsByTagName('script')[0];
                a.parentNode.insertBefore(d,a);
                d.onload = callback || function () {
-                  dl.log('+++DBDM-LOG > Script loaded: ' + d.src);
+                  var loadScriptEndTime = window.performance.now();   
+                  dl.log('+++DBDM-LOG > Script loaded (Load time: ' + Math.round(loadScriptEndTime - loadScriptStartTime) + 'ms): ' + d.src);
                }
             }
             catch (error) {
@@ -1586,21 +1588,21 @@ try {
                /************************* PRE-EVENT **********************************/
                /* Ensure that the digitalData Object has not been reset by the page */
                if (typeof(window.digitalData.page.isDataLayerReady) === "undefined") {
-                  datalayer.init(0);
-                  datalayer.log('+++DBDM-LOG > ibm-common.js: digitalData was reset, recreating datalayer');
+                  dl.init(0);
+                  dl.log('+++DBDM-LOG > ibm-common.js: digitalData was reset, recreating datalayer');
                }
                /* Ensure that we capture the CoreID6 cookie ID */
                if (typeof(window.digitalData.page.pageInfo.coremetrics.visitorID) === "undefined") {
-                  datalayer.fn.readCookies();
-                  datalayer.log('+++DBDM-LOG > ibm-common.js: Reading first-party cookies');
+                  dl.fn.readCookies();
+                  dl.log('+++DBDM-LOG > ibm-common.js: Reading first-party cookies');
                }
                /* Ensure that we capture the anonymous ID from the cookie */
                if (typeof(window.digitalData.user.profile.auid) === "undefined") {
-                  digitalData.user.profile.auid = datalayer.fn.getCookie('BMAID');
+                  digitalData.user.profile.auid = dl.fn.getCookie('BMAID');
                }
                /* Refresh the search terms and results */
                if (typeof(digitalData.page.pageInfo.onsiteSearchTerm) !== "undefined") {
-                  datalayer.util.setSearchTerms();
+                  dl.fn.setSearchTerms();
                }
 
                /************************* SEND COREMETRICS EVENT **********************************/
@@ -2149,6 +2151,35 @@ try {
          "eventTriggerTime": "ConversionEventTag_c_a20,ElementTag_e_a20",
          "cm_ElementTag_eid": "ElementTag_eid",
          "cm_ConversionEventTag_cid": "ConversionEventTag_cid",
+         "cm_ElementTag_e_a22": "ElementTag_e_a22",
+         "cm_ElementTag_e_a23": "ElementTag_e_a23",
+         "cm_ElementTag_e_a24": "ElementTag_e_a24",
+         "cm_ElementTag_e_a25": "ElementTag_e_a25",
+         "cm_ElementTag_e_a26": "ElementTag_e_a26",
+         "cm_ElementTag_e_a27": "ElementTag_e_a27",
+         "cm_ElementTag_e_a28": "ElementTag_e_a28",
+         "cm_ElementTag_e_a29": "ElementTag_e_a29",
+         "cm_ElementTag_e_a30": "ElementTag_e_a30",
+         "cm_ElementTag_e_a31": "ElementTag_e_a31",
+         "cm_ElementTag_e_a32": "ElementTag_e_a32",
+         "cm_ElementTag_e_a33": "ElementTag_e_a33",
+         "cm_ElementTag_e_a34": "ElementTag_e_a34",
+         "cm_ElementTag_e_a35": "ElementTag_e_a35",
+         "cm_ElementTag_e_a36": "ElementTag_e_a36",
+         "cm_ElementTag_e_a37": "ElementTag_e_a37",
+         "cm_ElementTag_e_a38": "ElementTag_e_a38",
+         "cm_ElementTag_e_a39": "ElementTag_e_a39",
+         "cm_ElementTag_e_a40": "ElementTag_e_a40",
+         "cm_ElementTag_e_a41": "ElementTag_e_a41",
+         "cm_ElementTag_e_a42": "ElementTag_e_a42",
+         "cm_ElementTag_e_a43": "ElementTag_e_a43",
+         "cm_ElementTag_e_a44": "ElementTag_e_a44",
+         "cm_ElementTag_e_a45": "ElementTag_e_a45",
+         "cm_ElementTag_e_a46": "ElementTag_e_a46",
+         "cm_ElementTag_e_a47": "ElementTag_e_a47",
+         "cm_ElementTag_e_a48": "ElementTag_e_a48",
+         "cm_ElementTag_e_a49": "ElementTag_e_a49",
+         "cm_ElementTag_e_a50": "ElementTag_e_a50",
          /* event types */
          "event_name:ibmStatsEvent_element": "Element",
          "event_name:ibmStatsEvent_conversion": "Conversion",
@@ -2391,35 +2422,34 @@ try {
             b.cm_PageViewTag_pv_a29 = searchParams["ibm.WTMSite"] || "";
          }
 
-         /* Rule for Bluemix Demand Base tag */
-         if ((siteID === 'bluemix' || siteID === 'bluemixTest') 
-               && b.event_name && b.event_name.toLowerCase() === 'demandbaseelement') {
-            b.cm_ElementTag_e_a29 = demandBase["DB_company_name"] || "";
-            b.cm_ElementTag_e_a30 = demandBase["DB_annual_sales"] || "";
-            b.cm_ElementTag_e_a31 = demandBase["DB_audience"] || "";
-            b.cm_ElementTag_e_a32 = demandBase["DB_audience_segment"] || "";
-            b.cm_ElementTag_e_a33 = demandBase["DB_b2b"] || "";
-            b.cm_ElementTag_e_a34 = demandBase["DB_b2c"] || "";
-            b.cm_ElementTag_e_a35 = demandBase["DB_employee_count"] || "";
-            b.cm_ElementTag_e_a36 = demandBase["DB_country"] || "";
-            b.cm_ElementTag_e_a37 = demandBase["DB_city"] || "";
-            b.cm_ElementTag_e_a38 = demandBase["DB_forbes_2000"] || "";
-            b.cm_ElementTag_e_a39 = demandBase["DB_forbes_1000"] || "";
-            b.cm_ElementTag_e_a40 = demandBase["DB_industry"] || "";
-            b.cm_ElementTag_e_a41 = demandBase["DB_sub_industry"] || "";
-            b.cm_ElementTag_e_a42 = demandBase["DB_revenue_range"] || "";
-            b.cm_ElementTag_e_a43 = demandBase["DB_employee_range"] || "";
-            b.cm_ElementTag_e_a44 = demandBase["DB_demandbase_sid"] || "";
-            b.cm_ElementTag_e_a45 = demandBase["DB_ip"] || "";
-            b.cm_ElementTag_e_a46 = demandBase["DB_country_name"] || "";
-            b.cm_ElementTag_e_a47 = demandBase["DB_primary_sic"] || "";
-            b.cm_ElementTag_e_a48 = demandBase["DB_web_site"] || "";
-            b.cm_ElementTag_e_a49 = demandBase["DB_state"] || "";
-            b.cm_ElementTag_e_a50 = demandBase["DB_watch_list"] || "";
+         /* Rule for Bluemix Demandbase tag */
+         if (siteID === 'bluemix' && b.eventName && b.eventName === 'DEMANDBASE') {
+            b.cm_ElementTag_e_a29 = b["ddo.u.ui.company_name"] || "";
+            b.cm_ElementTag_e_a30 = b["ddo.u.ui.annual_sales"] || "";
+            b.cm_ElementTag_e_a31 = b["ddo.u.ui.audience"] || "";
+            b.cm_ElementTag_e_a32 = b["ddo.u.ui.audience_segment"] || "";
+            b.cm_ElementTag_e_a33 = b["ddo.u.ui.b2b"] || "";
+            b.cm_ElementTag_e_a34 = b["ddo.u.ui.b2c"] || "";
+            b.cm_ElementTag_e_a35 = b["ddo.u.ui.employee_count"] || "";
+            b.cm_ElementTag_e_a36 = b["ddo.u.ui.country"] || "";
+            b.cm_ElementTag_e_a37 = b["ddo.u.ui.city"] || "";
+            b.cm_ElementTag_e_a38 = b["ddo.u.ui.forbes_2000"] || "";
+            b.cm_ElementTag_e_a39 = b["ddo.u.ui.forbes_1000"] || "";
+            b.cm_ElementTag_e_a40 = b["ddo.u.ui.industry"] || "";
+            b.cm_ElementTag_e_a41 = b["ddo.u.ui.sub_industry"] || "";
+            b.cm_ElementTag_e_a42 = b["ddo.u.ui.revenue_range"] || "";
+            b.cm_ElementTag_e_a43 = b["ddo.u.ui.employee_range"] || "";
+            b.cm_ElementTag_e_a44 = b["ddo.u.ui.demandbase_sid"] || "";
+            b.cm_ElementTag_e_a45 = b["ddo.u.ui.ip"] || "";
+            b.cm_ElementTag_e_a46 = b["ddo.u.ui.country_name"] || "";
+            b.cm_ElementTag_e_a47 = b["ddo.u.ui.primary_sic"] || "";
+            b.cm_ElementTag_e_a48 = b["ddo.u.ui.web_site"] || "";
+            b.cm_ElementTag_e_a49 = b["ddo.u.ui.state"] || "";
+            b.cm_ElementTag_e_a50 = b["ddo.u.ui.watch_list"] || "";
          }
 
          /* Rule for link tracking for developerWorks */
-         if (siteID === 'dwnext' && b.eventName && b.eventName.toLowerCase() === 'pagelinks') {
+         if (siteID === 'dwnext' && b.type && b.type === 'pageclick') {
             b.cm_ElementTag_e_a22 = b["evCustomCE_cspClient"] || b["evCustomSSI_htmlfid"] || b["evCustomSales_popid"] || b["evCustomIWM_docid"];
             b.cm_ElementTag_e_a23 = b["evCustomCE_cspOffering"];
             b.cm_ElementTag_e_a24 = b["evCustomCE_cspSAPSiteId"];
@@ -2427,46 +2457,6 @@ try {
             b.cm_ElementTag_e_a26 = b["evCustomCE_cspICN"];
             b.cm_ElementTag_e_a27 = b["evCustomCE_cspCMClientId"];
             b.cm_ElementTag_e_a28 = b["evCustomCE_cspAdvSrchOpt"];
-         }
-
-         /* Rule for ibmStats.event tracking for element tags */
-         if (b.event_name && b.event_name.toLowerCase() === 'ibmstatsevent_element') {
-            b.cm_ElementTag_e_a22 = b["formName"];
-            b.cm_ElementTag_e_a23 = b["field1"];
-            b.cm_ElementTag_e_a24 = b["field2"];
-            b.cm_ElementTag_e_a25 = b["field3"];
-            b.cm_ElementTag_e_a26 = b["field4"];
-            b.cm_ElementTag_e_a27 = b["field5"];
-            b.cm_ElementTag_e_a28 = b["field6"];
-            b.cm_ElementTag_e_a29 = b["field7"];
-            b.cm_ElementTag_e_a30 = b["field8"];
-            b.cm_ElementTag_e_a31 = b["field9"];
-            b.cm_ElementTag_e_a32 = b["field10"];
-            b.cm_ElementTag_e_a33 = b["field11"];
-            b.cm_ElementTag_e_a34 = b["field12"];
-            b.cm_ElementTag_e_a35 = b["field13"];
-            b.cm_ElementTag_e_a36 = b["field14"];
-            b.cm_ElementTag_e_a37 = b["field15"];
-         }
-
-         /* Rule for ibmStats.event tracking for conversion tag */
-         if (b.event_name && b.event_name.toLowerCase() === 'ibmstatsevent_conversion') {
-            b.cm_ConversionEventTag_c_a22 = b["formName"];
-            b.cm_ConversionEventTag_c_a23 = b["field1"];
-            b.cm_ConversionEventTag_c_a24 = b["field2"];
-            b.cm_ConversionEventTag_c_a25 = b["field3"];
-            b.cm_ConversionEventTag_c_a26 = b["field4"];
-            b.cm_ConversionEventTag_c_a27 = b["field5"];
-            b.cm_ConversionEventTag_c_a28 = b["field6"];
-            b.cm_ConversionEventTag_c_a29 = b["field7"];
-            b.cm_ConversionEventTag_c_a30 = b["field8"];
-            b.cm_ConversionEventTag_c_a31 = b["field9"];
-            b.cm_ConversionEventTag_c_a32 = b["field10"];
-            b.cm_ConversionEventTag_c_a33 = b["field11"];
-            b.cm_ConversionEventTag_c_a34 = b["field12"];
-            b.cm_ConversionEventTag_c_a35 = b["field13"];
-            b.cm_ConversionEventTag_c_a36 = b["field14"];
-            b.cm_ConversionEventTag_c_a37 = b["field15"];
          }
 
          /* Rule for ibmStats.event tracking for product view tag */
@@ -2640,7 +2630,7 @@ try {
                cmCreatePageviewTag(cm.data[e + "pi"], cm.data[e + "cg"], cm.data[e + "se"], cm.data[e + "sr"], cm.data.pv_a, cm.data.pv);
             }
             /* 2017-01-25 - jleon: Read CoreID6 cookie after pageview */
-            datalayer.util.readCookies();
+            dl.fn.readCookies();
 
          }
          else if (cm.data.a == "link" && cm.data["ManualLinkClickTag_hr"]) {
@@ -2794,10 +2784,10 @@ try {
             window.cmCreateShopAction5Tag2 = window.cmCreateShopAction5Tag;
             window.cmCreateShopAction9Tag2 = window.cmCreateShopAction9Tag;
             window.cmCreateShopAction5Tag = function () {
-               datalayer.util.maskPurchaseEvent("5", arguments);
+               dl.fn.maskPurchaseEvent("5", arguments);
             }
             window.cmCreateShopAction9Tag = function () {
-               datalayer.util.maskPurchaseEvent("9", arguments);
+               dl.fn.maskPurchaseEvent("9", arguments);
             }
          }
          /* eluminte just loaded, check the queue and send tags to coremetrics */
@@ -2868,7 +2858,7 @@ try {
                cm.initClient();
                dl.log('+++DBDM-LOG > coremetrics > exec: Loading: ' + cm.data.base_url);
                cm.scriptLoaded = true;
-               dl.fn.loadScript(cm.data.base_url, cm.callBack);
+               dl.fn.loadScript(cm.data.base_url, "javascript", cm.callBack);
             }
          }
       }
@@ -2900,7 +2890,7 @@ try {
     */
    (function () {
       /* create aliases to datalayer functions */
-      datalayer.util = datalayer.fn;
+      datalayer.util = dl.fn;
 
       try {
          /* Set Environment for Coremetrics and SDK */
@@ -2917,7 +2907,7 @@ try {
          /* Set listener for clicks on hyperlinks and buttons on DOM ready */
          jQuery2(document).ready(function() {
             jQuery2('body').on('click', 'a,button', function (e) {
-               datalayer.util.pageClickEventHandler(e);
+               dl.fn.pageClickEventHandler(e);
             });
          });
 

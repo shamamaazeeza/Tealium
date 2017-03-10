@@ -3,7 +3,7 @@
  * Extension Name: coremetrics-custom-data-mappings.js
  * Scope         : Coremetrics Global ID
  * Execution     : N/A
- * Version       : 2017.02.21.1223
+ * Version       : 2017.03.09.1607
  *
  * This script creates a calls the init function of the datalayer to initiate it
  * 
@@ -17,11 +17,6 @@ try {
    if (b["ddo.p.pi.coremetrics.clientID"] !== digitalData.page.pageInfo.coremetrics.clientID || b["ddo.p.pi.ibm.siteID"] !== digitalData.page.pageInfo.ibm.siteID) {
       datalayer.util.setClientID();
       b["ddo.p.pi.coremetrics.clientID"] = digitalData.page.pageInfo.coremetrics.clientID;
-   }
-   
-   /* DDO isn't populating keywords for some reason so going to set it based on the meta value */
-   if (typeof(b["ddo.p.pi.keywords"]) === 'undefined') {
-      b["ddo.p.pi.keywords"] = b["meta.keywords"];
    }
    
    /* Set siteID to accommodate TEST site IDs, "test" can be a prefix or suffix */
@@ -255,36 +250,34 @@ try {
       b.cm_PageViewTag_pv_a29 = searchParams["ibm.WTMSite"] || "";
    }
 
-   /* Rule for Bluemix Demand Base tag */
-   if ((siteID === 'bluemix' || siteID === 'bluemixTest') 
-      && b.event_name && b.event_name.toLowerCase() === 'demandbaseelement') {
-      demandBaseAPICall();
-      b.cm_ElementTag_e_a29 = demandBase["DB_company_name"] || "";
-      b.cm_ElementTag_e_a30 = demandBase["DB_annual_sales"] || "";
-      b.cm_ElementTag_e_a31 = demandBase["DB_audience"] || "";
-      b.cm_ElementTag_e_a32 = demandBase["DB_audience_segment"] || "";
-      b.cm_ElementTag_e_a33 = demandBase["DB_b2b"] || "";
-      b.cm_ElementTag_e_a34 = demandBase["DB_b2c"] || "";
-      b.cm_ElementTag_e_a35 = demandBase["DB_employee_count"] || "";
-      b.cm_ElementTag_e_a36 = demandBase["DB_country"] || "";
-      b.cm_ElementTag_e_a37 = demandBase["DB_city"] || "";
-      b.cm_ElementTag_e_a38 = demandBase["DB_forbes_2000"] || "";
-      b.cm_ElementTag_e_a39 = demandBase["DB_forbes_1000"] || "";
-      b.cm_ElementTag_e_a40 = demandBase["DB_industry"] || "";
-      b.cm_ElementTag_e_a41 = demandBase["DB_sub_industry"] || "";
-      b.cm_ElementTag_e_a42 = demandBase["DB_revenue_range"] || "";
-      b.cm_ElementTag_e_a43 = demandBase["DB_employee_range"] || "";
-      b.cm_ElementTag_e_a44 = demandBase["DB_demandbase_sid"] || "";
-      b.cm_ElementTag_e_a45 = demandBase["DB_ip"] || "";
-      b.cm_ElementTag_e_a46 = demandBase["DB_country_name"] || "";
-      b.cm_ElementTag_e_a47 = demandBase["DB_primary_sic"] || "";
-      b.cm_ElementTag_e_a48 = demandBase["DB_web_site"] || "";
-      b.cm_ElementTag_e_a49 = demandBase["DB_state"] || "";
-      b.cm_ElementTag_e_a50 = demandBase["DB_watch_list"] || "";
+   /* Rule for Bluemix Demandbase tag */
+   if (siteID === 'bluemix' && b.eventName && b.eventName === 'DEMANDBASE') {
+      b.cm_ElementTag_e_a29 = b["ddo.u.ui.company_name"] || "";
+      b.cm_ElementTag_e_a30 = b["ddo.u.ui.annual_sales"] || "";
+      b.cm_ElementTag_e_a31 = b["ddo.u.ui.audience"] || "";
+      b.cm_ElementTag_e_a32 = b["ddo.u.ui.audience_segment"] || "";
+      b.cm_ElementTag_e_a33 = b["ddo.u.ui.b2b"] || "";
+      b.cm_ElementTag_e_a34 = b["ddo.u.ui.b2c"] || "";
+      b.cm_ElementTag_e_a35 = b["ddo.u.ui.employee_count"] || "";
+      b.cm_ElementTag_e_a36 = b["ddo.u.ui.country"] || "";
+      b.cm_ElementTag_e_a37 = b["ddo.u.ui.city"] || "";
+      b.cm_ElementTag_e_a38 = b["ddo.u.ui.forbes_2000"] || "";
+      b.cm_ElementTag_e_a39 = b["ddo.u.ui.forbes_1000"] || "";
+      b.cm_ElementTag_e_a40 = b["ddo.u.ui.industry"] || "";
+      b.cm_ElementTag_e_a41 = b["ddo.u.ui.sub_industry"] || "";
+      b.cm_ElementTag_e_a42 = b["ddo.u.ui.revenue_range"] || "";
+      b.cm_ElementTag_e_a43 = b["ddo.u.ui.employee_range"] || "";
+      b.cm_ElementTag_e_a44 = b["ddo.u.ui.demandbase_sid"] || "";
+      b.cm_ElementTag_e_a45 = b["ddo.u.ui.ip"] || "";
+      b.cm_ElementTag_e_a46 = b["ddo.u.ui.country_name"] || "";
+      b.cm_ElementTag_e_a47 = b["ddo.u.ui.primary_sic"] || "";
+      b.cm_ElementTag_e_a48 = b["ddo.u.ui.web_site"] || "";
+      b.cm_ElementTag_e_a49 = b["ddo.u.ui.state"] || "";
+      b.cm_ElementTag_e_a50 = b["ddo.u.ui.watch_list"] || "";
    }
    
    /* Rule for link tracking for developerWorks */
-   if (siteID === 'dwnext' && b.eventName && b.eventName.toLowerCase() === 'pagelinks') {
+   if (siteID === 'dwnext' && b.type && b.type === 'pageclick') {
       b.cm_ElementTag_e_a22 = b["evCustomCE_cspClient"] || b["evCustomSSI_htmlfid"] || b["evCustomSales_popid"] || b["evCustomIWM_docid"];
       b.cm_ElementTag_e_a23 = b["evCustomCE_cspOffering"];
       b.cm_ElementTag_e_a24 = b["evCustomCE_cspSAPSiteId"];
@@ -292,46 +285,6 @@ try {
       b.cm_ElementTag_e_a26 = b["evCustomCE_cspICN"];
       b.cm_ElementTag_e_a27 = b["evCustomCE_cspCMClientId"];
       b.cm_ElementTag_e_a28 = b["evCustomCE_cspAdvSrchOpt"];
-   }
-
-   /* Rule for ibmStats.event tracking for element tags */
-   if (b.event_name && b.event_name.toLowerCase() === 'ibmstatsevent_element') {
-      b.cm_ElementTag_e_a22 = b["formName"];
-      b.cm_ElementTag_e_a23 = b["field1"];
-      b.cm_ElementTag_e_a24 = b["field2"];
-      b.cm_ElementTag_e_a25 = b["field3"];
-      b.cm_ElementTag_e_a26 = b["field4"];
-      b.cm_ElementTag_e_a27 = b["field5"];
-      b.cm_ElementTag_e_a28 = b["field6"];
-      b.cm_ElementTag_e_a29 = b["field7"];
-      b.cm_ElementTag_e_a30 = b["field8"];
-      b.cm_ElementTag_e_a31 = b["field9"];
-      b.cm_ElementTag_e_a32 = b["field10"];
-      b.cm_ElementTag_e_a33 = b["field11"];
-      b.cm_ElementTag_e_a34 = b["field12"];
-      b.cm_ElementTag_e_a35 = b["field13"];
-      b.cm_ElementTag_e_a36 = b["field14"];
-      b.cm_ElementTag_e_a37 = b["field15"];
-   }
-
-   /* Rule for ibmStats.event tracking for conversion tag */
-   if (b.event_name && b.event_name.toLowerCase() === 'ibmstatsevent_conversion') {
-      b.cm_ConversionEventTag_c_a22 = b["formName"];
-      b.cm_ConversionEventTag_c_a23 = b["field1"];
-      b.cm_ConversionEventTag_c_a24 = b["field2"];
-      b.cm_ConversionEventTag_c_a25 = b["field3"];
-      b.cm_ConversionEventTag_c_a26 = b["field4"];
-      b.cm_ConversionEventTag_c_a27 = b["field5"];
-      b.cm_ConversionEventTag_c_a28 = b["field6"];
-      b.cm_ConversionEventTag_c_a29 = b["field7"];
-      b.cm_ConversionEventTag_c_a30 = b["field8"];
-      b.cm_ConversionEventTag_c_a31 = b["field9"];
-      b.cm_ConversionEventTag_c_a32 = b["field10"];
-      b.cm_ConversionEventTag_c_a33 = b["field11"];
-      b.cm_ConversionEventTag_c_a34 = b["field12"];
-      b.cm_ConversionEventTag_c_a35 = b["field13"];
-      b.cm_ConversionEventTag_c_a36 = b["field14"];
-      b.cm_ConversionEventTag_c_a37 = b["field15"];
    }
 
    /* Rule for ibmStats.event tracking for product view tag */
@@ -356,7 +309,7 @@ function getNTPTVariable(addParams) {
    }
 }
 
-/*---------------------------------------------------add attributes---------------------------------------------------------*/
+/*----------------add attributes------------------------*/
 function addAttributes(clientArray,value){
    if(typeof (clientArray[value]) != "undefined"){
       utagVal = "customParam_"+value.replace(/\./g,"_");
