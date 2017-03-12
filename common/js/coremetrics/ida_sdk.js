@@ -17,8 +17,7 @@ try {
    if (!window.console) { window.console = {log: function(){}, error:function(){}, warn:function(){}, time:function(){}, timeEnd:function(){} }; }
 
    window.ibmStats = window.ibmStats || {};
-   //window.datalayer = window.datalayer || {};
-   window.datalayer = {};
+   window.datalayer = window.datalayer || {};
    window.dl = window.datalayer;
    dl.version = '20170311.1724'
 
