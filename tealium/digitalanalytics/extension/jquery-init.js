@@ -3,7 +3,7 @@
  * Extension Name: jquery-init.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.02.14.0904
+ * Version       : 2017.03.11.1724
  *
  * This script creates a calls the init function of the datalayer to initiate it
  *
@@ -12,6 +12,7 @@
  *
  */
 var tmeid = "jquery-init.js";
+window.scriptStartTime = window.scriptStartTime || window.performance.now();
 
 if (typeof(jQuery) !== "undefined" && typeof(jQuery.fn) !== "undefined" && typeof(jQuery.fn.on) !== "undefined") {
    /* Create variables for jQuery version and support for .on() function */

@@ -1,7 +1,7 @@
 /**
  * Id         : /tm-v1.0/common/js/coremetrics/ida_sdk.js
  * Scope      : All v18+ IBM pages
- * Version    : 2017.03.08.2023
+ * Version       : 2017.03.11.1724
  *
  * Script used to load the Coremetrics SDK on IBM web pages 
  *
@@ -11,14 +11,16 @@
  */
 
 try {
-   var scriptStartTime = window.performance.now();
+   window.scriptStartTime = window.scriptStartTime || window.performance.now();
 
    /*----------------------Ensure that old browsers don't break when referencing the console-----------------------*/
    if (!window.console) { window.console = {log: function(){}, error:function(){}, warn:function(){}, time:function(){}, timeEnd:function(){} }; }
 
    window.ibmStats = window.ibmStats || {};
-   window.datalayer = window.datalayer || {};
+   //window.datalayer = window.datalayer || {};
+   window.datalayer = {};
    window.dl = window.datalayer;
+   dl.version = '20170311.1724'
 
    /* To store all messages being sent by the solution */
    dl.logFile = dl.logFile || [];
@@ -657,9 +659,10 @@ try {
          /*--------------------Set referral URLID and referral domain in DDO--------------------*/
          setReferringURL : function (rf) {
             try {
-               digitalData.page.pageInfo.referrer = rf || digitalData.util.referrer.href;
-               if (typeof(digitalData.page.pageInfo.referrer) !== "undefined" && digitalData.page.pageInfo.referrer !== "") {
-                  digitalData.page.pageInfo.referrerID = this.calculateURLID(digitalData.page.pageInfo.referrer);
+               digitalData.page.pageInfo.referrer = rf || digitalData.util.referrer.href || "";
+               if (digitalData.page.pageInfo.referrer !== "") {
+                  /* get the urlID for the referrer, just make sure it is less than 256 characters */
+                  digitalData.page.pageInfo.referrerID = dl.fn.parseEventNameGen(dl.fn.calculateURLID(digitalData.page.pageInfo.referrer));
                   /* Get the sub domain or root domain from the referrer hostname */
                   var referrerParts = digitalData.util.referrer.hostname.split('.');
                   if (referrerParts.length < 2) {
@@ -996,7 +999,8 @@ try {
                if (typeof(eventName) === "string") {
                   /* replace all consecutive spaces for a dash '-' */
                   eventName = eventName.replace(/\s+/g, '-').toUpperCase();
-                  size -= (encodeURIComponent(eventName).length - eventName.length);
+                  //size -= (encodeURIComponent(eventName).length - eventName.length);
+                  size -= (eventName.length - eventName.length);
                   if (eventName.length > size) {
                      var eventNameParts = eventName.split(':');
                      if (eventNameParts.length === 1)
@@ -1023,8 +1027,9 @@ try {
                /* make sure eventName is a String */
                if (typeof(eventName) === "string") {
                   /* replace all consecutive spaces to one space */
-                  eventName = eventName.replace(/\s+/g, '-').toUpperCase();
-                  size -= (encodeURIComponent(eventName).length - eventName.length);
+                  eventName = eventName.replace(/\s+/g, '-');
+                  //size -= (encodeURIComponent(eventName).length - eventName.length);
+                  size -= (eventName.length - eventName.length);
                   /* if eventName is bigger than 50 characters then compress it */
                   if (eventName.length > size) {
                      var ovf = Math.round((eventName.length-size)/2);
@@ -1098,6 +1103,7 @@ try {
                   /* Get execution time in milliseconds */
                   var fnEndTime = window.performance.now();
                   dl.log('+++DBDM-LOG > getAnonymousID > Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms');
+                  digitalData.page.attribute.procFlag += "|A:" + Math.round(fnEndTime - fnStartTime);
                }
                else {
                   dl.log('+++DBDM-LOG > getAnonymousID > Getting anonymous ID from Bluemix (timeout set to ' + waittime + 'ms)');
@@ -1110,16 +1116,15 @@ try {
                            /* If the BMAID is set then set it to DDO and to cookie */
                            dl.fn.setCookie('BMAID', response.BMAID, 7300);
                            digitalData.user.profile.auid = response.BMAID;
-                           dl.log('+++DBDM-LOG > getAnonymousID > Fetched anonymous ID from Bluemix');
-                           /* Get execution time in milliseconds */
                            var fnEndTime = window.performance.now();
-                           dl.log('+++DBDM-LOG > getAnonymousID > Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms');
+                           dl.log('+++DBDM-LOG > getAnonymousID > Fetched anonymous ID from Bluemix. Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms');
+                           digitalData.page.attribute.procFlag += "|A:" + Math.round(fnEndTime - fnStartTime);
                         }
                      },
                      error: function (xhr, ajaxOptions, error) {
                         var fnEndTime = window.performance.now();
-                        dl.log('+++DBDM-ERROR > getAnonymousID > Ajax call error: ' + error);
-                        dl.log('+++DBDM-LOG > getAnonymousID > Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms');
+                        dl.log('+++DBDM-ERROR > getAnonymousID > Ajax call error. (Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms): ' + error);
+                        digitalData.page.attribute.procFlag += '|A:-1';
                      }
                   });
                }
@@ -1653,6 +1658,7 @@ try {
          digitalData.page.pageInfo.hotjar      = digitalData.page.pageInfo.hotjar || {};
          digitalData.page.pageInfo.convertro   = digitalData.page.pageInfo.convertro || {};
          digitalData.page.isDataLayerReady     = false;
+         digitalData.page.attribute.procFlag   = "";
 
          /*--------------------setting page loading time--------------------*/
          dl.fn.setPageLoadEpoch(reset); 
@@ -1725,7 +1731,7 @@ try {
          }
 
          /*--------------------Set Page Name--------------------*/
-         digitalData.page.pageInfo.pageName = document.title || "";
+         digitalData.page.pageInfo.pageName = dl.fn.parseEventNameGen((document.title || "").replace(/-_-/g, "---"));
 
          /*--------------------Set DLE ID for Page--------------------*/
          digitalData.page.pageInfo.dleID = dl.fn.sha256(digitalData.page.pageInfo.urlID);
@@ -2014,7 +2020,7 @@ try {
          "ddo.p.c.ibm.globalBrandTableL17": "PageviewTag_pv_a44",
          "ddo.p.c.ibm.globalBrandTableL20": "PageviewTag_pv_a45",
          "ddo.p.c.ibm.globalBrandTableL30": "PageviewTag_pv_a46",
-         "cm_PageViewTag_pv_a47": "PageviewTag_pv_a47",
+         "ddo.p.a.procFlag": "PageviewTag_pv_a47",
          "ddo.p.pi.publisher": "PageviewTag_pv_a48",
          "ddo.p.pi.publishDate": "PageviewTag_pv_a49",
          "ddo.p.pi.keywords": "PageviewTag_pv_a50",
@@ -2462,6 +2468,14 @@ try {
          /* Rule for ibmStats.event tracking for product view tag */
          if (b.eventName && b.eventName.toLowerCase() === 'product') {
             b.cm_ProductviewTag_pr_a31 = b["productTag_serviceType"];
+         }
+         
+         /* Get the list of Tags executed on Pageview */
+         if(cm.data.a === 'view') {
+            var scriptPVEndtTime = window.performance.now();
+            dl.log('+++DBDM-LOG > Up to Pageview Execution Time ' + Math.round(scriptPVEndtTime - scriptStartTime) + 'ms');
+            digitalData.page.attribute.procFlag = 'S:' + Math.round(scriptPVEndtTime - scriptStartTime) + digitalData.page.attribute.procFlag;
+            b['ddo.p.a.procFlag'] = digitalData.page.attribute.procFlag;
          }
       }
       catch (error) {

@@ -3,7 +3,7 @@
  * Extension Name: ibm-common.js
  * Scope         : All Tags
  * Execution     : N/A
- * Version       : 2017.03.04.1212
+ * Version       : 2017.03.11.1724
  *
  * This script creates a calls the init function of the datalayer to initiate it
  * 

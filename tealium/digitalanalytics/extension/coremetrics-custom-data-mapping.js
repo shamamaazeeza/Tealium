@@ -3,7 +3,7 @@
  * Extension Name: coremetrics-custom-data-mappings.js
  * Scope         : Coremetrics Global ID
  * Execution     : N/A
- * Version       : 2017.03.09.1607
+ * Version       : 2017.03.11.1724
  *
  * This script creates a calls the init function of the datalayer to initiate it
  * 
@@ -292,6 +292,25 @@ try {
       b.cm_ProductviewTag_pr_a31 = b["productTag_serviceType"];
    }
 
+   /* Get the list of Tags executed on Pageview */
+   if(utag2.initialPageView && a === 'view') {
+      var loadedTags="|T:";
+      for (f = 0; f < utag.loader.cfgsort.length; f++) {
+         d = utag.loader.cfgsort[f];
+         if (utag.loader.cfg[d].load && utag.loader.cfg[d].send) {
+            loadedTags += d + ','
+         }
+      }
+      loadedTags = loadedTags.replace(/,+$/, "");
+      digitalData.page.attribute.procFlag += loadedTags;
+      dl.log('+++DBDM-LOG > Loaded Tags: ' + loadedTags);
+
+      var scriptPVEndtTime = window.performance.now();
+      dl.log('+++DBDM-LOG > Up to Pageview Execution Time ' + Math.round(scriptPVEndtTime - scriptStartTime) + 'ms');
+      digitalData.page.attribute.procFlag = 'S:' + Math.round(scriptPVEndtTime - scriptStartTime) + digitalData.page.attribute.procFlag;
+      
+      b['ddo.p.a.procFlag'] = digitalData.page.attribute.procFlag;
+   }
 }
 catch (error) {
    datalayer.log('+++DBDM-ERROR > coremetrics-custom-data-mappings.js: ' + error);

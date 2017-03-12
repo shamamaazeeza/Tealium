@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.03.09.1607
+ * Version       : 2017.03.11.1724
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -16,6 +16,8 @@ var tmeid="datalayer.js";
 
 /*--------------------Initialize all Digital Data Objects--------------------*/
 var dl = {
+      version : '20170311.1724',
+
       PAGEIDQUERYSTRINGSDEFAULT : [
          /* Registration Forms - IWM */
          {"pathNameSubstring": "/marketing/iwm/",               "qsParameter" : ["S_PKG","source"]},
@@ -499,9 +501,10 @@ var dl = {
          /*--------------------Set referral URLID and referral domain in DDO--------------------*/
          setReferringURL : function (rf) {
             try {
-               digitalData.page.pageInfo.referrer = rf || digitalData.util.referrer.href;
-               if (typeof(digitalData.page.pageInfo.referrer) !== "undefined" && digitalData.page.pageInfo.referrer !== "") {
-                  digitalData.page.pageInfo.referrerID = this.calculateURLID(digitalData.page.pageInfo.referrer);
+               digitalData.page.pageInfo.referrer = rf || digitalData.util.referrer.href || "";
+               if (digitalData.page.pageInfo.referrer !== "") {
+                  /* get the urlID for the referrer, just make sure it is less than 256 characters */
+                  digitalData.page.pageInfo.referrerID = dl.fn.parseEventNameGen(dl.fn.calculateURLID(digitalData.page.pageInfo.referrer));
                   /* Get the sub domain or root domain from the referrer hostname */
                   var referrerParts = digitalData.util.referrer.hostname.split('.');
                   if (referrerParts.length < 2) {
@@ -839,7 +842,8 @@ var dl = {
                if (typeof(eventName) === "string") {
                   /* replace all consecutive spaces for a dash '-' */
                   eventName = eventName.replace(/\s+/g, '-').toUpperCase();
-                  size -= (encodeURIComponent(eventName).length - eventName.length);
+                  //size -= (encodeURIComponent(eventName).length - eventName.length);
+                  size -= (eventName.length - eventName.length);
                   if (eventName.length > size) {
                      var eventNameParts = eventName.split(':');
                      if (eventNameParts.length === 1)
@@ -866,8 +870,9 @@ var dl = {
                /* make sure eventName is a String */
                if (typeof(eventName) === "string") {
                   /* replace all consecutive spaces to one space */
-                  eventName = eventName.replace(/\s+/g, '-').toUpperCase();
-                  size -= (encodeURIComponent(eventName).length - eventName.length);
+                  eventName = eventName.replace(/\s+/g, '-');
+                  //size -= (encodeURIComponent(eventName).length - eventName.length);
+                  size -= (eventName.length - eventName.length);
                   /* if eventName is bigger than 50 characters then compress it */
                   if (eventName.length > size) {
                      var ovf = Math.round((eventName.length-size)/2);
@@ -934,16 +939,19 @@ var dl = {
          getAnonymousID: function (wt) {
             try {
                var waittime = wt || dl.WAITTIME;
-               console.time("getAnonymousID");
+               var fnStartTime = window.performance.now();
 
                /* See if the Anonymous ID is already in the Cookie */
                digitalData.user.profile.auid = dl.fn.getCookie('BMAID');
                if (digitalData.user.profile.auid) {
-                  console.timeEnd("getAnonymousID");
+                  /* Get execution time in milliseconds */
+                  var fnEndTime = window.performance.now();
+                  dl.log('+++DBDM-LOG > getAnonymousID > Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms');
+                  digitalData.page.attribute.procFlag += "|A:" + Math.round(fnEndTime - fnStartTime);
                }
                else {
-                  dl.log('+++DBDM-LOG > getAnonymousID > Fetching anonymous ID from Bluemix (timeout: ' + waittime + 'ms)');
-                  jQuery.ajax({
+                  dl.log('+++DBDM-LOG > getAnonymousID > Getting anonymous ID from Bluemix (timeout set to ' + waittime + 'ms)');
+                  jQuery2.ajax({
                      url: "https://console.ng.bluemix.net/analytics/bmaid",
                      method: "GET",
                      timeout: waittime,
@@ -952,12 +960,15 @@ var dl = {
                            /* If the BMAID is set then set it to DDO and to cookie */
                            dl.fn.setCookie('BMAID', response.BMAID, 7300);
                            digitalData.user.profile.auid = response.BMAID;
-                           dl.log('+++DBDM-LOG > getAnonymousID > Fetched anonymous ID from Bluemix');
-                           console.timeEnd("getAnonymousID");
+                           var fnEndTime = window.performance.now();
+                           dl.log('+++DBDM-LOG > getAnonymousID > Fetched anonymous ID from Bluemix. Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms');
+                           digitalData.page.attribute.procFlag += "|A:" + Math.round(fnEndTime - fnStartTime);
                         }
                      },
                      error: function (xhr, ajaxOptions, error) {
-                        dl.log('+++DBDM-ERROR > getAnonymousID > Ajax call error: ' + error);
+                        var fnEndTime = window.performance.now();
+                        dl.log('+++DBDM-ERROR > getAnonymousID > Ajax call error. (Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms): ' + error);
+                        digitalData.page.attribute.procFlag += '|A:-1';
                      }
                   });
                }
@@ -966,6 +977,7 @@ var dl = {
                dl.log('+++DBDM-ERROR > getAnonymousID: ' + error);
             }
          },
+
          /*--------------------Function to send datalayer_ready event ---------------------*/
          sendDatalayerReadyEvent: function (wt) {
             try {
@@ -1610,6 +1622,7 @@ var dl = {
             digitalData.page.pageInfo.hotjar      = digitalData.page.pageInfo.hotjar || {};
             digitalData.page.pageInfo.convertro   = digitalData.page.pageInfo.convertro || {};
             digitalData.page.isDataLayerReady     = false;
+            digitalData.page.attribute.procFlag   = "";
             
             /*--------------------setting page loading time--------------------*/
             this.fn.setPageLoadEpoch(reset); 
@@ -1656,9 +1669,20 @@ var dl = {
             /*--------------------setting Category ID--------------------*/
             this.fn.setCategoryID();
             
+            /*--------------------Set Destination URL--------------------*/
+            digitalData.page.pageInfo.destinationURL = window.location.href || "";
+
+            /*--------------------Set Destination URL Domain--------------------*/
+            digitalData.page.pageInfo.destinationDomain = document.domain.split('.').splice(-2, 2).join('.') || "";
+            if ( digitalData.page.pageInfo.destinationDomain === "github.io") {
+               /* 2017-03-02 - jleon: Domain name for github.io needs another level up - ibm-bluemix.github.io */
+               digitalData.page.pageInfo.destinationDomain = document.domain.split('.').splice(-3, 3).join('.');
+            }
+
             /*--------------------get anonymous ID from Bluemix--------------------*/
             var siteID = digitalData.page.pageInfo.ibm.siteID.toLowerCase().replace(/^test|test$/,"");
-            if (siteID === 'devwrk' || siteID === 'devwrks' || siteID === 'dwnext' || siteID === "devwrkscon") {
+            if (siteID === 'devwrk' || siteID === 'devwrks' || siteID === 'dwnext' || siteID === "devwrkscon" 
+               || digitalData.page.pageInfo.destinationDomain.indexOf('softlayer.com') > -1) {
                /* set timeout to 2s */
                this.fn.getAnonymousID(2000);
             }
@@ -1680,18 +1704,8 @@ var dl = {
             /*--------------------Set DDO from Metadata Valuesr--------------------*/
             this.fn.setDDOFromMetadata();
 
-            /*--------------------Set Destination URL--------------------*/
-            digitalData.page.pageInfo.destinationURL = window.location.href || "";
-
-            /*--------------------Set Destination URL Domain--------------------*/
-            digitalData.page.pageInfo.destinationDomain = document.domain.split('.').splice(-2, 2).join('.') || "";
-            if ( digitalData.page.pageInfo.destinationDomain === "github.io") {
-               /* 2017-03-02 - jleon: Domain name for github.io needs another level up - ibm-bluemix.github.io */
-               digitalData.page.pageInfo.destinationDomain = document.domain.split('.').splice(-3, 3).join('.');
-            }
-
             /*--------------------Set Page Name--------------------*/
-            digitalData.page.pageInfo.pageName = document.title || "";
+            digitalData.page.pageInfo.pageName = dl.fn.parseEventNameGen((document.title || "").replace(/-_-/g, "---"));
 
             /*--------------------Set DLE ID for Page--------------------*/
             digitalData.page.pageInfo.dleID = this.fn.sha256(digitalData.page.pageInfo.urlID);
