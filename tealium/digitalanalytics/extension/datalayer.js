@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.03.11.1724
+ * Version       : 2017.03.12.1138
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -16,7 +16,7 @@ var tmeid="datalayer.js";
 
 /*--------------------Initialize all Digital Data Objects--------------------*/
 var dl = {
-      version : '20170311.1724',
+      version : '20170312.1138',
 
       PAGEIDQUERYSTRINGSDEFAULT : [
          /* Registration Forms - IWM */
@@ -37,17 +37,17 @@ var dl = {
          /* Case Studies */
          {"pathNameSubstring": "/software/businesscasestudies", "qsParameter" : ["synkey"]}, 
       ],
-         
+
       DOWNLOADTYPES : "123,avi,bqy,doc,docx,dot,eps,exe,flv,gif,jpg,lwp,mas,mov,mp3,mp4,odp,ods,odt,otp,ots,ott,pdf,png,pot,pps,ppt,pptx,prz,rss,rtf,sh,stc,sti,stw,swf,sxc,sxi,sxw,tar,txt,wav,wma,wmv,xls,xlsx,xml,zip",
-      
+
       DOMAINLIST    : "bluemix.net,cognos.com,ibm.biz,ibm.co,ibm.com,ibmcloud.com,ibm-bluemix.github.io,ibmdw.net,jazz.net,lotuslive.com,mybluemix.net,securityintelligence.com,servicemanagementcenter.com,smartercitiescloud.com,softlayer.com,watsonanalytics.com,webdialogs.com,xtify.com",
-      
+
       TESTDOMAINS   : "dev.nwtw.ibm.com,testdata.coremetrics.com,localhost,wwwbeta-sso.toronto.ca.ibm.com",
-      
+
       WAITTIME      : 3000,
-      
+
       TOPANCESTORLEVEL : 10,
-      
+
       UDOTODDOREFRESH : {
          /* List of variables from DLE that need to be updated in DDO */
          "ddo.p.pi.ibm.siteID"            : "digitalData.page.pageInfo.ibm.siteID",
@@ -57,10 +57,10 @@ var dl = {
          "ddo.p.c.ibm.globalBrandTableL20": "digitalData.page.category.ibm.globalBrandTableL20",
          "ddo.p.c.ibm.globalBrandTableL30": "digitalData.page.category.ibm.globalBrandTableL30", 
       },
-      
+
       /* To store all messages being sent by the solution */
       logFile       : [],
-      
+
       /*--------------------Centralized log handling: Based on Tealium's --------------------*/
       log : function (a, b) {
          try {
@@ -371,7 +371,7 @@ var dl = {
                dl.log('+++DBDM-ERROR > setCookie: ' + error);
             }
          },
-         
+
          /*--------------------Add getCookie function--------------------*/
          getCookie : function (name) {
             try {
@@ -423,7 +423,7 @@ var dl = {
                dl.log('+++DBDM-ERROR > getMobileOperatingSystem: ' + error);
             }
          },
-         
+
          /*--------------------Set setUserInfo from DemandBase--------------------*/
          setUserInfo : function () {
             try {
@@ -525,7 +525,7 @@ var dl = {
                dl.log('+++DBDM-ERROR > setReferringURL: ' + error);
             }
          },
-         
+
          /*--------------------setting IBMER value--------------------*/
          setIBMer : function () {
             try {
@@ -672,7 +672,7 @@ var dl = {
                if (typeof(utag) !== "undefined" && typeof(utag.data) !== "undefined" && typeof(utag2) !== "undefined") {
                   digitalData.page.pageInfo.ibm.siteID = utag.data[utag2.getShortName("digitalData.page.pageInfo.ibm.siteID")] || digitalData.page.pageInfo.ibm.siteID || "IBMTESTWWW";
                }
-               
+
                /* If the siteID prefix or suffix is "test" or if the full domain of the hostname is in 
                 * the TESTDOMAINS array then set Client ID to 80200000 (test instance)
                 */
@@ -711,7 +711,7 @@ var dl = {
                if (digitalData.page.pageInfo.ibm.siteID.substring(0,4).toLowerCase() == "ecom") {
                   IBMPageCategory = digitalData.page.pageInfo.ibm.siteID + IBMPageCategory;
                }
-               
+
                /* adding DC.Language value category id for Support Content delivery pages */
                if ((typeof digitalData.page.pageInfo.ibm.siteID !== "undefined") && (digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estdbl" 
                   || digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estkcs" || digitalData.page.pageInfo.ibm.siteID.toLowerCase() == "estqst")) {
@@ -790,7 +790,7 @@ var dl = {
                dl.log('+++DBDM-ERROR > setSearchTerms: ' + error);
             }
          },
-         
+
          /*--------------------setting Page Header--------------------*/
          setPageHeader: function () {
             try {
@@ -804,7 +804,7 @@ var dl = {
                dl.log('+++DBDM-ERROR > setPageHeader: ' + error);
             }
          },
-         
+
          /*--------------------Set DDO from Metadata Valuesr--------------------*/
          setDDOFromMetadata: function () {
             try {
@@ -827,7 +827,7 @@ var dl = {
                dl.log('+++DBDM-ERROR > setDDOFromMetadata: ' + error);
             }
          },
-         
+
          /*--------------------Parse the event name  --------------------*/
          parseEventName : function (eventName, count) {
             /*
@@ -910,19 +910,19 @@ var dl = {
                      /* Set a timeout to kill the listener if it takes too long.
                       * Set this first in case the user info is already ready when you set the listener. */
                      var userInfoTimeout = setTimeout(function () {
-                           ibmweb.queue.remove(userInfoQueue);
-                           dl.log('+++DBDM-LOG > getDemandbaseUserData > User Info took too long');
-                        }, waittime);
+                        ibmweb.queue.remove(userInfoQueue);
+                        dl.log('+++DBDM-LOG > getDemandbaseUserData > User Info took too long');
+                     }, waittime);
 
                      /* Set a listener to wait till the user IP data has been loaded, then call your function when it's available. */
                      var userInfoQueue = ibmweb.queue.push(function () {
-                           return ibmweb.comusr.isLoaded();
-                        }, function () {
-                           /* Clear timeout since it returned in time. */
-                           clearTimeout(userInfoTimeout);
-                           /* Get user info now that it's ready. */
-                           dl.fn.setUserInfoV17();
-                        });
+                        return ibmweb.comusr.isLoaded();
+                     }, function () {
+                        /* Clear timeout since it returned in time. */
+                        clearTimeout(userInfoTimeout);
+                        /* Get user info now that it's ready. */
+                        dl.fn.setUserInfoV17();
+                     });
                   }
                }
                else {
@@ -955,13 +955,18 @@ var dl = {
                      url: "https://console.ng.bluemix.net/analytics/bmaid",
                      method: "GET",
                      timeout: waittime,
+                     xhrFields: {
+                        withCredentials: true
+                     },
                      success: function (response) {
                         if (response.BMAID) {
                            /* If the BMAID is set then set it to DDO and to cookie */
                            dl.fn.setCookie('BMAID', response.BMAID, 7300);
                            digitalData.user.profile.auid = response.BMAID;
+                           /* Send event to notify that we've got the BMAID */
+                           jQuery2(document).trigger('bmaid_ready');
                            var fnEndTime = window.performance.now();
-                           dl.log('+++DBDM-LOG > getAnonymousID > Fetched anonymous ID from Bluemix. Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms');
+                           dl.log('+++DBDM-LOG > getAnonymousID > Fetched anonymous ID from Bluemix: ' + response.BMAID + ' Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms');
                            digitalData.page.attribute.procFlag += "|A:" + Math.round(fnEndTime - fnStartTime);
                         }
                      },
@@ -1032,13 +1037,13 @@ var dl = {
                   if (eventAction === "5") {
                      window["cmCreateShopAction5Tag2"].apply(this, args);
                      var eventInfo = {
-                        'type'           : 'purchase-tst',
-                        'eventAction'    : eventAction,
-                        'productID'      : argsArray[0] || "NOTSET",
-                        'productName'    : argsArray[1] || "",
-                        'productQuantity': argsArray[2] || "",
-                        'productPrice'   : argsArray[3] || "",
-                        'productCategory': argsArray[4] || "",
+                           'type'           : 'purchase-tst',
+                           'eventAction'    : eventAction,
+                           'productID'      : argsArray[0] || "NOTSET",
+                           'productName'    : argsArray[1] || "",
+                           'productQuantity': argsArray[2] || "",
+                           'productPrice'   : argsArray[3] || "",
+                           'productCategory': argsArray[4] || "",
                      }
                      if (typeof(argsArray[5]) !== "undefined") {
                         var attrs = argsArray[5].split("-_-");
@@ -1052,16 +1057,16 @@ var dl = {
                   else {
                      window["cmCreateShopAction9Tag2"].apply(this, args);
                      var eventInfo = {
-                        'type'           : 'purchase-tst',
-                        'eventAction'    : eventAction,
-                        'productID'      : argsArray[0] || "",
-                        'productName'    : argsArray[1] || "",
-                        'productQuantity': argsArray[2] || "",
-                        'productPrice'   : argsArray[3] || "",
-                        'registrationID' : argsArray[4] || "",
-                        'orderID'        : argsArray[5] || "",
-                        'orderSubtotal'  : argsArray[6] || "",
-                        'productCategory': argsArray[7] || "",
+                           'type'           : 'purchase-tst',
+                           'eventAction'    : eventAction,
+                           'productID'      : argsArray[0] || "",
+                           'productName'    : argsArray[1] || "",
+                           'productQuantity': argsArray[2] || "",
+                           'productPrice'   : argsArray[3] || "",
+                           'registrationID' : argsArray[4] || "",
+                           'orderID'        : argsArray[5] || "",
+                           'orderSubtotal'  : argsArray[6] || "",
+                           'productCategory': argsArray[7] || "",
                      }
                      if (typeof(argsArray[8]) !== "undefined") {
                         var attrs = argsArray[8].split("-_-");
@@ -1099,7 +1104,7 @@ var dl = {
 
                /* Continue if 'link_obj' is defined */
                if (typeof (link_obj) !== 'undefined') {
-                  
+
                   /* Try to grab the text, class and ID of the object clicked upon, if no values, then try from the "A" node */
                   link_text = link_obj.text ? link_obj.text : link_obj.innerText ? link_obj.innerText : '';
                   link_text = encodeURIComponent(link_text);
@@ -1110,7 +1115,7 @@ var dl = {
                   link_class = link_class.trim();
                   /* Get the ID for the clicked upon element */
                   link_id = link_obj.id || "";
-                  
+
                   /* Now, scan the parents until whether node 'A' or 'BUTTON' are found */
                   link_node = link_obj.nodeName.toLowerCase();
                   if (link_node !== "a" && link_node !== "button") {
@@ -1271,7 +1276,7 @@ var dl = {
                dl.log('+++DBDM-ERROR > pageClickEventHandler:: ' + error);
             }
          },
-         
+
          /*--------------------Function to handle the ibmStats.event call --------------------*/
          ibmStatsEventHandler : function (obj) {
             try {
@@ -1324,7 +1329,7 @@ var dl = {
                      obj.type = "element";
                   }
                }
-               
+
                /* Set name and ID for event */
                if (obj.type === "conversion") {
                   obj.event_name = "ibmStatsEvent_conversion";
@@ -1348,7 +1353,7 @@ var dl = {
                   obj.event_name = "ibmStatsEvent_element";
                   obj.cm_ElementTag_eid = dl.fn.parseEventNameGen(obj.eventName,50);
                }
-              
+
                /* Set EventType for Data Layer */
                obj.eventType = obj.type;
                obj.destinationURL = digitalData.page.pageInfo.destinationURL;
@@ -1356,7 +1361,7 @@ var dl = {
                /* Ensure to replace coremetrics attribute separator '-_-' with '---' to avoid shifting */
                var statsObjListString = JSON.stringify(obj).replace(/-_-/g,"---");
                data = JSON.parse(statsObjListString);
- 
+
                if (data.type !== "product") {
                   if (data.type == "video") {
                      /* data.primaryCategory = "VIDEO - " + digitalData.page.pageInfo.ibm.siteID; */
@@ -1364,7 +1369,7 @@ var dl = {
                         var dataConversion = JSON.parse(JSON.stringify(data));
                         dataConversion.event_name="ibmStatsEvent_conversion";
                         dataConversion.type = dataConversion.eventType = "conversion"
-                        dataConversion.cm_ConversionEventTag_cid = dl.fn.parseEventNameGen(obj.eventName,256);
+                           dataConversion.cm_ConversionEventTag_cid = dl.fn.parseEventNameGen(obj.eventName,256);
                         delete dataConversion.cm_ElementTag_eid;
                         dataConversion.eventAction = 1;
                         dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
@@ -1374,7 +1379,7 @@ var dl = {
                         var dataConversion = JSON.parse(JSON.stringify(data));
                         dataConversion.event_name="ibmStatsEvent_conversion";
                         dataConversion.type = dataConversion.eventType = "conversion"
-                        dataConversion.cm_ConversionEventTag_cid = dl.fn.parseEventNameGen(obj.eventName,256);
+                           dataConversion.cm_ConversionEventTag_cid = dl.fn.parseEventNameGen(obj.eventName,256);
                         delete dataConversion.cm_ElementTag_eid;
                         dataConversion.eventAction = 2;
                         dl.log('+++DBDM-LOG > ibmStatsEventHandler: Event captured - ' + dataConversion.type + ': \n' + JSON.stringify(dataConversion, null, 2));
@@ -1587,7 +1592,7 @@ var dl = {
       init : function (r) {
          try {
             var reset = r || 0;
-            
+
             /* Set up digitalData object */
             window.digitalData = window.digitalData || {};
 
@@ -1604,7 +1609,7 @@ var dl = {
             digitalData.user.profile    = digitalData.user.profile   || {};
             digitalData.user.segment    = digitalData.user.segment   || {};
             digitalData.user.userInfo   = digitalData.user.userInfo  || {};
-            */
+             */
             digitalData.user.profile    = {};
             digitalData.user.segment    = {};
             digitalData.user.userInfo   = {};
@@ -1623,16 +1628,19 @@ var dl = {
             digitalData.page.pageInfo.convertro   = digitalData.page.pageInfo.convertro || {};
             digitalData.page.isDataLayerReady     = false;
             digitalData.page.attribute.procFlag   = "";
-            
+
             /*--------------------setting page loading time--------------------*/
             this.fn.setPageLoadEpoch(reset); 
+
+            /*--------------------get anonymous ID from Bluemix--------------------*/
+            this.fn.getAnonymousID(2000);
 
             /*--------------------Coremetics Cookie Migration [workaround]--------------------*/
             this.fn.coremetricsCookieWorkaround();
 
             /*--------------------Get Mobile OS for User Agent--------------------*/
             digitalData.page.attribute.agentMobileOS = this.fn.getMobileOperatingSystem();
-            
+
             /*--------------------Set Cookies--------------------*/
             this.fn.readCookies();
 
@@ -1668,7 +1676,7 @@ var dl = {
 
             /*--------------------setting Category ID--------------------*/
             this.fn.setCategoryID();
-            
+
             /*--------------------Set Destination URL--------------------*/
             digitalData.page.pageInfo.destinationURL = window.location.href || "";
 
@@ -1679,20 +1687,10 @@ var dl = {
                digitalData.page.pageInfo.destinationDomain = document.domain.split('.').splice(-3, 3).join('.');
             }
 
-            /*--------------------get anonymous ID from Bluemix--------------------*/
-            var siteID = digitalData.page.pageInfo.ibm.siteID.toLowerCase().replace(/^test|test$/,"");
-            if (siteID === 'devwrk' || siteID === 'devwrks' || siteID === 'dwnext' || siteID === "devwrkscon" 
-               || digitalData.page.pageInfo.destinationDomain.indexOf('softlayer.com') > -1) {
-               /* set timeout to 2s */
-               this.fn.getAnonymousID(2000);
-            }
-            else {
-               digitalData.user.profile.auid = dl.fn.getCookie('BMAID');
-            }
-
             /*--------------------get Demandbase data for Bluemix pages--------------------*/
+            var siteID = digitalData.page.pageInfo.ibm.siteID.toLowerCase().replace(/^test|test$/,"");
             if (siteID === 'bluemix') {
-                  dl.fn.loadScript('https://api.demandbase.com/api/v2/ip.json?key=7d901296060be8d862db19aeed6659e6&callback=dl.fn.demandbaseCallback');
+               dl.fn.loadScript('https://api.demandbase.com/api/v2/ip.json?key=7d901296060be8d862db19aeed6659e6&callback=dl.fn.demandbaseCallback');
             }
 
             /*--------------------setting Search Terms from Enterprise Search--------------------*/

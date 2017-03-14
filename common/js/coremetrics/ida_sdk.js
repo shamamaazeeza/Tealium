@@ -1,7 +1,7 @@
 /**
  * Id         : /tm-v1.0/common/js/coremetrics/ida_sdk.js
  * Scope      : All v18+ IBM pages
- * Version       : 2017.03.11.1724
+ * Version       : 2017.03.12.1138
  *
  * Script used to load the Coremetrics SDK on IBM web pages 
  *
@@ -11,7 +11,9 @@
  */
 
 try {
+   /* Get timestamps */
    window.scriptStartTime = window.scriptStartTime || window.performance.now();
+   window.loadingTime = window.loadingTime || new Date().getTime();
 
    /*----------------------Ensure that old browsers don't break when referencing the console-----------------------*/
    if (!window.console) { window.console = {log: function(){}, error:function(){}, warn:function(){}, time:function(){}, timeEnd:function(){} }; }
@@ -19,7 +21,7 @@ try {
    window.ibmStats = window.ibmStats || {};
    window.datalayer = window.datalayer || {};
    window.dl = window.datalayer;
-   dl.version = '20170311.1724'
+   dl.version = '20170312.1138'
 
    /* To store all messages being sent by the solution */
    dl.logFile = dl.logFile || [];
@@ -1110,13 +1112,18 @@ try {
                      url: "https://console.ng.bluemix.net/analytics/bmaid",
                      method: "GET",
                      timeout: waittime,
+                     xhrFields: {
+                        withCredentials: true
+                     },
                      success: function (response) {
                         if (response.BMAID) {
                            /* If the BMAID is set then set it to DDO and to cookie */
                            dl.fn.setCookie('BMAID', response.BMAID, 7300);
                            digitalData.user.profile.auid = response.BMAID;
+                           /* Send event to notify that we've got the BMAID */
+                           jQuery2(document).trigger('bmaid_ready');
                            var fnEndTime = window.performance.now();
-                           dl.log('+++DBDM-LOG > getAnonymousID > Fetched anonymous ID from Bluemix. Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms');
+                           dl.log('+++DBDM-LOG > getAnonymousID > Fetched anonymous ID from Bluemix: ' + response.BMAID + ' Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms');
                            digitalData.page.attribute.procFlag += "|A:" + Math.round(fnEndTime - fnStartTime);
                         }
                      },
@@ -1662,6 +1669,9 @@ try {
          /*--------------------setting page loading time--------------------*/
          dl.fn.setPageLoadEpoch(reset); 
 
+         /*--------------------get anonymous ID from Bluemix--------------------*/
+         dl.fn.getAnonymousID(2000);
+
          /*--------------------Coremetics Cookie Migration [workaround]--------------------*/
          dl.fn.coremetricsCookieWorkaround();
 
@@ -1706,9 +1716,6 @@ try {
 
          /*--------------------demandBase User Data--------------------*/
          //dl.fn.getDemandbaseUserData();
-
-         /*--------------------get anonymous ID from Bluemix--------------------*/
-         dl.fn.getAnonymousID(2000);
 
          /*--------------------setting Search Terms from Enterprise Search--------------------*/
          dl.fn.setSearchTerms();
@@ -2904,11 +2911,7 @@ try {
    (function () {
       /* create aliases to datalayer functions */
       datalayer.util = dl.fn;
-
       try {
-         /* Set Environment for Coremetrics and SDK */
-         window.loadingTime = new Date().getTime();
-
          /* Initialize Data Layer */
          dl.log('+++DBDM-LOG: Initializing Data Layer.');
          dl.init();
