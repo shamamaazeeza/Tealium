@@ -1,6 +1,7 @@
 //~~tv:3101.external.20150507
 //~~tc: Fixing a typo on ClientID.
 //~~tc: Fix queue logic so that order of events is preserved
+//~~jleon: multiple changes for adapt for IBM
 
 //tealium universal tag - utag.sender.3101.external ut4.0.##UTVERSION##, Copyright ##UTYEAR## Tealium.com Inc. All Rights Reserved.
 try {
@@ -118,7 +119,6 @@ try {
         // Start Loader Callback
         // coremetrics_callback
         u.loader_cb = function (b) {
-          u.initialized = true;
           if (u.data.test_domains.indexOf("," + location.hostname + ',') > -1) {
             u.data.test = true;
           }
@@ -129,19 +129,18 @@ try {
             u.data.DataCollectionDomain = u.data.TestDataCollectionDomain || "testdata.coremetrics.com";
           }
 
-          if (u.data.ClientID) {
+          /* 2017-03-15 - jleon: Changed the condition so this only runs once per pageview */
+          if (u.data.ClientID && !u.initialized) {
             cmSetClientID(u.data.ClientID, u.data.DataCollectionMethod, u.data.DataCollectionDomain, u.data.CookieDomain);
           }
-
-          /***
-           * 2017-01-25 - jleon: START - Cross-domain first party cookie migration
-           * Added here to account for the use of the cmTagQueue array
-           */
-          if (window.cmTagQueue_copy) {
-             window.cmTagQueue = window.cmTagQueue_copy;
+          if (window.cmTagQueue && !u.initialized) {
              cmExecuteTagQueue();
+             /* 2017-03-16 - jleon: Disable console logging directly due to a bug in Coremetrics */
+             if (IORequest) {
+                IORequest.disable_console_logging = true;
+             }
           }
-          /* 2017-01-25 - jleon: END - Cross-domain first party cookie migration */
+          u.initialized = true;
 
           // accepts an object passed in via mapping e.g. cmSetupOther({"cm_FormPageID":true});
           if (u.data.cmSetupOther && window.cmSetupOther) {
@@ -163,27 +162,11 @@ try {
             /***
              * 2017-01-25 - jleon: START - Read CoreID6 cookie after pageview
              */
-            if (typeof(datalayer) !== "undefined" && typeof(datalayer.util) !== "undefined" && typeof(datalayer.util.readCookies) !== "undefined") {
-                datalayer.util.readCookies();
+            if (typeof(dl) !== "undefined" && typeof(dl.fn) !== "undefined" && typeof(dl.fn.readCookies) !== "undefined" && typeof(dl.fn.setSessionID) !== "undefined") {
+               dl.fn.readCookies();
+               dl.fn.setSessionID();
             }
-             /* 2017-01-25 - jleon: END - Read newly created CoreI6 cookie */
-
-            /***
-             * 2017-02-14 - jleon: START - Mask original functions for shop5/shop9 events
-             */
-            if (!window.purchaseMasked) {
-               window.purchaseMasked = true;
-               window.cmCreateShopAction5Tag2  = window.cmCreateShopAction5Tag;
-               window.cmCreateShopAction9Tag2  = window.cmCreateShopAction9Tag;
-               window.cmCreateShopAction5Tag = function() {
-                  datalayer.util.maskPurchaseEvent("5",arguments);
-               }
-               window.cmCreateShopAction9Tag = function() {
-                  datalayer.util.maskPurchaseEvent("9",arguments);
-               }
-            }
-            /* 2017-02-14 - jleon: END - Mask original functions for shop5/shop9 events */
-
+            /* 2017-01-25 - jleon: END - Read newly created CoreI6 cookie */
 
           } else if (u.data.a == "link" && u.data["ManualLinkClickTag_hr"]) {
             e = "ManualLinkClickTag_";
@@ -347,6 +330,21 @@ try {
 
         u.callBack = function () {
           var data = {};
+          /***
+           * 2017-02-14 - jleon: START - Mask original functions for shop5/shop9 events
+           */
+          if (!window.purchaseMasked) {
+             window.purchaseMasked = true;
+             window.cmCreateShopAction5Tag2  = window.cmCreateShopAction5Tag;
+             window.cmCreateShopAction9Tag2  = window.cmCreateShopAction9Tag;
+             window.cmCreateShopAction5Tag = function() {
+                dl.fn.maskPurchaseEvent("5",arguments);
+             }
+             window.cmCreateShopAction9Tag = function() {
+                dl.fn.maskPurchaseEvent("9",arguments);
+             }
+          }
+          /* 2017-02-14 - jleon: END - Mask original functions for shop5/shop9 events */
           while (data = u.queue.shift()) {
             u.data = data.data;
             u.loader_cb(data.b);

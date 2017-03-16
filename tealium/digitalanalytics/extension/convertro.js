@@ -3,7 +3,7 @@
  * Extension Name: convertro.js
  * Scope         : All Tags
  * Execution     : N/A
- * Version       : 2017.02.07.0018
+ * Version       : 2017.03.16.1146
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -34,7 +34,7 @@ try {
       && typeof(b["type"]) !== "undefined" && b["type"] === "conversion" && b["eventAction"] === "2" && typeof(PREFIXMAPPING[b["primaryCategory"]]) !== "undefined") {
       /* set variables for convertro */
       b["convertro_type"] = "Conversion";
-      b["convertro_id"] = (b["primaryCategory"] || 'UNKNOWN') + '-' + (b["ddo.p.s.uSessionID"] || 'UNKNOWN') + '-' + (b["ddo.p.s.pageloadEpoch"] || 'UNKNOWN');
+      b["convertro_id"] = (b["primaryCategory"] || 'UNKNOWN').replace(/[-:]+/g,'_') + '-' + (b["ddo.p.s.uSessionID"] || 'UNKNOWN') + '-' + (b["ddo.p.s.pageloadEpoch"] || 'UNKNOWN');
       b["convertro_value"] = "1";
       b["ddo.p.pi.convertro.enabled"] = "true";
       datalayer.log('+++DBDM-LOG > convertro.js > Captured conversion event: ' + b["convertro_id"]);

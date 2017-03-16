@@ -1,7 +1,7 @@
 /**
  * Id         : /tm-v1.0/common/js/coremetrics/ida_sdk.js
  * Scope      : All v18+ IBM pages
- * Version       : 2017.03.12.1138
+ * Version       : 2017.03.16.1146
  *
  * Script used to load the Coremetrics SDK on IBM web pages 
  *
@@ -21,7 +21,7 @@ try {
    window.ibmStats = window.ibmStats || {};
    window.datalayer = window.datalayer || {};
    window.dl = window.datalayer;
-   dl.version = '20170312.1138'
+   dl.version = '20170316.1146'
 
    /* To store all messages being sent by the solution */
    dl.logFile = dl.logFile || [];
@@ -252,7 +252,7 @@ try {
       {"pathNameSubstring": "/software/businesscasestudies", "qsParameter" : ["synkey"]}, 
       ];
    dl.DOWNLOADTYPES = "123,avi,bqy,doc,docx,dot,eps,exe,flv,gif,jpg,lwp,mas,mov,mp3,mp4,odp,ods,odt,otp,ots,ott,pdf,png,pot,pps,ppt,pptx,prz,rss,rtf,sh,stc,sti,stw,swf,sxc,sxi,sxw,tar,txt,wav,wma,wmv,xls,xlsx,xml,zip";
-   dl.DOMAINLIST    = "bluemix.net,cognos.com,ibm.biz,ibm.co,ibm.com,ibmcloud.com,ibm-bluemix.github.io,ibmdw.net,jazz.net,lotuslive.com,mybluemix.net,securityintelligence.com,servicemanagementcenter.com,smartercitiescloud.com,softlayer.com,watsonanalytics.com,webdialogs.com,xtify.com";
+   dl.DOMAINLIST    = "bluemix.net,cognos.com,ibm.biz,ibm.co,ibm.com,ibmcloud.com,ibm-bluemix.github.io,github.io,ibmdw.net,jazz.net,lotuslive.com,mybluemix.net,securityintelligence.com,servicemanagementcenter.com,smartercitiescloud.com,softlayer.com,watsonanalytics.com,webdialogs.com,xtify.com";
    dl.TESTDOMAINS   = "dev.nwtw.ibm.com,testdata.coremetrics.com,localhost,wwwbeta-sso.toronto.ca.ibm.com";
    dl.WAITTIME      = 3000;
    dl.TOPANCESTORLEVEL = 10;
@@ -1543,7 +1543,8 @@ try {
                   window.createPageviewTagForSPA = function() {
                      if (window.pageviewSPA) {
                         /* Initialize Data Layer */
-                        dl.log('+++DBDM-LOG > bindPageViewWithAnalytics > Initializing Data Layer.');
+                        dl.log('+++DBDM-LOG > createPageviewTagForSPA > Initializing Data Layer.');
+                        window.scriptStartTime = window.performance.now();
                         dl.init(1);
                         /* Set referring URL to current page */
                         dl.fn.setReferringURL(window.referrerSPA);
@@ -1946,10 +1947,11 @@ try {
     ************************************************MODULE: COREMETRICS ************************************************
     *
     */
-   var coremetrics = {};
-   window.cm = coremetrics;
+   window.cm = {};
    cm.initialized = false;
    cm.scriptloaded = false;
+   cm.DOMAIN_WHITELIST = ".bluemix.net,.cognos.com,.ibm.biz,.ibm.co,.ibm.com,.ibmcloud.com,.ibmdw.net,.ibm-bluemix.github.io,.jazz.net,.lotuslive.com,.mybluemix.net,.securityintelligence.com,.servicemanagementcenter.com,.smartercitiescloud.com,.softlayer.com,.webdialogs.com,.xtify.com";
+   cm.DOMAIN_BLACKLIST = ".ibm.com,.mitre.org,.learnquest.com";
    cm.queue = [];
    cm.event_lookup = {
          "pageview"    : "1",
@@ -2475,7 +2477,7 @@ try {
          if (b.eventName && b.eventName.toLowerCase() === 'product') {
             b.cm_ProductviewTag_pr_a31 = b["productTag_serviceType"];
          }
-         
+
          /* Get the list of Tags executed on Pageview */
          if(cm.data.a === 'view') {
             var scriptPVEndtTime = window.performance.now();
@@ -2530,17 +2532,16 @@ try {
    cm.initClient = function () {
       try {
          /* set cmTagQueue */
-         if (typeof(window.cmTagQueue) == 'undefined')
-            window.cmTagQueue = [];
+         window.cmTagQueue = [];
 
          /* cookie migration from IBM to non IBM pages */
          if(typeof (document.domain) !== 'undefined' && document.domain.indexOf('ibm.com') !== -1) {
-            cmTagQueue.push(['cmSetupCookieMigration', true, true, null, v16elu.domainBlacklist]);
+            cmTagQueue.push(['cmSetupCookieMigration', true, true, null, cm.DOMAIN_BACKLIST]);
          }
 
          /* cookie migration code for all non IBM pages */
-         if(typeof (document.domain) !== 'undefined' && document.domain.indexOf('ibm.com') == -1){
-            cmTagQueue.push(['cmSetupCookieMigration', true, true, v16elu.NTPT_DOMAINLIST]);
+         if(typeof (document.domain) !== 'undefined' && document.domain.indexOf('ibm.com') == -1) {
+            cmTagQueue.push(['cmSetupCookieMigration', true, true, cm.DOMAIN_WHITELIST]);
          }
          cmTagQueue.push(['cmSetupOther', {"cm_JSFEAMasterIDSessionCookie" : true}]);
 
@@ -2554,6 +2555,7 @@ try {
          else {
             cmTagQueue.push(['cmSetupOther', {"cm_JSFEAMasterIDSessionCookie" : true}]);
          }
+         cmTagQueue.push(['cmSetupOther', {"IORequest.disable_console_logging":true}]);
       }
       catch (error) {
          dl.log('+++DBDM-ERROR > coremetrics > init: ' + error);
@@ -2606,7 +2608,6 @@ try {
    /*--------------------Prepare the tag and send it to Coremetrics--------------------*/
    cm.prepareAndSend = function (b) {
       try {
-         cm.initialized = true;
          /* See if the visit is to a test web server */
          if (cm.data.test_domains.indexOf("," + location.hostname + ',') > -1) {
             cm.data.test = true;
@@ -2616,18 +2617,25 @@ try {
             cm.data.DataCollectionMethod = cm.data.TestDataCollectionMethod || false;
             cm.data.DataCollectionDomain = cm.data.TestDataCollectionDomain || "testdata.coremetrics.com";
          }
+
          /* Set the global client ID for Coremetrics */
          if (cm.data.ClientID) {
             cmSetClientID(cm.data.ClientID, cm.data.DataCollectionMethod, cm.data.DataCollectionDomain, cm.data.CookieDomain);
          }
-         /*
-          * 2017-01-25 - jleon: Cross-domain first party cookie migration
-          * Added here to account for the use of the cmTagQueue array
-          */
-         if (window.cmTagQueue_copy) {
-            window.cmTagQueue = window.cmTagQueue_copy;
-            cmExecuteTagQueue();
+
+         /* 2017-03-15 - jleon: Changed the condition so this only runs once per pageview */
+         if (cm.data.ClientID && !cm.initialized) {
+           cmSetClientID(cm.data.ClientID, cm.data.DataCollectionMethod, cm.data.DataCollectionDomain, cm.data.CookieDomain);
          }
+         if (window.cmTagQueue && !cm.initialized) {
+            cmExecuteTagQueue();
+            /* 2017-03-16 - jleon: Disable console logging directly due to a bug in Coremetrics */
+            if (IORequest) {
+               IORequest.disable_console_logging = true;
+            }
+         }
+         cm.initialized = true;
+
          /* Coremetrics Settings execution */
          if (cm.data.cmSetupOther && window.cmSetupOther) {
             window.cmSetupOther(cm.data.cmSetupOther);
@@ -2710,7 +2718,8 @@ try {
                cm.data.s_a = cm.prepareAttr("s_a", e, 50, f);
                cm.data.sx = cm.prepareAttr("sx", e, 15, f);
                /* 2017-02-14 - jleon: START - Call alias instead of real method */
-               // cmCreateShopAction9Tag(u.data[e + "pr"][f], u.data[e + "pm"][f], u.data[e + "qt"][f], u.data[e + "bp"][f], u.data[e + "cd"], u.data[e + "on"], u.data[e + "tr"], u.data[e + "cg"][f], u.data.s_a, u.data.sx);
+               cmCreateShopAction9Tag(u.data[e + "pr"][f], u.data[e + "pm"][f], u.data[e + "qt"][f], u.data[e + "bp"][f], u.data[e + "cd"], u.data[e + "on"], u.data[e + "tr"], u.data[e + "cg"][f], u.data.s_a, u.data.sx);
+               // cmCreateShopAction9Tag(cm.data[e + "pr"][f], cm.data[e + "pm"][f], cm.data[e + "qt"][f], cm.data[e + "bp"][f], cm.data[e + "cd"], cm.data[e + "on"], cm.data[e + "tr"], cm.data[e + "cg"][f], cm.data.s_a, cm.data.sx);
                cmCreateShopAction9Tag2(cm.data[e + "pr"][f], cm.data[e + "pm"][f], cm.data[e + "qt"][f], cm.data[e + "bp"][f], cm.data[e + "cd"], cm.data[e + "on"], cm.data[e + "tr"], cm.data[e + "cg"][f], cm.data.s_a, cm.data.sx);
             }
             cmDisplayShops();
@@ -2753,7 +2762,7 @@ try {
                cm.data.s_a = cm.prepareAttr("s_a", e, 50, f);
                cm.data.sx = cm.prepareAttr("sx", e, 15, f);
                /* 2017-02-14 - jleon: START - Call alias instead of real method */
-               // cmCreateShopAction5Tag(u.data[e + "pr"][f], u.data[e + "pm"][f], u.data[e + "qt"][f], u.data[e + "bp"][f], u.data[e + "cg"][f], u.data.s_a, u.data.sx);
+               // cmCreateShopAction5Tag(cm.data[e + "pr"][f], cm.data[e + "pm"][f], cm.data[e + "qt"][f], cm.data[e + "bp"][f], cm.data[e + "cg"][f], cm.data.s_a, cm.data.sx);
                cmCreateShopAction5Tag2(cm.data[e + "pr"][f], cm.data[e + "pm"][f], cm.data[e + "qt"][f], cm.data[e + "bp"][f], cm.data[e + "cg"][f], cm.data.s_a, cm.data.sx);
             }
             cmDisplayShops();
@@ -2893,11 +2902,7 @@ try {
     *
     */
    var v16elu = {
-
-         NTPT_DOWNLOADTYPES : "123,avi,bqy,doc,docx,dot,eps,exe,flv,gif,jpg,lwp,mas,mov,mp3,mp4,odp,ods,odt,otp,ots,ott,pdf,png,pot,pps,ppt,pptx,prz,rss,rtf,sh,stc,sti,stw,swf,sxc,sxi,sxw,tar,txt,wav,wma,wmv,xls,xlsx,xml,zip",
-         NTPT_DOMAINLIST : ".bluemix.net,.cognos.com,.ibm.biz,.ibm.co,.ibm.com,.ibmcloud.com,.ibmdw.net,.jazz.net,.lotuslive.com,.mybluemix.net,.securityintelligence.com,.servicemanagementcenter.com,.smartercitiescloud.com,.softlayer.com,.webdialogs.com,.xtify.com",
          evhndlr : true,
-         domainBlacklist : ".ibm.com,.mitre.org,.learnquest.com",
          utilstatsHelper: function(e) {
             ibmStats.event(e);
          },

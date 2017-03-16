@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.03.12.1138
+ * Version       : 2017.03.16.1146
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -16,8 +16,7 @@ var tmeid="datalayer.js";
 
 /*--------------------Initialize all Digital Data Objects--------------------*/
 var dl = {
-      version : '20170312.1138',
-
+      version : '20170316.1146',
       PAGEIDQUERYSTRINGSDEFAULT : [
          /* Registration Forms - IWM */
          {"pathNameSubstring": "/marketing/iwm/",               "qsParameter" : ["S_PKG","source"]},
@@ -37,18 +36,14 @@ var dl = {
          /* Case Studies */
          {"pathNameSubstring": "/software/businesscasestudies", "qsParameter" : ["synkey"]}, 
       ],
-
       DOWNLOADTYPES : "123,avi,bqy,doc,docx,dot,eps,exe,flv,gif,jpg,lwp,mas,mov,mp3,mp4,odp,ods,odt,otp,ots,ott,pdf,png,pot,pps,ppt,pptx,prz,rss,rtf,sh,stc,sti,stw,swf,sxc,sxi,sxw,tar,txt,wav,wma,wmv,xls,xlsx,xml,zip",
-
-      DOMAINLIST    : "bluemix.net,cognos.com,ibm.biz,ibm.co,ibm.com,ibmcloud.com,ibm-bluemix.github.io,ibmdw.net,jazz.net,lotuslive.com,mybluemix.net,securityintelligence.com,servicemanagementcenter.com,smartercitiescloud.com,softlayer.com,watsonanalytics.com,webdialogs.com,xtify.com",
-
-      TESTDOMAINS   : "dev.nwtw.ibm.com,testdata.coremetrics.com,localhost,wwwbeta-sso.toronto.ca.ibm.com",
-
       WAITTIME      : 3000,
-
       TOPANCESTORLEVEL : 10,
-
-      UDOTODDOREFRESH : {
+      DOMAIN_WHITELIST : ".bluemix.net,.cognos.com,.ibm.biz,.ibm.co,.ibm.com,.ibmcloud.com,.ibmdw.net,.ibm-bluemix.github.io,.jazz.net,.lotuslive.com,.mybluemix.net,.securityintelligence.com,.servicemanagementcenter.com,.smartercitiescloud.com,.softlayer.com,.webdialogs.com,.xtify.com",
+      DOMAIN_BLACKLIST : ".ibm.com,.mitre.org,.learnquest.com",
+      DOMAINLIST       : "bluemix.net,cognos.com,ibm.biz,ibm.co,ibm.com,ibmcloud.com,ibm-bluemix.github.io,github.io,ibmdw.net,jazz.net,lotuslive.com,mybluemix.net,securityintelligence.com,servicemanagementcenter.com,smartercitiescloud.com,softlayer.com,watsonanalytics.com,webdialogs.com,xtify.com",
+      TESTDOMAINS      : "dev.nwtw.ibm.com,testdata.coremetrics.com,localhost,wwwbeta-sso.toronto.ca.ibm.com",
+      UDOTODDOREFRESH  : {
          /* List of variables from DLE that need to be updated in DDO */
          "ddo.p.pi.ibm.siteID"            : "digitalData.page.pageInfo.ibm.siteID",
          "ddo.p.c.primaryCategory"        : "digitalData.page.category.primaryCategory",
@@ -337,22 +332,36 @@ var dl = {
          },
 
          /*--------------------Coremetrics Cookie Migration [workaround]--------------------*/
-         coremetricsCookieWorkaround: function () {
+         cmInitClient: function () {
             try {
-               /**
-                *  This function checks for if the "cmTagQueue" array exists, makes a copy, then re-initializes it.
-                * This is to prevent the queue from executing before the cmSetClientID gets called from the tag template.
-                * Note: This required a tag template as well.
-                */
-               if (window.cmTagQueue) {
-                  /* Check if "cmTagQueue" exists, if so make a copy */
-                  window.cmTagQueue_copy = window.cmTagQueue;
-                  /* Re-initialize to an empty array */
-                  window.cmTagQueue = [];
+               /* set cmTagQueue */
+               window.cmTagQueue = [];
+
+               /* cookie migration from IBM to non IBM pages */
+               if(typeof (document.domain) !== 'undefined' && document.domain.indexOf('ibm.com') !== -1) {
+                  cmTagQueue.push(['cmSetupCookieMigration', true, true, null, dl.DOMAIN_BLACKLIST]);
                }
+
+               /* cookie migration code for all non IBM pages */
+               if(typeof (document.domain) !== 'undefined' && document.domain.indexOf('ibm.com') == -1) {
+                  cmTagQueue.push(['cmSetupCookieMigration', true, true, dl.DOMAIN_WHITELIST]);
+               }
+               cmTagQueue.push(['cmSetupOther', {"cm_JSFEAMasterIDSessionCookie" : true}]);
+
+               /* Set Coremetrics behavior for cookies and encryption */
+               if (typeof(digitalData.page.pageInfo.ibm.iniSiteID) !== "undefined" && digitalData.page.pageInfo.ibm.iniSiteID.toLowerCase() === "ecom") {
+                  cmTagQueue.push(['cmSetupNormalization', 'krypto-_-krypto']); 
+               }
+               if (typeof(digitalData.page.pageInfo.ibm.iniSiteID) !== "undefined" && digitalData.page.pageInfo.ibm.iniSiteID.toLowerCase() == "p4sc") {
+                  cmTagQueue.push(['cmSetupOther', {"cm_JSFEAMasterIDSessionCookie" : true, "cm_FormPageID" : true}]);
+               }
+               else {
+                  cmTagQueue.push(['cmSetupOther', {"cm_JSFEAMasterIDSessionCookie" : true}]);
+               }
+               cmTagQueue.push(['cmSetupOther', {"IORequest.disable_console_logging":true}]);
             }
             catch (error) {
-               dl.log('+++DBDM-ERROR > coremetricsCookieWorkaround: ' + error);
+               dl.log('+++DBDM-ERROR > cmInitClient: ' + error);
             }
          },
 
@@ -584,9 +593,12 @@ var dl = {
             try {
                /* Session ID is based on the Tealium cookie ID and the Tealium session ID */
                digitalData.page.session.uSessionID = digitalData.util.cp["utag_main_v_id"] + "-" + digitalData.util.cp["utag_main_ses_id"];
-               //digitalData.page.session.uSessionID = digitalData.page.pageInfo.coremetrics.visitorID + "-" + digitalData.util.cp["utag_main_ses_id"];
-               /* Unique Pageview ID is based on the unique session ID and the pageload epoch, the value is hashed */
                digitalData.page.session.uPageViewID = this.sha256(digitalData.page.session.uSessionID + '-' + digitalData.page.session.pageloadEpoch);
+               /* Session ID is based on the Coremetrics cookie ID and the client session ID */
+               /* if (typeof(digitalData.util.cp["50200000_clogin"]) !== "undefined") {
+                  digitalData.page.session.uSessionID = digitalData.page.pageInfo.coremetrics.visitorID + "-" + (digitalData.util.cp["50200000_clogin"].split("&")[1].split("=")[1] || 'NOSESSIONID');
+                  digitalData.page.session.uPageViewID = this.sha256(digitalData.page.session.uSessionID + '-' + digitalData.page.session.pageloadEpoch);
+               } */
             }
             catch (error) {
                dl.log('+++DBDM-ERROR > setSessionID: ' + error);
@@ -1435,6 +1447,7 @@ var dl = {
                         jQuery2(document).off('dle_ready');
                         /* Initialize Data Layer */
                         dl.log('+++DBDM-LOG > bindPageViewWithAnalytics > Initializing Data Layer.');
+                        window.scriptStartTime = window.performance.now();
                         dl.init(1);
                         /* Set referring URL to current page */
                         dl.fn.setReferringURL(window.referrerSPA);
@@ -1635,9 +1648,6 @@ var dl = {
             /*--------------------get anonymous ID from Bluemix--------------------*/
             this.fn.getAnonymousID(2000);
 
-            /*--------------------Coremetics Cookie Migration [workaround]--------------------*/
-            this.fn.coremetricsCookieWorkaround();
-
             /*--------------------Get Mobile OS for User Agent--------------------*/
             digitalData.page.attribute.agentMobileOS = this.fn.getMobileOperatingSystem();
 
@@ -1707,6 +1717,9 @@ var dl = {
 
             /*--------------------Set DLE ID for Page--------------------*/
             digitalData.page.pageInfo.dleID = this.fn.sha256(digitalData.page.pageInfo.urlID);
+
+            /*--------------------Initialize Coremetrics Settings--------------------*/
+            this.fn.cmInitClient();
 
             /*--------------------Load Coremetrics Tags by Default--------------------*/
             this.fn.setCoremetricsEnabled();
