@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.03.16.1146
+ * Version       : 2017.03.17.1205
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -13,10 +13,11 @@
  *        
  */
 var tmeid="datalayer.js";
+window.dlversion = '$Id:datalayer.js, $user:jleon@us.ibm.com, $version:2017.03.17.1205';
 
 /*--------------------Initialize all Digital Data Objects--------------------*/
 var dl = {
-      version : '20170316.1146',
+      version : dlversion,
       PAGEIDQUERYSTRINGSDEFAULT : [
          /* Registration Forms - IWM */
          {"pathNameSubstring": "/marketing/iwm/",               "qsParameter" : ["S_PKG","source"]},
@@ -36,8 +37,8 @@ var dl = {
          /* Case Studies */
          {"pathNameSubstring": "/software/businesscasestudies", "qsParameter" : ["synkey"]}, 
       ],
-      DOWNLOADTYPES : "123,avi,bqy,doc,docx,dot,eps,exe,flv,gif,jpg,lwp,mas,mov,mp3,mp4,odp,ods,odt,otp,ots,ott,pdf,png,pot,pps,ppt,pptx,prz,rss,rtf,sh,stc,sti,stw,swf,sxc,sxi,sxw,tar,txt,wav,wma,wmv,xls,xlsx,xml,zip",
-      WAITTIME      : 3000,
+      DOWNLOADTYPES    : "123,avi,bqy,doc,docx,dot,eps,exe,flv,gif,jpg,lwp,mas,mov,mp3,mp4,odp,ods,odt,otp,ots,ott,pdf,png,pot,pps,ppt,pptx,prz,rss,rtf,sh,stc,sti,stw,swf,sxc,sxi,sxw,tar,txt,wav,wma,wmv,xls,xlsx,xml,zip",
+      WAITTIME         : 3000,
       TOPANCESTORLEVEL : 10,
       DOMAIN_WHITELIST : ".bluemix.net,.cognos.com,.ibm.biz,.ibm.co,.ibm.com,.ibmcloud.com,.ibmdw.net,.ibm-bluemix.github.io,.jazz.net,.lotuslive.com,.mybluemix.net,.securityintelligence.com,.servicemanagementcenter.com,.smartercitiescloud.com,.softlayer.com,.webdialogs.com,.xtify.com",
       DOMAIN_BLACKLIST : ".ibm.com,.mitre.org,.learnquest.com",

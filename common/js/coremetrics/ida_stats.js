@@ -1,7 +1,7 @@
 /**
  * Id         : /tm-v1.0/common/js/coremetrics/ida_stats.js
  * Scope      : All v18+ IBM pages
- * Version    : 2017.01.31.1242
+ * Version       : 2017.03.11.1724
  *
  * Script used to load Tag Management (Tealium) on IBM web pages 
  *
@@ -9,6 +9,7 @@
  *        https://github.ibm.com/tag-management/tm-v1.0.git
  *
  */
+window.scriptStartTime = window.scriptStartTime || window.performance.now();
 
 /*----------------------Ensure that old browsers don't break when referencing the console-----------------------*/
 if (!window.console) { window.console = {log: function(){}, error:function(){}, warn:function(){} }; }
