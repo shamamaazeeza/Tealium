@@ -1,7 +1,7 @@
 /**
  * Id         : /tm-v1.0/common/js/coremetrics/ida_sdk.js
  * Scope      : All v18+ IBM pages
- * Version    : 2017.03.17.1205
+ * Version    : 2017.03.17.1259
  *
  * Script used to load the Coremetrics SDK on IBM web pages 
  *
@@ -18,7 +18,7 @@ if (window.isIdaStatsLoaded) {
    throw new Error('ida_sdk.js: Another version of the SDK has been loaded.');
 }
 window.isIdaStatsLoaded = true;
-window.dlversion = '$Id:ida_sdk.js, $user:jleon@us.ibm.com, $version:2017.03.17.1205';
+window.dlversion = '$Id:ida_sdk.js, $user:jleon@us.ibm.com, $version:2017.03.17.1259';
 
 /* Get timestamps */
 window.scriptStartTime = window.scriptStartTime || window.performance.now();
@@ -2626,6 +2626,8 @@ var cm = {
             if (cm.data.a === "view") {
                /* Execute the Pageview Tag */
                e = "PageviewTag_";
+               /* 2017-03-17 - jleon !!!!!EXCEPTION!!!!: Just make sure we have the latest value for PageviewTag_pv_a47:procFlag */
+               cm.data['PageviewTag_pv_a47'] = digitalData.page.attribute.procFlag;
                /* Prepare attributes */
                cm.data.pv_a = cm.prepareAttr("pv_a", e, 50);
                cm.data.pv = cm.prepareAttr("pv", e, 15);
@@ -2787,6 +2789,9 @@ var cm = {
       /*--------------------Callback function for eluminate.js--------------------*/
       callBack : function () {
          try {
+            var eluminateEndTime = window.performance.now();
+            dl.log('+++DBDM-LOG > coremetrics > loaded: //libs.coremetrics.com/eluminate.js. Execution time: ' + Math.round(eluminateEndTime - eluminateStartTime) + 'ms');
+            digitalData.page.attribute.procFlag += "|E:" + Math.round(eluminateEndTime - eluminateStartTime);
             /* 2017-02-14 - jleon: Mask original functions for shop5/shop9 events */
             if (!window.purchaseMasked) {
                window.purchaseMasked = true;
@@ -2866,8 +2871,9 @@ var cm = {
                   dl.log('+++DBDM-LOG > coremetrics > exec: Initializing global client');
                   cm.initClient();
                   dl.log('+++DBDM-LOG > coremetrics > exec: Loading: ' + cm.data.base_url);
-                  cm.scriptLoaded = true;
+                  window.eluminateStartTime = window.performance.now();
                   dl.fn.loadScript(cm.data.base_url, "javascript", cm.callBack);
+                  cm.scriptLoaded = true;
                }
             }
          }
