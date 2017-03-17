@@ -151,6 +151,8 @@ try {
 
           if (u.data.a === "view") {
             e = "PageviewTag_";
+            /* 2017-03-17 - jleon !!!!!EXCEPTION!!!!: Just make sure we have the latest value for PageviewTag_pv_a47:procFlag */
+            u.data['PageviewTag_pv_a47'] = digitalData.page.attribute.procFlag;
             u.data.pv_a = u.concat_attr("pv_a", e, 50);
             u.data.pv = u.concat_attr("pv", e, 15);
             if (u.data["ManualPageviewTag_ul"]) {
