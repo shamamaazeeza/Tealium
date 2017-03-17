@@ -332,6 +332,10 @@ try {
 
         u.callBack = function () {
           var data = {};
+          /* 2017-03-17 - jleon: Add performance information for eluminate.js */
+          var eluminateEndTime = window.performance.now();
+          dl.log('+++DBDM-LOG > coremetrics > loaded: //libs.coremetrics.com/eluminate.js. Execution time: ' + Math.round(eluminateEndTime - eluminateStartTime) + 'ms');
+          digitalData.page.attribute.procFlag += "|E:" + Math.round(eluminateEndTime - eluminateStartTime);
           /***
            * 2017-02-14 - jleon: START - Mask original functions for shop5/shop9 events
            */
@@ -359,6 +363,9 @@ try {
           u.queue.push({"data": u.data, "b": b});
           if (!u.scriptrequested) {
             u.scriptrequested = true;
+            /* 2017-03-17 - jleon: Add performance information for eluminate.js */
+            dl.log('+++DBDM-LOG > coremetrics > exec: Loading: ' + cm.data.base_url);
+            window.eluminateStartTime = window.performance.now();
             u.loader({"type": "script", "src": u.data.base_url, "cb": u.callBack, "loc": "script", "id": 'tealium_cormetrics##UTID##'});
           }
         }
