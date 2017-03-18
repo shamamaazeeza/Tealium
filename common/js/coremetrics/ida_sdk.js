@@ -1,7 +1,7 @@
 /**
  * Id         : /tm-v1.0/common/js/coremetrics/ida_sdk.js
  * Scope      : All v18+ IBM pages
- * Version    : $Id: ida_sdk.js 18895 2017-03-18 18:39:32Z jleon@us.ibm.com $
+ * Version    : $Id: ida_sdk.js 18900 2017-03-18 19:21:50Z jleon@us.ibm.com $
  *
  * Script used to load the Coremetrics SDK on IBM web pages 
  *
@@ -18,7 +18,7 @@ if (window.isIdaStatsLoaded) {
    throw new Error('ida_sdk.js: Another version of the SDK has been loaded.');
 }
 window.isIdaStatsLoaded = true;
-window.dlversion = '$Id: ida_sdk.js 18895 2017-03-18 18:39:32Z jleon@us.ibm.com $';
+window.dlversion = '$Id: ida_sdk.js 18900 2017-03-18 19:21:50Z jleon@us.ibm.com $';
 
 /* Get timestamps */
 window.scriptStartTime = window.scriptStartTime || window.performance.now();
