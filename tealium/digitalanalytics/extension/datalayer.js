@@ -1447,7 +1447,7 @@ var dl = {
                         /* Stop listening for the dle_ready event */
                         jQuery2(document).off('dle_ready');
                         /* Initialize Data Layer */
-                        dl.log('+++DBDM-LOG > bindPageViewWithAnalytics > Initializing Data Layer.');
+                        dl.log('+++DBDM-LOG > createPageviewTagForSPA > Initializing Data Layer.');
                         window.scriptStartTime = window.performance.now();
                         dl.init(1);
                         /* Set referring URL to current page */
