@@ -2658,7 +2658,7 @@ var cm = {
                   for (f = 0; f < cm.data[e + "cm_re"].length; f++) {
                      var cmnew = new _cm("tid", "9");
                      cmnew.cm_re = cm.data[e + "cm_re"][f];
-                     cmnew.pi = cm.data[e + "pi"] || c1(cm.ci);
+                     cmnew.pi = cm.data[e + "pi"] || c1(cmnew.ci);
                      cmnew.st = cm_ClientTS;
                      cmnew.write(1);
                   }
