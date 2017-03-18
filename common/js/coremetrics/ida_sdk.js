@@ -1,7 +1,7 @@
 /**
  * Id         : /tm-v1.0/common/js/coremetrics/ida_sdk.js
  * Scope      : All v18+ IBM pages
- * Version    : $Id: ida_sdk.js 18893 2017-03-18 04:23:13Z jleon@us.ibm.com $
+ * Version    : $Id: ida_sdk.js 18895 2017-03-18 18:39:32Z jleon@us.ibm.com $
  *
  * Script used to load the Coremetrics SDK on IBM web pages 
  *
@@ -18,7 +18,7 @@ if (window.isIdaStatsLoaded) {
    throw new Error('ida_sdk.js: Another version of the SDK has been loaded.');
 }
 window.isIdaStatsLoaded = true;
-window.dlversion = '$Id: ida_sdk.js 18893 2017-03-18 04:23:13Z jleon@us.ibm.com $';
+window.dlversion = '$Id: ida_sdk.js 18895 2017-03-18 18:39:32Z jleon@us.ibm.com $';
 
 /* Get timestamps */
 window.scriptStartTime = window.scriptStartTime || window.performance.now();
@@ -2596,11 +2596,6 @@ var cm = {
                cm.data.ClientID = cm.data.TestClientID;
                cm.data.DataCollectionMethod = cm.data.TestDataCollectionMethod || false;
                cm.data.DataCollectionDomain = cm.data.TestDataCollectionDomain || "testdata.coremetrics.com";
-            }
-
-            /* Set the global client ID for Coremetrics */
-            if (cm.data.ClientID) {
-               cmSetClientID(cm.data.ClientID, cm.data.DataCollectionMethod, cm.data.DataCollectionDomain, cm.data.CookieDomain);
             }
 
             /* 2017-03-15 - jleon: Changed the condition so this only runs once per pageview */
