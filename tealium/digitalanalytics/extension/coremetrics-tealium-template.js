@@ -153,6 +153,7 @@ try {
             e = "PageviewTag_";
             /* 2017-03-17 - jleon !!!!!EXCEPTION!!!!: Just make sure we have the latest value for PageviewTag_pv_a47:procFlag */
             u.data['PageviewTag_pv_a47'] = digitalData.page.attribute.procFlag;
+            u.data['PageviewTag_pv_a17'] = digitalData.user.profile.auid;
             u.data.pv_a = u.concat_attr("pv_a", e, 50);
             u.data.pv = u.concat_attr("pv", e, 15);
             if (u.data["ManualPageviewTag_ul"]) {
@@ -364,7 +365,7 @@ try {
           if (!u.scriptrequested) {
             u.scriptrequested = true;
             /* 2017-03-17 - jleon: Add performance information for eluminate.js */
-            dl.log('+++DBDM-LOG > coremetrics > exec: Loading: ' + cm.data.base_url);
+            dl.log('+++DBDM-LOG > coremetrics > exec: Loading: ' + u.data.base_url);
             window.eluminateStartTime = window.performance.now();
             u.loader({"type": "script", "src": u.data.base_url, "cb": u.callBack, "loc": "script", "id": 'tealium_cormetrics##UTID##'});
           }

@@ -1,7 +1,7 @@
 /**
  * Id         : /tm-v1.0/common/js/coremetrics/ida_sdk.js
  * Scope      : All v18+ IBM pages
- * Version    : 2017.03.17.1259
+ * Version    : $Id: ida_sdk.js 18893 2017-03-18 04:23:13Z jleon@us.ibm.com $
  *
  * Script used to load the Coremetrics SDK on IBM web pages 
  *
@@ -18,7 +18,7 @@ if (window.isIdaStatsLoaded) {
    throw new Error('ida_sdk.js: Another version of the SDK has been loaded.');
 }
 window.isIdaStatsLoaded = true;
-window.dlversion = '$Id:ida_sdk.js, $user:jleon@us.ibm.com, $version:2017.03.17.1259';
+window.dlversion = '$Id: ida_sdk.js 18893 2017-03-18 04:23:13Z jleon@us.ibm.com $';
 
 /* Get timestamps */
 window.scriptStartTime = window.scriptStartTime || window.performance.now();
@@ -2628,6 +2628,7 @@ var cm = {
                e = "PageviewTag_";
                /* 2017-03-17 - jleon !!!!!EXCEPTION!!!!: Just make sure we have the latest value for PageviewTag_pv_a47:procFlag */
                cm.data['PageviewTag_pv_a47'] = digitalData.page.attribute.procFlag;
+               cm.data['PageviewTag_pv_a17'] = digitalData.user.profile.auid;
                /* Prepare attributes */
                cm.data.pv_a = cm.prepareAttr("pv_a", e, 50);
                cm.data.pv = cm.prepareAttr("pv", e, 15);
