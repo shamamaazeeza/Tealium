@@ -1539,7 +1539,7 @@ var dl = {
                   digitalData.page.pageInfo.ibm             = digitalData.page.pageInfo.ibm || {};
                   digitalData.page.pageInfo.ibm.siteID      = b["ddo.p.pi.ibm.siteID"]      || digitalData.page.pageInfo.ibm.siteID      || "IBMTESTWWW";
                   digitalData.page.pageInfo.ibm.country     = b["ddo.p.pi.ibm.country"]     || digitalData.page.pageInfo.ibm.country     || "";
-                  digital.Datapage.pageInfo.ibm.industry    = b["ddo.p.pi.ibm.industry"]    || digital.Datapage.pageInfo.ibm.industry    || "";
+                  digitalData.page.pageInfo.ibm.industry    = b["ddo.p.pi.ibm.industry"]    || digitalData.page.pageInfo.ibm.industry    || "";
                   digitalData.page.pageInfo.ibm.owner       = b["ddo.p.pi.ibm.owner"]       || digitalData.page.pageInfo.ibm.owner       || "";
                   digitalData.page.pageInfo.ibm.purpose     = b["ddo.p.pi.ibm.purpose"]     || digitalData.page.pageInfo.ibm.purpose     || "";
                   /* Global Brand Table values */
