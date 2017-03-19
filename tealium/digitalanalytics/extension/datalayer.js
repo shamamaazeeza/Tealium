@@ -1534,20 +1534,20 @@ var dl = {
             try {
                if (typeof(b) !== "undefined" && typeof(utag2) !== "undefined") {
                   /* Site ID and other values */
-                  digitalData.page.category.primaryCategory = b["ddo.p.c.primaryCategory"]  || digitalData.page.category.primaryCategory || "";
                   digitalData.page.pageInfo.language        = b["ddo.p.pi.language"]        || digitalData.page.pageInfo.language        || "";
                   digitalData.page.pageInfo.ibm             = digitalData.page.pageInfo.ibm || {};
                   digitalData.page.pageInfo.ibm.siteID      = b["ddo.p.pi.ibm.siteID"]      || digitalData.page.pageInfo.ibm.siteID      || "IBMTESTWWW";
                   digitalData.page.pageInfo.ibm.country     = b["ddo.p.pi.ibm.country"]     || digitalData.page.pageInfo.ibm.country     || "";
                   digitalData.page.pageInfo.ibm.industry    = b["ddo.p.pi.ibm.industry"]    || digitalData.page.pageInfo.ibm.industry    || "";
                   digitalData.page.pageInfo.ibm.owner       = b["ddo.p.pi.ibm.owner"]       || digitalData.page.pageInfo.ibm.owner       || "";
-                  digitalData.page.pageInfo.ibm.purpose     = b["ddo.p.pi.ibm.purpose"]     || digitalData.page.pageInfo.ibm.purpose     || "";
                   /* Global Brand Table values */
+                  digitalData.page.category.primaryCategory         = b["ddo.p.c.primaryCategory"]         || digitalData.page.category.primaryCategory         || "";
                   digitalData.page.category.ibm                     = digitalData.page.category.ibm        || {};
                   digitalData.page.category.ibm.globalBrandTableL10 = b["ddo.p.c.ibm.globalBrandTableL10"] || digitalData.page.category.ibm.globalBrandTableL10 || "";
                   digitalData.page.category.ibm.globalBrandTableL17 = b["ddo.p.c.ibm.globalBrandTableL17"] || digitalData.page.category.ibm.globalBrandTableL17 || "";
                   digitalData.page.category.ibm.globalBrandTableL20 = b["ddo.p.c.ibm.globalBrandTableL20"] || digitalData.page.category.ibm.globalBrandTableL20 || "";
                   digitalData.page.category.ibm.globalBrandTableL30 = b["ddo.p.c.ibm.globalBrandTableL30"] || digitalData.page.category.ibm.globalBrandTableL30 || "";
+                  digitalData.page.category.ibm.purpose             = b["ddo.p.c.ibm.purpose"]             || digitalData.page.category.ibm.purpose             || "";
                   /* Page Services values */
                   digitalData.page.pageInfo.convertro.enabled    = b["ddo.p.pi.convertro.enabled"]    || digitalData.page.pageInfo.convertro.enabled    || "false";
                   digitalData.page.pageInfo.hotjar.enabled       = b["ddo.p.pi.hotjar.enabled"]       || digitalData.page.pageInfo.hotjar.enabled       || "false";
