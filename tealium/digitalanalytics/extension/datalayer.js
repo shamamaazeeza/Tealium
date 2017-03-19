@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.03.17.1205
+ * Version       : 2017.03.19.0033
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -13,7 +13,7 @@
  *        
  */
 var tmeid="datalayer.js";
-window.dlversion = '$Id:datalayer.js, $user:jleon@us.ibm.com, $version:2017.03.17.1205';
+window.dlversion = '$Id:datalayer.js, $user:jleon@us.ibm.com, $version:2017.03.19.0033';
 
 /*--------------------Initialize all Digital Data Objects--------------------*/
 var dl = {
@@ -1533,21 +1533,29 @@ var dl = {
          refreshFromUDO : function (b) {
             try {
                if (typeof(b) !== "undefined" && typeof(utag2) !== "undefined") {
-                  /* Site ID values */
-                  digitalData.page.pageInfo.ibm.siteID = b["ddo.p.pi.ibm.siteID"] || digitalData.page.pageInfo.ibm.siteID || "IBMTESTWWW";
-                  digitalData.page.category.primaryCategory = b["ddo.p.c.primaryCategory"] || digitalData.page.category.primaryCategory || "";
+                  /* Site ID and other values */
+                  digitalData.page.category.primaryCategory = b["ddo.p.c.primaryCategory"]  || digitalData.page.category.primaryCategory || "";
+                  digitalData.page.pageInfo.language        = b["ddo.p.pi.language"]        || digitalData.page.pageInfo.language        || "";
+                  digitalData.page.pageInfo.ibm             = digitalData.page.pageInfo.ibm || {};
+                  digitalData.page.pageInfo.ibm.siteID      = b["ddo.p.pi.ibm.siteID"]      || digitalData.page.pageInfo.ibm.siteID      || "IBMTESTWWW";
+                  digitalData.page.pageInfo.ibm.country     = b["ddo.p.pi.ibm.country"]     || digitalData.page.pageInfo.ibm.country     || "";
+                  digital.Datapage.pageInfo.ibm.industry    = b["ddo.p.pi.ibm.industry"]    || digital.Datapage.pageInfo.ibm.industry    || "";
+                  digitalData.page.pageInfo.ibm.owner       = b["ddo.p.pi.ibm.owner"]       || digitalData.page.pageInfo.ibm.owner       || "";
+                  digitalData.page.pageInfo.ibm.purpose     = b["ddo.p.pi.ibm.purpose"]     || digitalData.page.pageInfo.ibm.purpose     || "";
                   /* Global Brand Table values */
-                  digitalData.page.category.ibm = digitalData.page.category.ibm || {};
+                  digitalData.page.category.ibm                     = digitalData.page.category.ibm        || {};
                   digitalData.page.category.ibm.globalBrandTableL10 = b["ddo.p.c.ibm.globalBrandTableL10"] || digitalData.page.category.ibm.globalBrandTableL10 || "";
                   digitalData.page.category.ibm.globalBrandTableL17 = b["ddo.p.c.ibm.globalBrandTableL17"] || digitalData.page.category.ibm.globalBrandTableL17 || "";
                   digitalData.page.category.ibm.globalBrandTableL20 = b["ddo.p.c.ibm.globalBrandTableL20"] || digitalData.page.category.ibm.globalBrandTableL20 || "";
                   digitalData.page.category.ibm.globalBrandTableL30 = b["ddo.p.c.ibm.globalBrandTableL30"] || digitalData.page.category.ibm.globalBrandTableL30 || "";
                   /* Page Services values */
-                  digitalData.page.pageInfo.convertro.enabled = b["ddo.p.pi.convertro.enabled"] || digitalData.page.pageInfo.convertro.enabled || "false";
-                  digitalData.page.pageInfo.hotjar.enabled = b["ddo.p.pi.hotjar.enabled"] || digitalData.page.pageInfo.hotjar.enabled || "false";
-                  digitalData.page.pageInfo.optimizely.enabled = b["ddo.p.pi.optimizely.enabled"] || digitalData.page.pageInfo.optimizely.enabled || "false";
+                  digitalData.page.pageInfo.convertro.enabled    = b["ddo.p.pi.convertro.enabled"]    || digitalData.page.pageInfo.convertro.enabled    || "false";
+                  digitalData.page.pageInfo.hotjar.enabled       = b["ddo.p.pi.hotjar.enabled"]       || digitalData.page.pageInfo.hotjar.enabled       || "false";
+                  digitalData.page.pageInfo.optimizely.enabled   = b["ddo.p.pi.optimizely.enabled"]   || digitalData.page.pageInfo.optimizely.enabled   || "false";
                   digitalData.page.pageInfo.optimizely.projectID = b["ddo.p.pi.optimizely.projectID"] || digitalData.page.pageInfo.optimizely.projectID || "";
-
+                 
+                  /* Update the CM client ID */
+                  dl.fn.setClientID();
                }
             }
             catch (error) {

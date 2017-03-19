@@ -3,7 +3,7 @@
  * Extension Name: coremetrics-custom-data-mappings.js
  * Scope         : Coremetrics Global ID
  * Execution     : N/A
- * Version       : 2017.03.11.1724
+ * Version       : 2017.03.19.0033
  *
  * This script creates a calls the init function of the datalayer to initiate it
  * 
@@ -15,7 +15,7 @@ var tmeid = "coremetrics-custom-data-mappings.js";
 try {
    /* setting Client ID */
    if (b["ddo.p.pi.coremetrics.clientID"] !== digitalData.page.pageInfo.coremetrics.clientID || b["ddo.p.pi.ibm.siteID"] !== digitalData.page.pageInfo.ibm.siteID) {
-      datalayer.util.setClientID();
+      dl.fn.refreshFromUDO(b)
       b["ddo.p.pi.coremetrics.clientID"] = digitalData.page.pageInfo.coremetrics.clientID;
    }
    
