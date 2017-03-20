@@ -336,6 +336,12 @@ try {
           /* 2017-03-17 - jleon: Add performance information for eluminate.js */
           var eluminateEndTime = window.performance.now();
           dl.log('+++DBDM-LOG > coremetrics > loaded: //libs.coremetrics.com/eluminate.js. Execution time: ' + Math.round(eluminateEndTime - eluminateStartTime) + 'ms');
+          /* Ensure that the digitalData Object has not been reset by the page */
+          if (typeof(digitalData.page.isDataLayerReady) === "undefined") {
+             dl.init(0);
+             digitalData.page.isDataLayerReady = true;
+             dl.log('+++DBDM-WARNING > coremetrics > callBack: digitalData was reset, recreating datalayer');
+          }
           digitalData.page.attribute.procFlag += "|E:" + Math.round(eluminateEndTime - eluminateStartTime);
           /***
            * 2017-02-14 - jleon: START - Mask original functions for shop5/shop9 events

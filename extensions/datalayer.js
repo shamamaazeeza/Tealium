@@ -1434,8 +1434,9 @@ var dl = {
                   ibmStats.event = function (obj) {
                      /* Ensure that the digitalData Object has not been reset by the page */
                      if (typeof(digitalData.page.isDataLayerReady) === "undefined") {
-                        dl.update();
-                        dl.log('+++DBDM-WARNING > marketing-events.js: digitalData was reset, recreating datalayer');
+                        dl.init(0);
+                        digitalData.page.isDataLayerReady = true;
+                        dl.log('+++DBDM-WARNING > ibmStatsEventInit: digitalData was reset, recreating datalayer');
                      }
                      dl.fn.ibmStatsEventHandler(obj);
                   };
