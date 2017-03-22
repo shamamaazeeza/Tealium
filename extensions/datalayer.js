@@ -1151,7 +1151,7 @@ var dl = {
                            break;
                         }
                         el = el.parentElement || el.parentNode;
-                     } while ((el !== null) && (el.parentElement || el.parentNode)); 
+                     } while ((el !== null) && (el.parentElement || el.parentNode));
                      **************************************/
 
                      /* Clicked on non-White-Space Link, continue. */
@@ -1476,21 +1476,41 @@ var dl = {
          },
 
          /*--------------------Function to load remote scripts --------------------*/
-         loadScript : function (script,type, callback) {
+         loadScript : function (script,type,callback) {
             try {
                var b = document,
                c = type || 'javascript',
-               d = b.createElement('script');
-               var loadScriptStartTime = window.performance.now();
+               d = b.createElement('script'),
+               loadScriptStartTime = window.performance.now();
 
                d.src = script;
                d.type = 'application/' + c;
                d.async = true;
                a = b.getElementsByTagName('script')[0];
+               
+               dl.log('+++DBDM-LOG > loadScript: Loading: ' + d.src);
                a.parentNode.insertBefore(d,a);
-               d.onload = callback || function () {
+               d.onload = function () {
                   var loadScriptEndTime = window.performance.now();   
-                  dl.log('+++DBDM-LOG > Script loaded (Load time: ' + Math.round(loadScriptEndTime - loadScriptStartTime) + 'ms): ' + d.src);
+                  /* Ensure that the digitalData Object has not been reset by the page */
+                  if (typeof(digitalData.page.isDataLayerReady) === "undefined") {
+                     dl.init(0);
+                     digitalData.page.isDataLayerReady = true;
+                     dl.log('+++DBDM-LOG > loadScript: digitalData was reset, recreating datalayer');
+                  }
+                  dl.log('+++DBDM-LOG > loadScript: Script loaded: ' + d.src + ' (Load time: ' + Math.round(loadScriptEndTime - loadScriptStartTime) + 'ms)');
+                  /* if coremetrics or demandbase, register loadtimes to procFlag */
+                  if (d.src.indexOf("eluminate.js") > -1) {
+                     digitalData.page.attribute.procFlag += "|E:" + Math.round(loadScriptEndTime - loadScriptStartTime);
+                  }
+                  else if (d.src.indexOf("demandbase") > -1) {
+                     digitalData.page.attribute.procFlag += "|D:" + Math.round(loadScriptEndTime - loadScriptStartTime);
+                  }
+                  /* See if there is callback function and call it */
+                  if (typeof(callback) === "function") {
+                     dl.log('+++DBDM-LOG > loadScript: Executing callback function...');
+                     callback.call();
+                  }
                }
             }
             catch (error) {
