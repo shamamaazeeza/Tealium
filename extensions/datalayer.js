@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.03.19.0033
+ * Version       : 2017.03.21.1441
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -13,7 +13,7 @@
  *        
  */
 var tmeid="datalayer.js";
-window.dlversion = '$Id:datalayer.js, $user:jleon@us.ibm.com, $version:2017.03.19.0033';
+window.dlversion = '$Id:datalayer.js, $user:jleon@us.ibm.com, $version:2017.03.21.1441';
 
 /*--------------------Initialize all Digital Data Objects--------------------*/
 var dl = {
@@ -1141,6 +1141,8 @@ var dl = {
                   /* Continue only if node is wither 'A' or 'BUTTON' */
                   if (link_node === "a" || link_node === "button") {
                      /* Make sure that Masthead and Footer links are excluded */
+                     /* 2017-03-21 jleon: Disabling code to exclude masthead and footer events */
+                     /**************************************
                      var el = link_obj;
                      do {
                         if (el.id == "ibm-masthead" || el.id == "ibm-footer" || el.id == "ibm-footer-module" || el.className == "ibm-mobilemenu" 
@@ -1149,7 +1151,8 @@ var dl = {
                            break;
                         }
                         el = el.parentElement || el.parentNode;
-                     } while ((el !== null) && (el.parentElement || el.parentNode));
+                     } while ((el !== null) && (el.parentElement || el.parentNode)); 
+                     **************************************/
 
                      /* Clicked on non-White-Space Link, continue. */
                      if (nonWhiteSpaceLink) {
