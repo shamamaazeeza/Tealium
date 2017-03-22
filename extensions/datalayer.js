@@ -995,6 +995,65 @@ var dl = {
                dl.log('+++DBDM-ERROR > getAnonymousID: ' + error);
             }
          },
+         
+         /*--------------------Getting the VCPI information from URL--------------------*/
+         getVCPI: function () {
+            try {
+		   if (typeof(Storage) !== 'undefined') {
+		      var fnStartTime = window.performance.now();
+				  
+		      if (sessionStorage.getItem('cm_mmc') && sessionStorage.getItem('cm_mmc') !== 'undefined') {
+			   /* Get execution time in milliseconds */
+                     var fnEndTime = window.performance.now();
+                     dl.log('+++DBDM-LOG > getVCPI > Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms');
+			}
+			else {
+			   /* Get the URL */
+	               var fullURL = window.location.href;	
+			   /* Parse URL to get the querystrings */
+			   var qs = "";
+			   if (fullURL !== "") {
+			      qs = dl.fn.parseQueryString(fullURL);
+			   }
+                     
+                     var vcpiCount = 0;					 
+			   for (var k in qs) {				
+			      if (qs[k] !== null && qs.hasOwnProperty(k)) {
+				   sessionStorage.setItem(k, k+'='+qs[k]);	
+				   dl.log('+++DBDM-LOG > getVCPI > Sessionstorage item set: ' + sessionStorage.getItem(k));
+						   
+				   /* Get individual mmc values */
+				   if (k.toLowerCase() === 'cm_mmc'){
+				      var attrs = qs[k].split("-_-");
+					if (attrs.length === 4) {
+					   if (attrs[0] !== "") sessionStorage.setItem('Vendor', 'Vendor=' + attrs[0]);                              
+					   if (attrs[1] !== "") sessionStorage.setItem('Category', 'Category=' + attrs[1]);                              
+					   if (attrs[2] !== "") sessionStorage.setItem('Placement', 'Placement=' + attrs[2]);                              
+					   if (attrs[3] !== "") sessionStorage.setItem('Item', 'Item=' + attrs[3]);                
+				   	   vcpiCount += 1;
+	                           dl.log('+++DBDM-LOG > getVCPI > Sessionstorage item set: ' + sessionStorage.getItem('Vendor')+", "+sessionStorage.getItem('Category')+", "+sessionStorage.getItem('Placement')+", "+sessionStorage.getItem('Item')); 														 
+			  	      }  
+				   }
+				}			 
+			   }	
+                    
+                     if (vcpiCount <= 0) {
+                        dl.log('+++DBDM-LOG > getVCPI > VCPI value not present on this page');					                         
+                     }
+					 
+			   /* Get execution time in milliseconds */
+                     var fnEndTime = window.performance.now();
+                     dl.log('+++DBDM-LOG > getVCPI > Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms');
+			}
+               }
+		   else {
+                  dl.log('+++DBDM-LOG > getVCPI > Browser does not support Web Storage');
+               }
+            }
+            catch (error) {
+               dl.log('+++DBDM-ERROR > getVCPI: ' + error);
+            }
+         },
 
          /*--------------------Function to send datalayer_ready event ---------------------*/
          sendDatalayerReadyEvent: function (wt) {
@@ -1680,6 +1739,9 @@ var dl = {
 
             /*--------------------get anonymous ID from Bluemix--------------------*/
             this.fn.getAnonymousID(2000);
+            
+            /*--------------------Get the VCPI information from URL--------------------*/
+		this.fn.getVCPI();
 
             /*--------------------Get Mobile OS for User Agent--------------------*/
             digitalData.page.attribute.agentMobileOS = this.fn.getMobileOperatingSystem();
