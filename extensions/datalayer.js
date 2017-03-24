@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.03.21.1441
+ * Version       : 2017.03.24.0813
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -13,7 +13,7 @@
  *        
  */
 var tmeid="datalayer.js";
-window.dlversion = '$Id:datalayer.js, $user:jleon@us.ibm.com, $version:2017.03.21.1441';
+window.dlversion = '$Id:datalayer.js, $user:jleon@us.ibm.com, $version:2017.03.24.0813';
 
 /*--------------------Initialize all Digital Data Objects--------------------*/
 var dl = {
@@ -22,7 +22,7 @@ var dl = {
          /* Registration Forms - IWM */
          {"pathNameSubstring": "/marketing/iwm/",               "qsParameter" : ["S_PKG","source"]},
          /* Registration Forms - IBMid */
-         {"pathNameSubstring": "/account/us-en/signup",         "qsParameter" : ["a","catalogName","partNumber","pkg","quantity","source","trial"]},
+         {"pathNameSubstring": "/account/us-en/signup/register.html", "qsParameter" : ["a","catalogName","partNumber","pkg","quantity","source","trial"]},
          /* Enterprise Search */
          {"pathNameSubstring": "/search/",                      "qsParameter" : ["cc","hpp","lang","o","q"]},
          /* MAM */
