@@ -3,7 +3,7 @@
  * Extension Name: jquery-init.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.03.11.1724
+ * Version       : 2017.03.26.2051
  *
  * This script creates a calls the init function of the datalayer to initiate it
  *
@@ -13,6 +13,9 @@
  */
 var tmeid = "jquery-init.js";
 window.scriptStartTime = window.scriptStartTime || window.performance.now();
+
+/* if this variable is set to true, then we need to don't issue the default pageview, we assume page will send the createPageviewForSPA */
+window.idaPageIsSPA = window.idaPageIsSPA || false;
 
 if (typeof(jQuery) !== "undefined" && typeof(jQuery.fn) !== "undefined" && typeof(jQuery.fn.on) !== "undefined") {
    /* Create variables for jQuery version and support for .on() function */

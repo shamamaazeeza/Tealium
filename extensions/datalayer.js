@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.03.24.0813
+ * Version       : 2017.03.26.2051
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -13,11 +13,12 @@
  *        
  */
 var tmeid="datalayer.js";
-window.dlversion = '$Id:datalayer.js, $user:jleon@us.ibm.com, $version:2017.03.24.0813';
+window.dlversion = '$Id:datalayer.js, $user:jleon@us.ibm.com, $version:2017.03.26.2051';
 
 /*--------------------Initialize all Digital Data Objects--------------------*/
 var dl = {
-      version : dlversion,
+      version          : dlversion,
+      initialPageview  : false,
       PAGEIDQUERYSTRINGSDEFAULT : [
          /* Registration Forms - IWM */
          {"pathNameSubstring": "/marketing/iwm/",               "qsParameter" : ["S_PKG","source"]},
@@ -999,54 +1000,54 @@ var dl = {
          /*--------------------Getting the VCPI information from URL--------------------*/
          getVCPI: function () {
             try {
-		   if (typeof(Storage) !== 'undefined') {
-		      var fnStartTime = window.performance.now();
-				  
-		      if (sessionStorage.getItem('cm_mmc') && sessionStorage.getItem('cm_mmc') !== 'undefined') {
-			   /* Get execution time in milliseconds */
+               if (typeof(Storage) !== 'undefined') {
+                  var fnStartTime = window.performance.now();
+
+                  if (sessionStorage.getItem('cm_mmc') && sessionStorage.getItem('cm_mmc') !== 'undefined') {
+                     /* Get execution time in milliseconds */
                      var fnEndTime = window.performance.now();
                      dl.log('+++DBDM-LOG > getVCPI > Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms');
-			}
-			else {
-			   /* Get the URL */
-	               var fullURL = window.location.href;	
-			   /* Parse URL to get the querystrings */
-			   var qs = "";
-			   if (fullURL !== "") {
-			      qs = dl.fn.parseQueryString(fullURL);
-			   }
-                     
+                  }
+                  else {
+                     /* Get the URL */
+                     var fullURL = window.location.href;	
+                     /* Parse URL to get the querystrings */
+                     var qs = "";
+                     if (fullURL !== "") {
+                        qs = dl.fn.parseQueryString(fullURL);
+                     }
+
                      var vcpiCount = 0;					 
-			   for (var k in qs) {				
-			      if (qs[k] !== null && qs.hasOwnProperty(k)) {
-				   sessionStorage.setItem(k, k+'='+qs[k]);	
-				   dl.log('+++DBDM-LOG > getVCPI > Sessionstorage item set: ' + sessionStorage.getItem(k));
-						   
-				   /* Get individual mmc values */
-				   if (k.toLowerCase() === 'cm_mmc'){
-				      var attrs = qs[k].split("-_-");
-					if (attrs.length === 4) {
-					   if (attrs[0] !== "") sessionStorage.setItem('Vendor', 'Vendor=' + attrs[0]);                              
-					   if (attrs[1] !== "") sessionStorage.setItem('Category', 'Category=' + attrs[1]);                              
-					   if (attrs[2] !== "") sessionStorage.setItem('Placement', 'Placement=' + attrs[2]);                              
-					   if (attrs[3] !== "") sessionStorage.setItem('Item', 'Item=' + attrs[3]);                
-				   	   vcpiCount += 1;
-	                           dl.log('+++DBDM-LOG > getVCPI > Sessionstorage item set: ' + sessionStorage.getItem('Vendor')+", "+sessionStorage.getItem('Category')+", "+sessionStorage.getItem('Placement')+", "+sessionStorage.getItem('Item')); 														 
-			  	      }  
-				   }
-				}			 
-			   }	
-                    
+                     for (var k in qs) {				
+                        if (qs[k] !== null && qs.hasOwnProperty(k)) {
+                           sessionStorage.setItem(k, k+'='+qs[k]);	
+                           dl.log('+++DBDM-LOG > getVCPI > Sessionstorage item set: ' + sessionStorage.getItem(k));
+
+                           /* Get individual mmc values */
+                           if (k.toLowerCase() === 'cm_mmc'){
+                              var attrs = qs[k].split("-_-");
+                              if (attrs.length === 4) {
+                                 if (attrs[0] !== "") sessionStorage.setItem('Vendor', 'Vendor=' + attrs[0]);                              
+                                 if (attrs[1] !== "") sessionStorage.setItem('Category', 'Category=' + attrs[1]);                              
+                                 if (attrs[2] !== "") sessionStorage.setItem('Placement', 'Placement=' + attrs[2]);                              
+                                 if (attrs[3] !== "") sessionStorage.setItem('Item', 'Item=' + attrs[3]);                
+                                 vcpiCount += 1;
+                                 dl.log('+++DBDM-LOG > getVCPI > Sessionstorage item set: ' + sessionStorage.getItem('Vendor')+", "+sessionStorage.getItem('Category')+", "+sessionStorage.getItem('Placement')+", "+sessionStorage.getItem('Item')); 														 
+                              }  
+                           }
+                        }			 
+                     }	
+
                      if (vcpiCount <= 0) {
                         dl.log('+++DBDM-LOG > getVCPI > VCPI value not present on this page');					                         
                      }
-					 
-			   /* Get execution time in milliseconds */
+
+                     /* Get execution time in milliseconds */
                      var fnEndTime = window.performance.now();
                      dl.log('+++DBDM-LOG > getVCPI > Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms');
-			}
+                  }
                }
-		   else {
+               else {
                   dl.log('+++DBDM-LOG > getVCPI > Browser does not support Web Storage');
                }
             }
@@ -1055,18 +1056,18 @@ var dl = {
             }
          },
 
-         /*--------------------Function to send datalayer_ready event ---------------------*/
+         /*--------------------Function to send ddo_ready event ---------------------*/
          sendDatalayerReadyEvent: function (wt) {
             try {
                var waittime = wt || dl.WAITTIME;
 
                /* Trigger Event for digitalData Object Ready */
-               dl.log('+++DBDM-LOG > sendDatalayerReadyEvent > Triggering ddo_ready event!');
+               dl.log('+++DBDM-LOG > sendDatalayerReadyEvent: Triggering ddo_ready event!');
                jQuery2(document).trigger('ddo_ready');
 
                if (typeof(utag2) !== "undefined" && utag2.dleReady) {
                   /* Continue finishing setting up data layer */
-                  dl.log('+++DBDM-LOG > sendDatalayerReadyEvent > dle_ready event was already triggered!');
+                  dl.log('+++DBDM-LOG > sendDatalayerReadyEvent: dle_ready event was already triggered!');
                   dl.fn.finalizeDataLayer();
                }
                else {
@@ -1077,7 +1078,7 @@ var dl = {
                         jQuery2(document).off('dle_ready');
                      }
                      /* Continue finishing setting up data layer */
-                     dl.log('+++DBDM-LOG > sendDatalayerReadyEvent > Timed out waiting for dle_ready event!');
+                     dl.log('+++DBDM-LOG > sendDatalayerReadyEvent: Timed out waiting for dle_ready event!');
                      dl.fn.finalizeDataLayer();
                   }, waittime);
 
@@ -1087,7 +1088,7 @@ var dl = {
                         /* Clear timeout since it returned in time. */
                         clearTimeout(dleTimeout);
                         /* Continue finishing setting up data layer */
-                        dl.log('+++DBDM-LOG > sendDatalayerReadyEvent > dle_ready event captured!');
+                        dl.log('+++DBDM-LOG > sendDatalayerReadyEvent: dle_ready event captured!');
                         if (typeof(utag2.full_dle_id) !== "undefined") {
                            digitalData.page.pageInfo.dleURL = "https://tags.tiqcdn.com/dle/ibm/web/" + utag2.full_dle_id + ".js";
                            dl.log('+++DBDM-LOG > sendDatalayerReadyEvent > DLE File: ' + digitalData.page.pageInfo.dleURL);
@@ -1503,34 +1504,67 @@ var dl = {
                      dl.fn.ibmStatsEventHandler(obj);
                   };
                }
+            }
+            catch (error) {
+               dl.log('+++DBDM-ERROR > ibmStatsEventInit: ' + error);
+            }
+         },
+
+         /*--------------------Function to handle the ibmStats.event call --------------------*/
+         createPageviewTagForSPAInit: function () {
+            try {
                if (typeof(createPageviewTagForSPA) === "undefined" || (typeof(createPageviewTagForSPA) === "function" && createPageviewTagForSPA.isGhost)) {
-                  /*-------------------- Ajax function to bind page view tag -----------------------------*/
-                  window.createPageviewTagForSPA = function() {
-                     if (typeof(utag) !== "undefined" && window.pageviewSPA) {
-                        /* Stop listening for the dle_ready event */
-                        jQuery2(document).off('dle_ready');
-                        /* Initialize Data Layer */
-                        dl.log('+++DBDM-LOG > createPageviewTagForSPA > Initializing Data Layer.');
-                        window.scriptStartTime = window.performance.now();
-                        dl.init(1);
-                        /* Set referring URL to current page */
-                        dl.fn.setReferringURL(window.referrerSPA);
+                  /**
+                   * createPageviewTagForSPA, a.k.a. bindPageViewWithAnalytics
+                   * This function is provided to adopters with Single Page Applications to
+                   * create a virtual pageview event.
+                   */
+                  window.createPageviewTagForSPA = function () {
+                     if (!dl.initialPageviewIssued && !window.pageviewSPA) {
+                        dl.initialPageviewIssued = window.pageviewSPA = true;
+                        /* Reinitialize Data Layer, to re-read all variabled for possible updates */
+                        dl.log('+++DBDM-LOG > createPageviewTagForSPA > Initializing Data Layer for initial pageview.');
+                        dl.init(0);
+
                         /* Save the current URL for SPAs */
                         window.referrerSPA = digitalData.page.pageInfo.destinationURL;
-                        /* Send jQuery event for ddo_ready */ 
+                        /************************* SEND PAGEVIEW **********************************/
+                        dl.log('+++DBDM-LOG > createPageviewTagForSPA: Sending initial pageview tag to Coremetrics');
+                        /* Send jQuery event for ddo_ready */
                         dl.fn.sendDatalayerReadyEvent();
+                        dl.log('+++DBDM-LOG: Defining ibmStats.event()');
+                        dl.fn.ibmStatsEventInit();
                      }
                      else {
-                        /* Do not run pageview twice for SPAs */
-                        window.pageviewSPA = true;
+                        if (window.pageviewSPA) {
+                           window.scriptStartTime = window.performance.now();
+                           /* Reinitialize Data Layer, to re-read all variabled for possible updates */
+                           dl.log('+++DBDM-LOG > createPageviewTagForSPA > Initializing Data Layer for virtual pageview.');
+                           dl.init(1);
+
+                           /* Set referring URL to current page */
+                           dl.fn.setReferringURL(window.referrerSPA);
+                           /* Save the current URL for SPAs */
+                           window.referrerSPA = digitalData.page.pageInfo.destinationURL;
+                           /************************* SEND PAGEVIEW **********************************/
+                           dl.log('+++DBDM-LOG > createPageviewTagForSPA: Sending virtual pageview tag to Coremetrics');
+                           /* Stop listening for the dle_ready event */
+                           jQuery2(document).off('dle_ready');
+                           /* Send jQuery event for ddo_ready */
+                           dl.fn.sendDatalayerReadyEvent();
+                        }
+                        else {
+                           /* Do not run pageview twice for SPAs */
+                           dl.log('+++DBDM-LOG > createPageviewTagForSPA: Ignoring call as the initial pageview has been sent.');
+                           window.pageviewSPA = true;
+                        }
                      }
                   }
                   /* Support legacy calls to bindPageViewWithAnalytics */
                   window.bindPageViewWithAnalytics = window.createPageviewTagForSPA;
                }
-            }
-            catch (error) {
-               dl.log('+++DBDM-ERROR > ibmStatsEventInit: ' + error);
+            } catch (error) {
+               dl.log('+++DBDM-ERROR > createPageviewTagForSPAInit: ' + error);
             }
          },
 
@@ -1650,29 +1684,27 @@ var dl = {
          finalizeDataLayer : function () {
             try {
                if (typeof(utag) !== "undefined" && typeof(utag.data) !== "undefined") {
-                  dl.log("+++DBDM-LOG > finalizeDataLayer > Tealium Version: [" + utag.data["ut.version"] + "] - Environment: [" + utag.data["ut.env"] + "]");
+                  dl.log("+++DBDM-LOG > finalizeDataLayer: Tealium Version: [" + utag.data["ut.version"] + "] - Environment: [" + utag.data["ut.env"] + "]");
                }
                if (!digitalData.page.isDataLayerReady) {
+                  digitalData.page.isDataLayerReady = true;
+
                   /* setting Client ID */
                   dl.fn.setClientID();
-
                   /* Update Cookies */
                   dl.fn.readCookies();
 
-                  /* Initialize ibmStats.event */
-                  dl.log('+++DBDM-LOG > finalizeDataLayer > Defining ibmStats.event()');
-                  dl.fn.ibmStatsEventInit();
+                  if (!window.pageviewSPA) {
+                     /* Initialize ibmStats.event */
+                     dl.log('+++DBDM-LOG > finalizeDataLayer: Defining createPageviewTagForSPA()');
+                     dl.fn.createPageviewTagForSPAInit();
 
-                  /* Set Data Layer Ready and trigger Event */
-                  digitalData.page.isDataLayerReady = true;
+                     dl.log('+++DBDM-LOG > finalizeDataLayer: Defining ibmStats.event()');
+                     dl.fn.ibmStatsEventInit();
 
-                  if (typeof(jQuery2) !== "undefined") {
                      /* Trigger Event for Data Layer Ready */
-                     dl.log('+++DBDM-LOG > finalizeDataLayer > Triggering datalayer_ready event!');
+                     dl.log('+++DBDM-LOG > finalizeDataLayer: Triggering datalayer_ready event!');
                      jQuery2(document).trigger('datalayer_ready');
-                  }
-                  else {
-                     dl.log('+++DBDM-LOG > datalayer_ready event was not triggered');
                   }
                }
             }
@@ -1836,28 +1868,45 @@ var dl = {
    datalayer.util = dl.fn;
 
    try {
-      /* Initialize Data Layer */
-      dl.log('+++DBDM-LOG > datalayer.js > Initializing Data Layer.');
-      dl.init();
-
       if (window.jQueryNativeVersion) {
          dl.log('+++DBDM-LOG > datalayer.js > Using native jQuery version: ' + window.jQueryNativeVersion);
-         digitalData.page.attribute.jQueryNativeVersion = window.jQueryNativeVersion;
       }
       else {
          dl.log('+++DBDM-LOG > datalayer.js > Using embedded jQuery version: ' + jQuery2.fn.jquery);
       }
 
+      /* Initialize Data Layer */
+      dl.log('+++DBDM-LOG > datalayer.js > Initializing Data Layer.');
+      dl.init();
+
       /* Save the current URL for SPAs and don't run pageview twice */
       window.referrerSPA = digitalData.page.pageInfo.destinationURL;
       window.pageviewSPA = false;
 
+      /* Set listener for clicks on hyperlinks and buttons on DOM ready */
+      jQuery2(document).ready(function() {
+         jQuery2('body').on('click', 'a,button', function (e) {
+            dl.fn.pageClickEventHandler(e);
+         });
+      });
+
       /* Get demandbase data from v18 */
       dl.fn.getDemandbaseUserData();
 
-      /* Send jQuery event for ddo_ready */
-      dl.fn.sendDatalayerReadyEvent();
-   } catch (error) {
+      /************************* SEND PAGEVIEW **********************************/
+      if (!window.idaPageIsSPA) {
+         dl.log('+++DBDM-LOG: Sending initial pageview tag to Coremetrics');
+         dl.initialPageviewIssued = true;
+         /* Send jQuery event for ddo_ready */
+         dl.fn.sendDatalayerReadyEvent();
+      }
+      else {
+         dl.log('+++DBDM-LOG: window.idaPageIsSPA is set, initial pageview will be sent by createPageviewTagForSPA().');
+         dl.log('+++DBDM-LOG: Defining createPageviewTagForSPA()');
+         dl.fn.createPageviewTagForSPAInit();
+      }
+   }
+   catch (error) {
       dl.log('+++DBDM-ERROR > datalayer.js: ' + error);
    }
 })();
