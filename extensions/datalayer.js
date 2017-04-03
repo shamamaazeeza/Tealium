@@ -3,7 +3,7 @@
  * Extension Name: datalayer.js
  * Scope         : Pre Loader
  * Execution     : N/A
- * Version       : 2017.03.26.2051
+ * Version       : 2017.04.03.0132
  *
  * This script creates a utility object to manage the datalayer for the Tag Management 
  * solution in IBM.
@@ -13,7 +13,7 @@
  *        
  */
 var tmeid="datalayer.js";
-window.dlversion = '$Id:datalayer.js, $user:jleon@us.ibm.com, $version:2017.03.26.2051';
+window.dlversion = '$Id:datalayer.js, $user:jleon@us.ibm.com, $version:2017.04.03.0132';
 
 /*--------------------Initialize all Digital Data Objects--------------------*/
 var dl = {
@@ -466,17 +466,30 @@ var dl = {
          /*--------------------Set Whether Coremetrics should run--------------------*/
          setCoremetricsEnabled : function () {
             try {
-               if (typeof(digitalData.page.pageInfo.coremetrics.enabled) === "boolean") {
-                  /* boolean value, convert to String */
-                  digitalData.page.pageInfo.coremetrics.enabled = digitalData.page.pageInfo.coremetrics.enabled.toString();
-               }
-               else if (typeof(digitalData.page.pageInfo.coremetrics.enabled) === "string") {
-                  /* ensure value is lower case */
-                  digitalData.page.pageInfo.coremetrics.enabled = digitalData.page.pageInfo.coremetrics.enabled.toLowerCase();
+               /** 
+                * This function sets whether or not coremetrics should be enabled based on the following:
+                * 1. if the global variable idaCoremetricsEnabled is set to false, coremetrics will not run
+                * 2. if global variable idaCoremetricsEnabled is not present, but 
+                *    digitalData.page.pageInfo.coremetrics.enabled is set, coremetrics will either run or 
+                *    not based on the DDO variable
+                */
+               if ((typeof(window.idaCoremetricsEnabled) === "boolean" && window.idaCoremetricsEnabled === false)
+                     || (typeof(window.idaCoremetricsEnabled) === "string" && window.idaCoremetricsEnabled === "false")) {
+                  digitalData.page.pageInfo.coremetrics.enabled = "false";
                }
                else {
-                  /* Default value - Load Coremetrics */
-                  digitalData.page.pageInfo.coremetrics.enabled = "true";
+                  if (typeof(digitalData.page.pageInfo.coremetrics.enabled) === "boolean") {
+                     /* boolean value, convert to String */
+                     digitalData.page.pageInfo.coremetrics.enabled = digitalData.page.pageInfo.coremetrics.enabled.toString();
+                  }
+                  else if (typeof(digitalData.page.pageInfo.coremetrics.enabled) === "string") {
+                     /* ensure value is lower case */
+                     digitalData.page.pageInfo.coremetrics.enabled = digitalData.page.pageInfo.coremetrics.enabled.toLowerCase();
+                  }
+                  else {
+                     /* Default value - Load Coremetrics */
+                     digitalData.page.pageInfo.coremetrics.enabled = "true";
+                  }
                }
             }
             catch (error) {
@@ -950,9 +963,9 @@ var dl = {
          },
 
          /*--------------------Getting the Bluemix Anonynous ID--------------------*/
-         getAnonymousID: function (wt) {
+         getAnonymousID: function (callback) {
             try {
-               var waittime = wt || dl.WAITTIME;
+               var waittime = dl.WAITTIME;
                var fnStartTime = window.performance.now();
 
                /* See if the Anonymous ID is already in the Cookie */
@@ -962,9 +975,14 @@ var dl = {
                   var fnEndTime = window.performance.now();
                   dl.log('+++DBDM-LOG > getAnonymousID > Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms');
                   digitalData.page.attribute.procFlag += "|A:" + Math.round(fnEndTime - fnStartTime);
+                  /* See if there is callback function and call it */
+                  if (typeof(callback) === "function") {
+                     dl.log('+++DBDM-LOG > getAnonymousID: Executing callback function...');
+                     callback.call({"BMAID":digitalData.user.profile.auid});
+                  }
                }
                else {
-                  dl.log('+++DBDM-LOG > getAnonymousID > Getting anonymous ID from Bluemix (timeout set to ' + waittime + 'ms)');
+                  dl.log('+++DBDM-LOG > getAnonymousID > Getting anonymous ID from Bluemix micro service...');
                   jQuery2.ajax({
                      url: "https://console.ng.bluemix.net/analytics/bmaid",
                      method: "GET",
@@ -982,6 +1000,11 @@ var dl = {
                            var fnEndTime = window.performance.now();
                            dl.log('+++DBDM-LOG > getAnonymousID > Fetched anonymous ID from Bluemix: ' + response.BMAID + ' Execution time: ' + Math.round(fnEndTime - fnStartTime) + 'ms');
                            digitalData.page.attribute.procFlag += "|A:" + Math.round(fnEndTime - fnStartTime);
+                           /* See if there is callback function and call it */
+                           if (typeof(callback) === "function") {
+                              dl.log('+++DBDM-LOG > getAnonymousID: Callback function provided, executing...');
+                              callback.call(response);
+                           }
                         }
                      },
                      error: function (xhr, ajaxOptions, error) {
@@ -1601,7 +1624,7 @@ var dl = {
                   }
                   /* See if there is callback function and call it */
                   if (typeof(callback) === "function") {
-                     dl.log('+++DBDM-LOG > loadScript: Executing callback function...');
+                     dl.log('+++DBDM-LOG > loadScript: Callback function provided, executing...');
                      callback.call();
                   }
                }
@@ -1770,7 +1793,7 @@ var dl = {
             this.fn.setPageLoadEpoch(reset); 
 
             /*--------------------get anonymous ID from Bluemix--------------------*/
-            this.fn.getAnonymousID(2000);
+            this.fn.getAnonymousID();
             
             /*--------------------Get the VCPI information from URL--------------------*/
 		this.fn.getVCPI();
