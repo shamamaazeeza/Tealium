@@ -1079,7 +1079,47 @@ var dl = {
             }
          },
 
-         /*--------------------Function to send ddo_ready event ---------------------*/
+         /*--------------------Function to get all the Updates made by the Registry ---------------------*/
+         getRegistryUpdates: function() {
+            try {
+               var ua = window.navigator.userAgent;
+               var msie = ua.indexOf("MSIE ");
+               if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
+
+                  var obj = utag.globals.dle.enrichments[utag2.full_dle_id].page;
+                  console.log("List of digitalData elements updated by the IBM Registry");
+                  for (var k in obj) {
+
+                     var consmessage = JSON.stringify(obj[k], null, 2);
+
+                     if (k.indexOf("digitalData.") > -1) {
+                        console.log("   " + k + ": " + consmessage);
+                     }
+                  }
+               }
+               else {
+
+                  var obj = utag.globals.dle.enrichments[utag2.full_dle_id].page;
+                  console.log("List of digitalData elements updated by the IBM Registry");
+                  for (var k in obj) {
+                     var consmessage = JSON.stringify(obj[k], null, 2);
+                     var styles = [
+                        'background: linear-gradient(#e0eff9,#d8e1e7)', 'border: 1px solid #ddd', 'color: black', 'display: inline-block', 'font-size: 20', 'text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3)', 'box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 5px 3px -5px rgba(0, 0, 0, 0.5), 0 -13px 5px -10px rgba(255, 255, 255, 0.4) inset'
+                        ].join(';');
+                     if (k.indexOf("digitalData.") > -1) {
+                        console.log("   " + k + ": " + '%c' + consmessage, styles);
+                     }
+                  }
+
+               }
+
+            }
+            catch (error) {
+               dl.log('+++DBDM-ERROR > getRegistryUpdates > ibmweb not ready: ' + error);
+            }
+         },
+        
+        /*--------------------Function to send ddo_ready event ---------------------*/
          sendDatalayerReadyEvent: function (wt) {
             try {
                var waittime = wt || dl.WAITTIME;
